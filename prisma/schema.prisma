@@ -1,0 +1,348 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------
+// Locale helper types
+// ---------------------------------------------------------------
+// We store localized strings on models using suffix columns (nameEn / nameAr)
+// or as JSON. Prisma + Postgres handles both.
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  role          String    @default("admin") // admin | owner
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------
+// Taxonomy: SuperCategory (Cousins grouping) -> Category (course subject)
+// ---------------------------------------------------------------
+model SuperCategory {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  nameEn    String
+  nameAr    String?
+  image     String?
+  sort      Int     @default(0)
+  featured  Boolean @default(false)
+  createdAt DateTime @default(now())
+
+  categories Category[]
+}
+
+model Category {
+  id              String  @id @default(cuid())
+  slug            String  @unique
+  nameEn          String
+  nameAr          String?
+  taglineEn       String?
+  taglineAr       String?
+  descriptionEn   String?
+  descriptionAr   String?
+  image           String?
+  icon            String?
+  sort            Int     @default(0)
+  featured        Boolean @default(false)
+
+  superCategoryId String?
+  superCategory   SuperCategory? @relation(fields: [superCategoryId], references: [id])
+
+  courses   Course[]
+  faqs      Faq[]
+  testimonials Testimonial[]
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------
+// Venues (cities) grouped by region
+// ---------------------------------------------------------------
+model Region {
+  id       String   @id @default(cuid())
+  slug     String   @unique
+  nameEn   String
+  nameAr   String?
+  icon     String?
+  sort     Int      @default(0)
+  venues   Venue[]
+}
+
+model Venue {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  nameEn    String
+  nameAr    String?
+  country   String
+  flag      String?
+  regionId  String
+  region    Region  @relation(fields: [regionId], references: [id])
+  sort      Int     @default(0)
+  schedules Schedule[]
+}
+
+// ---------------------------------------------------------------
+// Certificates / accreditation bodies
+// ---------------------------------------------------------------
+model Certificate {
+  id           String  @id @default(cuid())
+  code         String  @unique
+  nameEn       String
+  nameAr       String?
+  slug         String  @unique
+  description  String?
+  logo         String?
+  sort         Int     @default(0)
+  courses      Course[] @relation("CourseCertificates")
+}
+
+// ---------------------------------------------------------------
+// Course + schedules
+// ---------------------------------------------------------------
+model Course {
+  id             String  @id @default(cuid())
+  code           String  @unique @default("")
+  slug           String  @unique
+  titleEn        String
+  titleAr        String?
+  subtitleEn     String?
+  subtitleAr     String?
+  badgeEn        String?  // "An Interactive 5-Day Training Course"
+  badgeAr        String?
+  durationDays   Int     @default(5)
+  image          String?
+  featured       Boolean @default(false)
+
+  introEn        String?
+  introAr        String?
+  objectivesEn   String?
+  objectivesAr   String?
+  methodologyEn  String?
+  methodologyAr  String?
+  orgImpactEn    String?
+  orgImpactAr    String?
+  personalImpactEn String?
+  personalImpactAr String?
+  targetAudienceEn String?
+  targetAudienceAr String?
+  certificateNoteEn String?
+  certificateNoteAr String?
+  dayOutlineEn   Json?   // [{day, title, topics[]}]
+  dayOutlineAr   Json?
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  certificates Certificate[] @relation("CourseCertificates")
+  providers     ProviderAssociation[]
+
+  schedules    Schedule[]
+  testimonials Testimonial[]
+  relatedAsSource  CourseRelation[] @relation("CourseSource")
+  relatedAsTarget  CourseRelation[] @relation("CourseTarget")
+
+  seoTitleEn String?
+  seoTitleAr String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model CourseRelation {
+  courseId  String
+  course    Course @relation("CourseSource", fields: [courseId], references: [id])
+  relatedId String
+  related   Course @relation("CourseTarget", fields: [relatedId], references: [id])
+
+  @@id([courseId, relatedId])
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id])
+  venueId   String
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  fee       Decimal  @default(5950) @db.Decimal(10, 2)
+  currency  String   @default("USD")
+  format    String   @default("classroom") // classroom | online | inhouse
+  active    Boolean  @default(true)
+}
+
+model ProviderAssociation {
+  id        String  @id @default(cuid())
+  code      String  @default("") // e.g. KHDA, NASBA, Oxford
+  nameEn    String
+  logo      String?
+  url       String?
+  kind      String  @default("endorsed") // endorsed | association
+  sort      Int     @default(0)
+  courseId  String?
+  course    Course? @relation(fields: [courseId], references: [id])
+}
+
+// ---------------------------------------------------------------
+// Testimonials / FAQs
+// ---------------------------------------------------------------
+model Testimonial {
+  id        String  @id @default(cuid())
+  textEn    String
+  textAr    String?
+  author    String
+  company   String?
+  courseId  String?
+  course    Course? @relation(fields: [courseId], references: [id])
+  categoryId String?
+  category  Category? @relation(fields: [categoryId], references: [id])
+  featured  Boolean @default(false)
+  sort      Int     @default(0)
+}
+
+model Faq {
+  id         String  @id @default(cuid())
+  questionEn String
+  questionAr String?
+  answerEn   String
+  answerAr   String?
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  sort       Int      @default(0)
+}
+
+// ---------------------------------------------------------------
+// Countries (for registration forms / dropdowns)
+// ---------------------------------------------------------------
+model Country {
+  id       String  @id @default(cuid())
+  iso      String  @unique
+  nameEn   String
+  nameAr   String?
+  currency String?
+  sort     Int     @default(0)
+}
+
+model Title {
+  id   String @id @default(cuid())
+  name String @unique
+  nameAr String?
+}
+
+// ---------------------------------------------------------------
+// Registration / Enquiry submissions (no accounts, no payment)
+// ---------------------------------------------------------------
+model Registration {
+  id            String   @id @default(cuid())
+  type          String   @default("register") // register | enquiry | inhouse | online
+  courseTitle   String
+  courseCode    String?
+  scheduleSummary String?
+  salutation    String?
+  fullName      String
+  email         String
+  phone         String?
+  countryIso    String?
+  company       String?
+  designation   String?
+  message       String?
+  paymentMode   String?   // invoice-me | invoice-company
+  billingInfo   Json?
+  status        String   @default("new") // new | contacted
+  adminNote     String?
+  locale        String   @default("en")
+  createdAt     DateTime @default(now())
+}
+
+// ---------------------------------------------------------------
+// Articles, Press, Case studies, Downloads, Videos
+// ---------------------------------------------------------------
+model Article {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  titleEn      String
+  titleAr      String?
+  excerptEn    String?
+  excerptAr    String?
+  bodyEn       String?
+  bodyAr       String?
+  image        String?
+  publishedAt  DateTime @default(now())
+  status       String   @default("published")
+  type         String   @default("article") // article | press | case_study
+}
+
+model Download {
+  id        String @id @default(cuid())
+  titleEn   String
+  titleAr   String?
+  fileUrl   String
+  type      String @default("catalogue")
+  sort      Int    @default(0)
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleAr   String?
+  youtubeId String
+  sort      Int      @default(0)
+}
+
+// ---------------------------------------------------------------
+// Client logos + testimonials on home
+// ---------------------------------------------------------------
+model Client {
+  id     String @id @default(cuid())
+  nameEn String
+  logo   String
+  url    String?
+  sort   Int    @default(0)
+}
+
+// ---------------------------------------------------------------
+// Site configuration (contact, social, logos)
+// ---------------------------------------------------------------
+model SiteSetting {
+  key    String @id
+  value  String
+}

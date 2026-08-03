@@ -3,7 +3,6 @@ import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { formatDateRange } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default async function NewTrainingCoursesPage({ params }: { params: Promise<{ locale: string }> }) {

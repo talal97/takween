@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { deleteCountry } from "@/app/admin/(protected)/actions";
+import { deleteCountry } from "@/app/admin/(protected)/actions-taxonomy";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 

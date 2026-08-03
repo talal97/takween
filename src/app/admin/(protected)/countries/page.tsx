@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createCountry, updateCountry, deleteCountry } from "@/app/admin/(protected)/actions";
+import { createCountry, updateCountry, deleteCountry } from "../actions-taxonomy";
 
 export default async function CountriesPage() {
   const countries = await prisma.country.findMany({ orderBy: { nameEn: "asc" } });
@@ -12,6 +12,7 @@ export default async function CountriesPage() {
     nameEn: c.nameEn,
     nameAr: c.nameAr ?? "",
     currency: c.currency ?? "",
+    flag: c.flag ?? "",
   }));
 
   const fields: FieldSpec[] = [
@@ -30,6 +31,7 @@ export default async function CountriesPage() {
         fields={fields}
         items={items}
         columns={[
+          { key: "flag", label: "Flag" },
           { key: "iso", label: "ISO" },
           { key: "nameEn", label: "English" },
           { key: "nameAr", label: "Arabic", ar: true },

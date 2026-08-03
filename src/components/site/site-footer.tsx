@@ -1,11 +1,11 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
-import { getSettings } from "@/lib/settings";
+import { getSettingsCached } from "@/lib/settings";
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
 
 export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
   const t = await getTranslations("navigation");
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
   const phone = settings.contact_phone || "+971 (04) 425 0700";
   const email = settings.contact_email || "info@takween.com";
   const tagline = settings[`brand_tagline_${locale}`] || "";

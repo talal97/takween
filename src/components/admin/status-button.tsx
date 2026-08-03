@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { updateRegistrationStatus } from "@/app/admin/(protected)/actions";
+import { updateRegistrationStatus } from "@/app/admin/(protected)/actions-settings";
 import { Button } from "@/components/ui/button";
 
 export function StatusButton({ id, status }: { id: string; status: string }) {

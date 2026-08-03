@@ -1,4 +1,4 @@
-import { getSettings } from "@/lib/settings";
+import { getSettingsCached } from "@/lib/settings";
 
 const GLOBAL_TOKENS: Array<[string, string]> = [
   ["--brand", "color_brand"],
@@ -29,7 +29,7 @@ const VAR_BY_KEY: Record<string, string> = {
 };
 
 export async function ThemeStyle() {
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
 
   const globalDefs = GLOBAL_TOKENS.map(([cssVar, key]) => {
     const value = settings[key];

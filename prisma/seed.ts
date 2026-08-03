@@ -3,12 +3,26 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+function isoToFlag(iso: string): string {
+  if (!iso || iso.length !== 2) return "";
+  const codePoints = [...iso.toUpperCase()].map((c) => 0x1f1e6 - 65 + c.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
+
 async function main() {
   // ---------------------------------------------------------------
   // Admin bootstrap account
+  // Fail fast if not explicitly configured so a known default is
+  // never silently used in a deployment.
   // ---------------------------------------------------------------
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@takween.com";
-  const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe123!";
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "ADMIN_EMAIL and ADMIN_PASSWORD must be set to run the seed. " +
+      "Generate ADMIN_PASSWORD with: openssl rand -base64 24",
+    );
+  }
   await prisma.user.upsert({
     where: { email: adminEmail },
     update: {},
@@ -85,29 +99,29 @@ async function main() {
   // Countries (a starter set)
   // ---------------------------------------------------------------
   const countries = [
-    { iso: "AE", nameEn: "United Arab Emirates", nameAr: "الإمارات العربية المتحدة", currency: "AED" },
-    { iso: "SA", nameEn: "Saudi Arabia", nameAr: "المملكة العربية السعودية", currency: "SAR" },
-    { iso: "QA", nameEn: "Qatar", nameAr: "قطر", currency: "QAR" },
-    { iso: "KW", nameEn: "Kuwait", nameAr: "الكويت", currency: "KWD" },
-    { iso: "OM", nameEn: "Oman", nameAr: "عُمان", currency: "OMR" },
-    { iso: "BH", nameEn: "Bahrain", nameAr: "البحرين", currency: "BHD" },
-    { iso: "US", nameEn: "United States", nameAr: "الولايات المتحدة", currency: "USD" },
-    { iso: "GB", nameEn: "United Kingdom", nameAr: "المملكة المتحدة", currency: "GBP" },
-    { iso: "CA", nameEn: "Canada", nameAr: "كندا", currency: "CAD" },
-    { iso: "NG", nameEn: "Nigeria", nameAr: "نيجيريا", currency: "NGN" },
-    { iso: "EG", nameEn: "Egypt", nameAr: "مصر", currency: "EGP" },
-    { iso: "ZA", nameEn: "South Africa", nameAr: "جنوب أفريقيا", currency: "ZAR" },
-    { iso: "MA", nameEn: "Morocco", nameAr: "المغرب", currency: "MAD" },
-    { iso: "KE", nameEn: "Kenya", nameAr: "كينيا", currency: "KES" },
-    { iso: "JP", nameEn: "Japan", nameAr: "اليابان", currency: "JPY" },
-    { iso: "SG", nameEn: "Singapore", nameAr: "سنغافورة", currency: "SGD" },
-    { iso: "MY", nameEn: "Malaysia", nameAr: "ماليزيا", currency: "MYR" },
-    { iso: "TR", nameEn: "Turkey", nameAr: "تركيا", currency: "TRY" },
-    { iso: "FR", nameEn: "France", nameAr: "فرنسا", currency: "EUR" },
-    { iso: "NL", nameEn: "Netherlands", nameAr: "هولندا", currency: "EUR" },
-    { iso: "ES", nameEn: "Spain", nameAr: "إسبانيا", currency: "EUR" },
-    { iso: "AT", nameEn: "Austria", nameAr: "النمسا", currency: "EUR" },
-    { iso: "CH", nameEn: "Switzerland", nameAr: "سويسرا", currency: "CHF" },
+    { iso: "AE", nameEn: "United Arab Emirates", nameAr: "الإمارات العربية المتحدة", currency: "AED", flag: isoToFlag("AE") },
+    { iso: "SA", nameEn: "Saudi Arabia", nameAr: "المملكة العربية السعودية", currency: "SAR", flag: isoToFlag("SA") },
+    { iso: "QA", nameEn: "Qatar", nameAr: "قطر", currency: "QAR", flag: isoToFlag("QA") },
+    { iso: "KW", nameEn: "Kuwait", nameAr: "الكويت", currency: "KWD", flag: isoToFlag("KW") },
+    { iso: "OM", nameEn: "Oman", nameAr: "عُمان", currency: "OMR", flag: isoToFlag("OM") },
+    { iso: "BH", nameEn: "Bahrain", nameAr: "البحرين", currency: "BHD", flag: isoToFlag("BH") },
+    { iso: "US", nameEn: "United States", nameAr: "الولايات المتحدة", currency: "USD", flag: isoToFlag("US") },
+    { iso: "GB", nameEn: "United Kingdom", nameAr: "المملكة المتحدة", currency: "GBP", flag: isoToFlag("GB") },
+    { iso: "CA", nameEn: "Canada", nameAr: "كندا", currency: "CAD", flag: isoToFlag("CA") },
+    { iso: "NG", nameEn: "Nigeria", nameAr: "نيجيريا", currency: "NGN", flag: isoToFlag("NG") },
+    { iso: "EG", nameEn: "Egypt", nameAr: "مصر", currency: "EGP", flag: isoToFlag("EG") },
+    { iso: "ZA", nameEn: "South Africa", nameAr: "جنوب أفريقيا", currency: "ZAR", flag: isoToFlag("ZA") },
+    { iso: "MA", nameEn: "Morocco", nameAr: "المغرب", currency: "MAD", flag: isoToFlag("MA") },
+    { iso: "KE", nameEn: "Kenya", nameAr: "كينيا", currency: "KES", flag: isoToFlag("KE") },
+    { iso: "JP", nameEn: "Japan", nameAr: "اليابان", currency: "JPY", flag: isoToFlag("JP") },
+    { iso: "SG", nameEn: "Singapore", nameAr: "سنغافورة", currency: "SGD", flag: isoToFlag("SG") },
+    { iso: "MY", nameEn: "Malaysia", nameAr: "ماليزيا", currency: "MYR", flag: isoToFlag("MY") },
+    { iso: "TR", nameEn: "Turkey", nameAr: "تركيا", currency: "TRY", flag: isoToFlag("TR") },
+    { iso: "FR", nameEn: "France", nameAr: "فرنسا", currency: "EUR", flag: isoToFlag("FR") },
+    { iso: "NL", nameEn: "Netherlands", nameAr: "هولندا", currency: "EUR", flag: isoToFlag("NL") },
+    { iso: "ES", nameEn: "Spain", nameAr: "إسبانيا", currency: "EUR", flag: isoToFlag("ES") },
+    { iso: "AT", nameEn: "Austria", nameAr: "النمسا", currency: "EUR", flag: isoToFlag("AT") },
+    { iso: "CH", nameEn: "Switzerland", nameAr: "سويسرا", currency: "CHF", flag: isoToFlag("CH") },
   ];
   for (const c of countries) {
     await prisma.country.upsert({ where: { iso: c.iso }, update: {}, create: c });

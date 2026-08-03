@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteInList } from "@/components/admin/category-form";
-import { deleteArticle } from "@/app/admin/(protected)/actions";
+import { deleteArticle } from "../actions-content";
 import { Badge } from "@/components/ui/badge";
 import { ArticleForm } from "@/components/admin/article-form";
 

@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveSettings } from "@/app/admin/(protected)/actions";
+import { saveSettings } from "@/app/admin/(protected)/actions-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const COLS: Array<{ key: string; label: string; def: string }> = [
-  { key: "color_brand", label: "Brand / Primary", def: "#c8102c" },
-  { key: "color_brand_dark", label: "Brand Dark", def: "#9c0d24" },
-  { key: "color_brand_light", label: "Brand Light bg", def: "#fdecef" },
+  { key: "color_brand", label: "Brand / Primary", def: "#026481" },
+  { key: "color_brand_dark", label: "Brand Dark", def: "#014a61" },
+  { key: "color_brand_light", label: "Brand Light bg", def: "#e6f0f4" },
   { key: "color_navy", label: "Navy", def: "#0e2a45" },
   { key: "color_gold", label: "Gold / Accent", def: "#f5a623" },
   { key: "color_background", label: "Page Background", def: "#ffffff" },

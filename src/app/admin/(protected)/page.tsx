@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function AdminDashboardPage() {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    redirect("/admin/login");
+  }
   if (!session?.user) redirect("/admin/login");
 
   const [courses, schedules, categories, venues, registrations, newRegistrations, testimonials, articles] =

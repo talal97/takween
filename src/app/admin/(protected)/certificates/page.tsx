@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createCertificate, updateCertificate, deleteCertificate } from "@/app/admin/(protected)/actions";
+import { createCertificate, updateCertificate, deleteCertificate } from "../actions-content";
 
 export default async function CertificatesPage() {
   const certificates = await prisma.certificate.findMany({

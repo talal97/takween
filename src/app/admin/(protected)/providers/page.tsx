@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createProvider, updateProvider, deleteProvider } from "@/app/admin/(protected)/actions";
+import { createProvider, updateProvider, deleteProvider } from "../actions-content";
 
 export default async function ProvidersPage() {
   const [providers, courses] = await Promise.all([

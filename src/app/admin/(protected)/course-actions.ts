@@ -1,10 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 import { slugify } from "@/lib/slug";
+import { SITE_TAG } from "@/lib/data";
+
+function revalidateSite() {
+  revalidateTag(SITE_TAG);
+}
 
 const scheduleSchema = z.object({
   venueId: z.string().min(1),
@@ -95,6 +100,7 @@ export async function createCourse(
     },
   });
   revalidatePath("/admin/courses");
+  revalidateSite();
   return out.id;
 }
 
@@ -131,7 +137,9 @@ export async function updateCourse(
     });
   });
   revalidatePath("/admin/courses");
+  revalidateSite();
   revalidatePath(`/admin/courses/${id}`);
+  revalidateSite();
 }
 
 export async function deleteCourse(id: string) {
@@ -141,4 +149,5 @@ export async function deleteCourse(id: string) {
   await prisma.courseRelation.deleteMany({ where: { relatedId: id } });
   await prisma.course.delete({ where: { id } });
   revalidatePath("/admin/courses");
+  revalidateSite();
 }

@@ -5,7 +5,12 @@ import { AdminSidebar } from "@/components/admin/sidebar";
 export const metadata = { title: "Takween Admin" };
 
 export default async function AdminGuardLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    // JWTSessionError — stale or missing secret cookie. Force re-login.
+  }
   if (!session?.user) redirect("/admin/login");
 
   return (

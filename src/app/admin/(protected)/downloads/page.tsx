@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createDownload, updateDownload, deleteDownload } from "@/app/admin/(protected)/actions";
+import { createDownload, updateDownload, deleteDownload } from "../actions-content";
 
 export default async function DownloadsPage() {
   const downloads = await prisma.download.findMany({ orderBy: { sort: "asc" } });

@@ -12,12 +12,25 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { DeleteCourseButton } from "@/components/admin/delete-course-button";
+import { Pagination } from "@/components/admin/pagination";
 
-export default async function CoursesPage() {
-  const courses = await prisma.course.findMany({
-    orderBy: { updatedAt: "desc" },
-    include: { category: true, schedules: true },
-  });
+const PAGE_SIZE = 25;
+
+export default async function CoursesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.page) || 1);
+
+  const [courses, total] = await prisma.$transaction([
+    prisma.course.findMany({
+      orderBy: { updatedAt: "desc" },
+      include: { category: true, schedules: true },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.course.count(),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div>
@@ -70,6 +83,7 @@ export default async function CoursesPage() {
           </Table>
         </CardContent>
       </Card>
+      <Pagination page={page} totalPages={totalPages} pageSize={PAGE_SIZE} total={total} />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createCategory, updateCategory, deleteCategory } from "@/app/admin/(protected)/actions";
+import { createCategory, updateCategory } from "@/app/admin/(protected)/actions-taxonomy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,7 +93,7 @@ export function CategoryForm({
   );
 }
 
-export function DeleteInList({ id, action, label = "Delete" }: { id: string; action: () => Promise<void>; label?: string }) {
+export function DeleteInList({ action, label = "Delete" }: { id: string; action: () => Promise<void>; label?: string }) {
   const router = useRouter();
   return (
     <Button

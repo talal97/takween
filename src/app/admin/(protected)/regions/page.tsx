@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createRegion, updateRegion, deleteRegion } from "@/app/admin/(protected)/actions";
+import { createRegion, updateRegion, deleteRegion } from "../actions-taxonomy";
 
 export default async function RegionsPage() {
   const regions = await prisma.region.findMany({ orderBy: { sort: "asc" } });

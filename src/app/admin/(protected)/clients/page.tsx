@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createClient, updateClient, deleteClient } from "@/app/admin/(protected)/actions";
+import { createClient, updateClient, deleteClient } from "../actions-content";
 
 export default async function ClientsPage() {
   const clients = await prisma.client.findMany({ orderBy: { sort: "asc" } });

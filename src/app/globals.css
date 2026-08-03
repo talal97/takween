@@ -16,10 +16,10 @@
   --secondary: #f0f4f8;
   --secondary-foreground: #1f1f1f;
 
-  /* GLOMACS-style brand palette */
-  --brand: #c8102c;
-  --brand-dark: #9c0d24;
-  --brand-light: #fdecef;
+  /* Brand palette (logo color) */
+  --brand: #026481;
+  --brand-dark: #014a61;
+  --brand-light: #e6f0f4;
   --navy: #0e2a45;
   --gold: #f5a623;
 }

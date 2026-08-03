@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createFaq, updateFaq, deleteFaq } from "@/app/admin/(protected)/actions";
+import { createFaq, updateFaq, deleteFaq } from "../actions-content";
 
 export default async function FaqsPage() {
   const [faqs, categories] = await Promise.all([

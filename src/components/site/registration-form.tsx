@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { submitRegistration } from "@/app/admin/(protected)/actions";
+import { submitRegistration } from "@/lib/actions/registration";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocale, useTranslations } from "next-intl";
+import { isoToFlag } from "@/lib/utils";
 
 type Schedule = { id: string; venueId: string; venueName: string; startDate: string; endDate: string; fee: number; currency: string; format: string };
 
@@ -138,7 +139,7 @@ export function RegistrationForm({
           <option value="">{t("country")}</option>
           {countries.map((c) => (
             <option key={c.iso} value={c.iso}>
-              {locale === "ar" && c.nameAr ? c.nameAr : c.nameEn}
+              {isoToFlag(c.iso)} {locale === "ar" && c.nameAr ? c.nameAr : c.nameEn}
             </option>
           ))}
         </select>

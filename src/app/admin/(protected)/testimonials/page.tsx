@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteInList } from "@/components/admin/category-form";
-import { deleteTestimonial } from "@/app/admin/(protected)/actions";
+import { deleteTestimonial } from "../actions-content";
 import { TestimonialForm } from "@/components/admin/testimonial-form";
 
 export default async function TestimonialsPage() {

@@ -1,15 +1,16 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
-import { prisma } from "@/lib/prisma";
-import { getSettings } from "@/lib/settings";
-import { localeText } from "@/lib/data";
+import { getSettingsCached } from "@/lib/settings";
+import { localeText, getHomePageDataCached } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { QuickSearch } from "@/components/site/quick-search";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays, Users, Award, Building2, MonitorPlay, Users as UsersIcon, Globe2, ShieldCheck, Quote } from "lucide-react";
 
+// The page stays dynamic so no database is required at build time. The heavy
+// Prisma reads underneath are cached via unstable_cache (ISR, tag "site").
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -28,26 +29,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const t = await getTranslations("home");
   const tc = await getTranslations("common");
 
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
   const s = (k: string, fb: string) => settings[`${k}_${l}`] || fb;
-  const sLocal = (k: string, fb: string) => settings[k] || fb;
 
-  const [categories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts] =
-    await Promise.all([
-      prisma.category.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 12 }),
-      prisma.region.findMany({ orderBy: { sort: "asc" }, include: { venues: { orderBy: { nameEn: "asc" } } } }),
-      prisma.certificate.findMany({ orderBy: { sort: "asc" }, take: 8 }),
-      prisma.course.findMany({
-        where: { featured: true },
-        orderBy: { updatedAt: "desc" },
-        take: 6,
-        include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } }, category: true },
-      }),
-      prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 3 }),
-      prisma.testimonial.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 3 }),
-      prisma.client.findMany({ orderBy: { sort: "asc" }, take: 12 }),
-      prisma.course.groupBy({ by: ["categoryId"], _count: { _all: true } }),
-    ]);
+  const {
+    categories,
+    regionsList,
+    certificates,
+    featured,
+    articles,
+    testimonials,
+    clients,
+    categoryCounts,
+    totalCourses,
+  } = await getHomePageDataCached();
 
   const counts: Record<string, number> = {};
   categoryCounts.forEach((c) => {
@@ -55,7 +50,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   });
 
   const allVenues = regionsList.flatMap((r) => r.venues);
-  const totalCourses = await prisma.course.count();
   const totalVenues = allVenues.length;
 
   return (

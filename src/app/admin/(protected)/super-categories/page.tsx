@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { DeleteInList } from "@/components/admin/category-form";
-import { deleteSuperCategory } from "@/app/admin/(protected)/actions";
+import { deleteSuperCategory } from "../actions-taxonomy";
 import { SuperCategoryForm } from "@/components/admin/super-category-form";
 
 export default async function SuperCategoriesPage() {

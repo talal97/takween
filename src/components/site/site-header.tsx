@@ -1,14 +1,11 @@
 import { Link } from "@/i18n/navigation";
 import { getTranslations } from "next-intl/server";
-import { getNavigation } from "@/lib/data";
-import { localeText } from "@/lib/data";
-import { getSettings } from "@/lib/settings";
+import { getSettingsCached } from "@/lib/settings";
 import { MobileNav } from "@/components/site/mobile-nav";
 
 export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
   const t = await getTranslations("navigation");
-  const nav = await getNavigation(locale);
-  const settings = await getSettings();
+  const settings = await getSettingsCached();
   const phone = settings.contact_phone || "+971 (04) 425 0700";
   const email = settings.contact_email || "info@takween.com";
 

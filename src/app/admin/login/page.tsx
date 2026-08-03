@@ -3,7 +3,12 @@ import { auth } from "@/auth";
 import { LoginForm } from "@/components/admin/login-form";
 
 export default async function LoginPage() {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch {
+    // JWTSessionError — stale or missing secret cookie. Treat as logged-out.
+  }
   if (session?.user) redirect("/admin");
 
   return (

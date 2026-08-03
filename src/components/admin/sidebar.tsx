@@ -19,6 +19,8 @@ import {
   Building2,
   Award,
   Download,
+  Users,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +40,8 @@ const nav = [
   { href: "/admin/downloads", label: "Resources", icon: Download },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/submissions", label: "Registrations", icon: Mail },
+  { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/settings", label: "Settings & SMTP", icon: Settings },
 ];
 

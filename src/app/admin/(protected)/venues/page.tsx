@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/admin/page-header";
 import { ResourceManager, type FieldSpec } from "@/components/admin/resource-manager";
-import { createVenue, updateVenue, deleteVenue } from "@/app/admin/(protected)/actions";
+import { createVenue, updateVenue, deleteVenue } from "../actions-taxonomy";
 
 export default async function VenuesPage() {
   const [venues, regions] = await Promise.all([

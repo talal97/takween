@@ -259,6 +259,7 @@ model Country {
   nameEn   String
   nameAr   String?
   currency String?
+  flag     String?
   sort     Int     @default(0)
 }
 
@@ -345,4 +346,32 @@ model Client {
 model SiteSetting {
   key    String @id
   value  String
+}
+
+// ---------------------------------------------------------------
+// Analytics (self-hosted, no PII)
+// ---------------------------------------------------------------
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  locale    String   @default("en")
+  referrer  String?
+  userAgent String?
+  country   String?
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+}
+
+model ClickEvent {
+  id        String   @id @default(cuid())
+  element   String
+  path      String
+  locale    String   @default("en")
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([element])
+  @@index([createdAt])
 }

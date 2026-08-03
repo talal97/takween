@@ -13,10 +13,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import NextLink from "next/link";
 import { StatusButton } from "@/components/admin/status-button";
 import { DeleteInList } from "@/components/admin/category-form";
-import { deleteRegistration } from "@/app/admin/(protected)/actions";
+import { deleteRegistration } from "../actions-settings";
+import { Pagination } from "@/components/admin/pagination";
 
-export default async function SubmissionsPage() {
-  const submissions = await prisma.registration.findMany({ orderBy: { createdAt: "desc" } });
+const PAGE_SIZE = 25;
+
+export default async function SubmissionsPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const sp = await searchParams;
+  const page = Math.max(1, Number(sp.page) || 1);
+
+  const [submissions, total] = await prisma.$transaction([
+    prisma.registration.findMany({
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+    }),
+    prisma.registration.count(),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div>
@@ -65,6 +80,7 @@ export default async function SubmissionsPage() {
           </Table>
         </CardContent>
       </Card>
+      <Pagination page={page} totalPages={totalPages} pageSize={PAGE_SIZE} total={total} />
     </div>
   );
 }

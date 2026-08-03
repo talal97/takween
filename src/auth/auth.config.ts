@@ -3,6 +3,35 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+// Refuse to run with the placeholder secret in production.
+if (
+  process.env.NODE_ENV === "production" &&
+  (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 32)
+) {
+  throw new Error(
+    "AUTH_SECRET must be set to a strong random value (>=32 chars) in production. " +
+    "Generate with: openssl rand -base64 32",
+  );
+}
+
+// Simple in-memory brute-force protection. Not shared across instances —
+// fine for a single admin host, but replace with Redis/DB for multi-instance.
+const MAX_ATTEMPTS = 5;
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+type Attempt = { count: number; resetAt: number };
+const attempts = new Map<string, Attempt>();
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = attempts.get(key);
+  if (!entry || now > entry.resetAt) {
+    attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });
+    return true;
+  }
+  entry.count += 1;
+  return entry.count <= MAX_ATTEMPTS;
+}
+
 export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
   pages: {
@@ -20,11 +49,21 @@ export const authConfig: NextAuthConfig = {
         const password = credentials?.password as string | undefined;
         if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+        const key = email.toLowerCase();
+        if (!checkRateLimit(key)) {
+          // Keep the failure response identical to a bad password to avoid
+          // leaking whether an account exists.
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({ where: { email: key } });
         if (!user || !user.passwordHash) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);
         if (!valid) return null;
+
+        // Successful login clears the attempt counter for this account.
+        attempts.delete(key);
 
         return {
           id: user.id,

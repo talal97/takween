@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
+import { siteUrl, absoluteImage, courseJsonLd } from "@/lib/seo";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { AccordionBlock } from "@/components/site/faq-accordion";
@@ -23,6 +25,12 @@ export async function generateMetadata({
     title,
     description: course?.subtitleEn || undefined,
     alternates: { canonical: `/${locale}/training-course/${slug}` },
+    openGraph: {
+      title,
+      description: course?.subtitleEn || undefined,
+      url: siteUrl(`/${locale}/training-course/${slug}`),
+      images: course?.image ? [{ url: absoluteImage(course.image)! }] : undefined,
+    },
   };
 }
 
@@ -82,14 +90,30 @@ export default async function CoursePage({
 
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            await courseJsonLd({
+              name: localeText({ en: course.titleEn, ar: course.titleAr }, l),
+              description: course.subtitleEn || undefined,
+            }),
+          ),
+        }}
+      />
       <section className="bg-navy text-white">
         <div className="mx-auto max-w-7xl px-4 py-10">
           {course.image && (
-            <img
-              src={course.image}
-              alt={localeText({ en: course.titleEn, ar: course.titleAr }, l)}
-              className="mb-6 h-44 w-full rounded-lg object-cover"
-            />
+            <div className="relative mb-6 h-44 w-full overflow-hidden rounded-lg">
+              <Image
+                src={course.image}
+                alt={localeText({ en: course.titleEn, ar: course.titleAr }, l)}
+                fill
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                className="object-cover"
+                priority
+              />
+            </div>
           )}
           <Badge className="bg-brand">{course.badgeEn || `${course.durationDays}-Day Training`}</Badge>
           <h1 className="mt-3 text-3xl font-bold">

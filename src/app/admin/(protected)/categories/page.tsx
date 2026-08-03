@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryForm } from "@/components/admin/category-form";
 import { DeleteInList } from "@/components/admin/category-form";
-import { deleteCategory } from "@/app/admin/(protected)/actions";
+import { deleteCategory } from "../actions-taxonomy";
 
 export default async function CategoriesPage() {
   const [categories, superCats] = await Promise.all([

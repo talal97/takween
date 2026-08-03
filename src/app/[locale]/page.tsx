@@ -6,11 +6,8 @@ import { localeText, getHomePageDataCached } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { QuickSearch } from "@/components/site/quick-search";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, Users, Award, Building2, MonitorPlay, Users as UsersIcon, Globe2, ShieldCheck, Quote } from "lucide-react";
+import { CalendarDays, Users, Award, Building2, MonitorPlay, Users as UsersIcon, Globe2, ShieldCheck, Quote, ArrowRight, CheckCircle2 } from "lucide-react";
 
-// The page stays dynamic so no database is required at build time. The heavy
-// Prisma reads underneath are cached via unstable_cache (ISR, tag "site").
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -31,6 +28,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const settings = await getSettingsCached();
   const s = (k: string, fb: string) => settings[`${k}_${l}`] || fb;
+  const heroImage = settings.hero_image || "";
 
   const {
     categories,
@@ -55,47 +53,62 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="bg-background">
       {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden bg-navy text-white">
-        <div className="absolute inset-0 opacity-[0.07]" aria-hidden="true" />
-        <div className="mx-auto max-w-7xl px-4 py-16 lg:py-24">
-          <div className="grid items-center gap-10 lg:grid-cols-2">
+      <section className="relative min-h-[600px] overflow-hidden bg-navy text-white lg:min-h-[680px]">
+        {heroImage ? (
+          <img
+            src={heroImage}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+            fetchPriority="high"
+          />
+        ) : null}
+        <div className="hero-overlay absolute inset-0" />
+        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-32 lg:pt-40">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1 text-xs font-semibold uppercase tracking-wider text-gold">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-gold">
                 <Award className="h-4 w-4" />
-                {l === "ar" ? "تدريب عالمي معتمد" : "Globally accredited training"}
+                {l === "ar" ? "تدريب عالمي معتمد" : "Globally Accredited Training"}
               </span>
-              <h1 className="mt-5 text-4xl font-extrabold leading-tight sm:text-5xl">{s("hero_title", t("heroTitle"))}</h1>
-              <p className="mt-4 max-w-xl text-lg text-white/80">{s("hero_subtitle", t("heroSubtitle"))}</p>
+              <h1 className="mt-6 text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
+                {s("hero_title", t("heroTitle"))}
+              </h1>
+              <p className="mt-5 max-w-xl text-lg text-white/80">
+                {s("hero_subtitle", t("heroSubtitle"))}
+              </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/training-subjects"
-                  className="rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+                  className="inline-flex items-center gap-2 rounded-lg bg-brand px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
                 >
                   {l === "ar" ? "تصفح الدورات" : "Browse Courses"}
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/contact-us"
-                  className="rounded-lg border border-white/30 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                  className="rounded-lg border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
                 >
                   {t("requestCallback")}
                 </Link>
               </div>
-              <div className="mt-10 grid max-w-md grid-cols-3 gap-4">
+              <div className="mt-12 grid max-w-md grid-cols-3 gap-6">
                 {[
-                  { n: totalCourses, label: l === "ar" ? "دورة" : "Courses" },
-                  { n: totalVenues, label: l === "ar" ? "مدينة" : "Venues" },
-                  { n: categories.length, label: l === "ar" ? "تخصص" : "Subjects" },
-                ].map((s) => (
-                  <div key={s.label} className="border-white/15">
-                    <div className="text-3xl font-extrabold text-gold">+{s.n}</div>
-                    <div className="mt-1 text-sm text-white/70">{s.label}</div>
+                  { n: totalCourses, label: l === "ar" ? "دورة تدريبية" : "Training Courses" },
+                  { n: totalVenues, label: l === "ar" ? "مدينة" : "Global Venues" },
+                  { n: categories.length, label: l === "ar" ? "تخصص" : "Subject Areas" },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <div className="text-3xl font-extrabold text-gold lg:text-4xl">+{item.n}</div>
+                    <div className="mt-1 text-sm text-white/60">{item.label}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Category quick-picker card */}
-            <div className="rounded-2xl border border-white/15 bg-white p-6 text-navy shadow-2xl">
+            <div className="rounded-2xl border border-white/15 bg-white p-6 text-navy shadow-2xl lg:p-8">
+              <h3 className="mb-4 text-lg font-bold text-navy">
+                {l === "ar" ? "ابحث عن دورتك" : "Find Your Course"}
+              </h3>
               <QuickSearch
                 categories={categories.map((c) => ({ key: c.id, slug: c.slug, labelEn: c.nameEn, labelAr: c.nameAr }))}
                 venues={allVenues.map((v) => ({ key: v.id, slug: v.slug, labelEn: v.nameEn }))}
@@ -106,29 +119,33 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ CATEGORIES ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-20">
         <div className="flex items-end justify-between">
           <div>
-            <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "تخصصاتنا" : "Our subjects"}</span>
-            <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">{s("section_categories", t("categoriesTitle"))}</h2>
+            <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "تخصصاتنا" : "Training Categories"}</span>
+            <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{s("section_categories", t("categoriesTitle"))}</h2>
           </div>
-          <Link href="/training-subjects" className="hidden text-sm font-semibold text-brand hover:underline sm:inline">
-            {l === "ar" ? "عرض الكل ←" : "View all →"}
+          <Link href="/training-subjects" className="hidden items-center gap-1 text-sm font-semibold text-brand hover:underline sm:inline-flex">
+            {l === "ar" ? "عرض الكل" : "View all"} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {categories.map((c) => {
             const count = counts[c.id] ?? 0;
             return (
               <Link
                 key={c.id}
                 href={`/training-courses/${c.slug}`}
-                className="group relative overflow-hidden rounded-xl border bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-lg"
+                className="group relative overflow-hidden rounded-xl border bg-white p-5 transition-all hover:-translate-y-1 hover:border-brand hover:shadow-lg"
               >
                 <div className="absolute inset-x-0 top-0 h-1 bg-brand opacity-0 transition-opacity group-hover:opacity-100" />
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-light text-brand">
-                  <UsersIcon size={20} />
-                </div>
+                {c.icon ? (
+                  <img src={c.icon} alt="" className="h-10 w-10 rounded-lg object-contain" />
+                ) : (
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-light text-brand">
+                    <UsersIcon size={20} />
+                  </div>
+                )}
                 <h3 className="mt-4 font-semibold leading-snug text-navy group-hover:text-brand">
                   {localeText({ en: c.nameEn, ar: c.nameAr }, l)}
                 </h3>
@@ -142,18 +159,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ VENUES ============ */}
-      <section className="bg-muted/50 py-16">
+      <section className="section-divider bg-muted/40 py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-end justify-between">
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "أماكن التدريب" : "Training locations"}</span>
-              <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">{s("section_venues", t("venuesTitle"))}</h2>
+              <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "أماكن التدريب" : "Training Locations"}</span>
+              <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{s("section_venues", t("venuesTitle"))}</h2>
             </div>
-            <Link href="/training" className="hidden text-sm font-semibold text-brand hover:underline sm:inline">
-              {l === "ar" ? "المواقع ←" : "All venues →"}
+            <Link href="/training" className="hidden items-center gap-1 text-sm font-semibold text-brand hover:underline sm:inline-flex">
+              {l === "ar" ? "كل المواقع" : "All venues"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {regionsList.map((region) => (
               <div key={region.id} className="rounded-xl border bg-white p-6">
                 <div className="mb-4 flex items-center gap-2 font-semibold text-navy">
@@ -178,52 +195,61 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ FORMATS ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-20">
         <div className="text-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "طرق التدريب" : "Training formats"}</span>
-          <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">{s("section_formats", t("formatsTitle"))}</h2>
+          <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "طرق التدريب" : "Training Formats"}</span>
+          <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{s("section_formats", t("formatsTitle"))}</h2>
         </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
-            { icon: Building2, title: l === "ar" ? "قاعات تدريب" : "Classroom", desc: l === "ar" ? "تعلم وجهاً لوجه في مدننا العالمية." : "Learn in-person at our venues worldwide." },
-            { icon: MonitorPlay, title: l === "ar" ? "تدريب أونلاين" : "Online", desc: l === "ar" ? "جلسات مباشرة مع خبرائنا." : "Live virtual sessions with our expert trainers." },
-            { icon: UsersIcon, title: l === "ar" ? "تدريب داخلي" : "In-House", desc: l === "ar" ? "برامج مخصصة لفريقك في موقعك." : "Tailored programmes for your team, on-site." },
+            { icon: Building2, title: l === "ar" ? "قاعات تدريب" : "Classroom Training", desc: l === "ar" ? "تعلم وجهاً لوجه في مدننا العالمية." : "Learn in-person at our world-class venues in Dubai, London, and beyond." },
+            { icon: MonitorPlay, title: l === "ar" ? "تدريب أونلاين" : "Online Live Sessions", desc: l === "ar" ? "جلسات مباشرة مع خبرائنا." : "Join live virtual classrooms with expert instructors from anywhere." },
+            { icon: UsersIcon, title: l === "ar" ? "تدريب داخلي" : "In-House Training", desc: l === "ar" ? "برامج مخصصة لفريقك في موقعك." : "Tailored programmes delivered at your premises for your team." },
           ].map((f) => (
-            <div key={f.title} className="rounded-xl border bg-white p-6 text-center transition-shadow hover:shadow-md">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand-light text-brand">
-                <f.icon size={26} />
+            <div key={f.title} className="rounded-xl border bg-white p-8 text-center transition-shadow hover:shadow-lg">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-light text-brand">
+                <f.icon size={28} />
               </div>
-              <h3 className="mt-4 font-semibold text-navy">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
+              <h3 className="mt-5 text-lg font-semibold text-navy">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ============ FEATURED COURSES ============ */}
-      <section className="bg-navy py-16 text-white">
+      <section className="section-divider bg-navy py-20 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-end justify-between">
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-gold">{l === "ar" ? "دورات مميزة" : "Popular right now"}</span>
-              <h2 className="mt-2 text-2xl font-bold sm:text-3xl">{s("section_featured", t("featuredTitle"))}</h2>
+              <span className="text-sm font-semibold uppercase tracking-wider text-gold">{l === "ar" ? "دورات مميزة" : "Popular Courses"}</span>
+              <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{s("section_featured", t("featuredTitle"))}</h2>
             </div>
-            <Link href="/new-training-courses" className="hidden text-sm font-semibold text-gold hover:underline sm:inline">
-              {l === "ar" ? "عرض الكل ←" : "View all →"}
+            <Link href="/new-training-courses" className="hidden items-center gap-1 text-sm font-semibold text-gold hover:underline sm:inline-flex">
+              {l === "ar" ? "عرض الكل" : "View all"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((c) => {
               const next = c.schedules[0];
               return (
-                <Card key={c.id} className="group bg-white text-navy transition-all hover:-translate-y-0.5 hover:shadow-xl">
-                  <CardContent className="flex h-full flex-col p-5">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-brand/30 text-brand">{c.code}</Badge>
-                      {next && <span className="text-xs font-medium text-muted-foreground">{next.venue.nameEn}</span>}
+                <div key={c.id} className="group overflow-hidden rounded-xl bg-white text-navy transition-all hover:-translate-y-1 hover:shadow-2xl">
+                  {c.image && (
+                    <div className="relative h-48 overflow-hidden">
+                      <img
+                        src={c.image}
+                        alt=""
+                        className="course-card-img h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <Badge variant="outline" className="absolute left-3 top-3 border-white/30 bg-white/90 text-navy">{c.code}</Badge>
                     </div>
-                    <Link href={`/training-course/${c.slug}`} className="mt-4 flex-1">
-                      <h3 className="font-semibold leading-snug text-navy transition-colors group-hover:text-brand">
+                  )}
+                  <div className="flex flex-col p-5">
+                    {!c.image && <Badge variant="outline" className="mb-3 w-fit border-brand/30 text-brand">{c.code}</Badge>}
+                    <Link href={`/training-course/${c.slug}`} className="flex-1">
+                      <h3 className="text-lg font-semibold leading-snug text-navy transition-colors group-hover:text-brand">
                         {localeText({ en: c.titleEn, ar: c.titleAr }, l)}
                       </h3>
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
@@ -231,25 +257,28 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                       </p>
                     </Link>
                     {next && (
-                      <div className="mt-5 space-y-2 border-t pt-4 text-sm">
+                      <div className="mt-4 space-y-2 border-t pt-4 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <CalendarDays size={16} className="text-brand" />
+                          <CalendarDays size={15} className="shrink-0 text-brand" />
                           {formatDateRange(next.startDate, next.endDate, l)}
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-muted-foreground">
-                            <Globe2 size={16} className="text-brand" />
+                            <Globe2 size={15} className="shrink-0 text-brand" />
                             {next.venue.nameEn}
                           </div>
-                          <span className="font-semibold text-navy">{formatCurrency(Number(next.fee), next.currency)}</span>
+                          <span className="font-bold text-navy">{formatCurrency(Number(next.fee), next.currency)}</span>
                         </div>
                       </div>
                     )}
-                    <Link href={`/training-course/${c.slug}`} className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark">
+                    <Link
+                      href={`/training-course/${c.slug}`}
+                      className="mt-4 inline-flex items-center justify-center rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+                    >
                       {tc("registerNow")}
                     </Link>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -257,12 +286,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ ABOUT + TESTIMONIALS ============ */}
-      <section className="mx-auto max-w-7xl px-4 py-16">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-20">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "من نحن" : "Why Takween"}</span>
-            <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">{s("section_about", t("aboutTitle"))}</h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
+            <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{s("section_about", t("aboutTitle"))}</h2>
+            <p className="mt-5 leading-relaxed text-muted-foreground">
               {s(
                 "about_text",
                 l === "ar"
@@ -270,29 +299,31 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                   : "We are a leading professional training provider, delivering over 1000 courses across cities worldwide, powered by expert trainers and hands-on, practical curricula."
               )}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               {[
-                { icon: ShieldCheck, label: l === "ar" ? "معتمدون عالمياً" : "Globally accredited" },
-                { icon: Users, label: l === "ar" ? "مدربون خبراء" : "Expert trainers" },
-                { icon: Award, label: l === "ar" ? "برامج عملية" : "Practical programmes" },
+                { icon: ShieldCheck, label: l === "ar" ? "معتمدون عالمياً" : "Globally Accredited" },
+                { icon: Users, label: l === "ar" ? "مدربون خبراء" : "Expert Trainers" },
+                { icon: Award, label: l === "ar" ? "برامج عملية" : "Practical Programmes" },
               ].map((f) => (
                 <span key={f.label} className="inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-2 text-sm font-medium text-navy">
-                  <f.icon size={16} className="text-brand" />
+                  <CheckCircle2 size={16} className="text-brand" />
                   {f.label}
                 </span>
               ))}
             </div>
-            <Link href="/about-us" className="mt-6 inline-block text-sm font-semibold text-brand hover:underline">
-              {l === "ar" ? "اقرأ المزيد ←" : "Read more →"}
+            <Link href="/about-us" className="mt-8 inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline">
+              {l === "ar" ? "اقرأ المزيد" : "Read more"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
           {testimonials.length > 0 && (
-            <div className="space-y-4">
-              {testimonials.map((tm) => (
-                <figure key={tm.id} className="rounded-xl border bg-white p-6">
-                  <Quote className="h-6 w-6 text-brand" />
-                  <blockquote className="mt-3 text-navy">{localeText({ en: tm.textEn, ar: tm.textAr }, l)}</blockquote>
+            <div className="space-y-5">
+              {testimonials.slice(0, 3).map((tm) => (
+                <figure key={tm.id} className="rounded-xl border bg-white p-6 transition-shadow hover:shadow-md">
+                  <Quote className="h-6 w-6 text-brand/30" />
+                  <blockquote className="mt-2 text-sm leading-relaxed text-navy">
+                    {localeText({ en: tm.textEn, ar: tm.textAr }, l)}
+                  </blockquote>
                   <figcaption className="mt-4 flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-navy text-sm font-bold text-white">
                       {tm.author.charAt(0)}
@@ -310,25 +341,30 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ CERTIFICATES ============ */}
-      <section className="bg-navy py-16 text-white">
+      <section className="section-divider bg-navy py-20 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-end justify-between">
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-gold">{l === "ar" ? "الشهادات" : "Certificates"}</span>
-              <h2 className="mt-2 text-2xl font-bold sm:text-3xl">{s("section_certificates", t("certificatesTitle"))}</h2>
+              <span className="text-sm font-semibold uppercase tracking-wider text-gold">{l === "ar" ? "الشهادات" : "Professional Certificates"}</span>
+              <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{s("section_certificates", t("certificatesTitle"))}</h2>
             </div>
-            <Link href="/certificates" className="hidden text-sm font-semibold text-gold hover:underline sm:inline">
-              {l === "ar" ? "كل الشهادات ←" : "All certificates →"}
+            <Link href="/certificates" className="hidden items-center gap-1 text-sm font-semibold text-gold hover:underline sm:inline-flex">
+              {l === "ar" ? "كل الشهادات" : "All certificates"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {certificates.map((c) => (
               <Link
                 key={c.id}
                 href={`/certified-courses/${c.slug}`}
-                className="rounded-xl border border-white/15 bg-white/5 p-5 text-sm font-medium text-white/90 transition-colors hover:border-gold hover:bg-white/10 hover:text-gold"
+                className="group flex items-center gap-3 rounded-xl border border-white/15 bg-white/5 p-5 transition-all hover:border-gold hover:bg-white/10 hover:text-gold"
               >
-                {localeText({ en: c.nameEn, ar: c.nameAr }, l)}
+                {c.logo ? (
+                  <img src={c.logo} alt="" className="h-10 w-10 rounded object-contain" />
+                ) : null}
+                <span className="text-sm font-medium text-white/90 group-hover:text-gold">
+                  {localeText({ en: c.nameEn, ar: c.nameAr }, l)}
+                </span>
               </Link>
             ))}
           </div>
@@ -337,13 +373,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ============ CLIENTS ============ */}
       {clients.length > 0 && (
-        <section className="border-b bg-white py-12">
+        <section className="section-divider bg-white py-16">
           <div className="mx-auto max-w-7xl px-4 text-center">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{s("section_clients", t("clientsTitle"))}</h3>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
               {clients.map((c) => (
-                <span key={c.id} className="text-xl font-bold uppercase tracking-wide text-gray-300">
-                  {c.nameEn}
+                <span key={c.id} className="text-lg font-bold uppercase tracking-wide text-gray-300 transition-colors hover:text-gray-400">
+                  {c.logo ? (
+                    <img src={c.logo} alt={c.nameEn} className="h-8 w-auto object-contain opacity-40 grayscale" />
+                  ) : (
+                    c.nameEn
+                  )}
                 </span>
               ))}
             </div>
@@ -353,28 +393,35 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ============ ARTICLES / INSIGHTS ============ */}
       {articles.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-16">
+        <section className="section-divider mx-auto max-w-7xl px-4 py-20">
           <div className="flex items-end justify-between">
             <div>
-              <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "المدونة" : "Blog"}</span>
-              <h2 className="mt-2 text-2xl font-bold text-navy sm:text-3xl">{s("section_articles", t("articlesTitle"))}</h2>
+              <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "المدونة" : "Latest Insights"}</span>
+              <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{s("section_articles", t("articlesTitle"))}</h2>
             </div>
-            <Link href="/resources" className="hidden text-sm font-semibold text-brand hover:underline sm:inline">
-              {l === "ar" ? "كل المقالات ←" : "All articles →"}
+            <Link href="/resources" className="hidden items-center gap-1 text-sm font-semibold text-brand hover:underline sm:inline-flex">
+              {l === "ar" ? "كل المقالات" : "All articles"} <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
-              <Link key={a.id} href={`/resources/${a.slug}`} className="group rounded-xl border bg-white p-6 transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                <h3 className="font-semibold leading-snug text-navy group-hover:text-brand">
-                  {localeText({ en: a.titleEn, ar: a.titleAr }, l)}
-                </h3>
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                  {localeText({ en: a.excerptEn, ar: a.excerptAr }, l)}
-                </p>
-                <span className="mt-4 inline-block text-sm font-semibold text-brand">
-                  {l === "ar" ? "اقرأ المزيد ←" : "Read more →"}
-                </span>
+              <Link key={a.id} href={`/resources/${a.slug}`} className="group overflow-hidden rounded-xl border bg-white transition-all hover:-translate-y-1 hover:shadow-lg">
+                {a.image && (
+                  <div className="relative h-44 overflow-hidden">
+                    <img src={a.image} alt="" className="course-card-img h-full w-full object-cover" loading="lazy" />
+                  </div>
+                )}
+                <div className="p-6">
+                  <h3 className="font-semibold leading-snug text-navy group-hover:text-brand">
+                    {localeText({ en: a.titleEn, ar: a.titleAr }, l)}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                    {localeText({ en: a.excerptEn, ar: a.excerptAr }, l)}
+                  </p>
+                  <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand">
+                    {l === "ar" ? "اقرأ المزيد" : "Read more"} <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
@@ -383,12 +430,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ============ CTA ============ */}
       <section className="bg-brand">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-10 text-center text-white sm:flex-row sm:text-left">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-12 text-center text-white sm:flex-row sm:text-left">
           <div>
-            <h2 className="text-2xl font-bold">{s("cta_title", l === "ar" ? "جاهز لتطوير مهاراتك؟" : "Ready to advance your career?")}</h2>
-            <p className="mt-1 text-white/90">{s("cta_subtitle", l === "ar" ? "تواصل مع مستشارينا التدريبيين اليوم." : "Talk to our training advisors today.")}</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{s("cta_title", l === "ar" ? "جاهز لتطوير مهاراتك؟" : "Ready to advance your career?")}</h2>
+            <p className="mt-1 text-white/80">{s("cta_subtitle", l === "ar" ? "تواصل مع مستشارينا التدريبيين اليوم." : "Talk to our training advisors today.")}</p>
           </div>
-          <Link href="/contact-us" className="shrink-0 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-brand hover:bg-brand-light">
+          <Link href="/contact-us" className="shrink-0 rounded-lg bg-white px-7 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand-light">
             {l === "ar" ? "اتصل بنا" : "Contact us"}
           </Link>
         </div>

@@ -103,10 +103,10 @@ export default async function CoursePage({
           ),
         }}
       />
-      <section className="bg-navy text-white">
-        <div className="mx-auto max-w-7xl px-4 py-10">
+      <section className="bg-navy pt-28 text-white">
+        <div className="mx-auto max-w-7xl px-4 pb-10">
           {course.image && (
-            <div className="relative mb-6 h-44 w-full overflow-hidden rounded-lg">
+            <div className="relative mb-6 h-56 w-full overflow-hidden rounded-xl lg:h-72">
               <Image
                 src={course.image}
                 alt={localeText({ en: course.titleEn, ar: course.titleAr }, l)}
@@ -115,13 +115,14 @@ export default async function CoursePage({
                 className="object-cover"
                 priority
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
           )}
           <Badge className="bg-brand">{course.badgeEn || `${course.durationDays}-Day Training`}</Badge>
-          <h1 className="mt-3 text-3xl font-bold">
+          <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
             {localeText({ en: course.titleEn, ar: course.titleAr }, l)}
           </h1>
-          <p className="mt-2 text-white/80">
+          <p className="mt-2 max-w-3xl text-white/80">
             {localeText({ en: course.subtitleEn, ar: course.subtitleAr }, l)}
           </p>
         </div>
@@ -208,7 +209,7 @@ export default async function CoursePage({
           )}
         </div>
 
-        <aside className="space-y-6">
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           <Card>
             <CardContent className="pt-6">
               <h3 className="mb-4 font-semibold text-navy">{tc("registerNow")}</h3>
@@ -278,33 +279,30 @@ export default async function CoursePage({
       </section>
 
       {related.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-12">
-          <h2 className="mb-4 text-xl font-bold text-navy">{t("relatedCourses")}</h2>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="section-divider mx-auto max-w-7xl px-4 py-12">
+          <h2 className="mb-6 text-xl font-bold text-navy">{t("relatedCourses")}</h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {related.map((rc) => {
               const next = rc.schedules[0];
               return (
-                <Card key={rc.id} className="group transition-all hover:-translate-y-0.5 hover:shadow-lg">
-                  <CardContent className="flex h-full flex-col p-5">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="border-brand/30 text-brand">{rc.code}</Badge>
-                      {next && <span className="text-xs text-muted-foreground">{next.venue.nameEn}</span>}
+                <Link key={rc.id} href={`/training-course/${rc.slug}`} className="group overflow-hidden rounded-xl border bg-white transition-all hover:-translate-y-1 hover:shadow-lg">
+                  {rc.image && (
+                    <div className="relative h-40 overflow-hidden">
+                      <img src={rc.image} alt="" className="course-card-img h-full w-full object-cover" loading="lazy" />
                     </div>
-                    <Link href={`/training-course/${rc.slug}`} className="mt-3 flex-1">
-                      <h3 className="font-semibold text-navy group-hover:text-brand">
-                        {localeText({ en: rc.titleEn, ar: rc.titleAr }, l)}
-                      </h3>
-                      {next && (
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          {formatDateRange(next.startDate, next.endDate, l)}
-                        </p>
-                      )}
-                    </Link>
-                    <Link href={`/training-course/${rc.slug}`} className="mt-3 text-sm font-semibold text-brand hover:underline">
-                      {tc("registerNow")}
-                    </Link>
-                  </CardContent>
-                </Card>
+                  )}
+                  <div className="p-5">
+                    <Badge variant="outline" className="mb-2 border-brand/30 text-brand">{rc.code}</Badge>
+                    <h3 className="font-semibold text-navy group-hover:text-brand">
+                      {localeText({ en: rc.titleEn, ar: rc.titleAr }, l)}
+                    </h3>
+                    {next && (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {formatDateRange(next.startDate, next.endDate, l)}
+                      </p>
+                    )}
+                  </div>
+                </Link>
               );
             })}
           </div>

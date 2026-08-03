@@ -53,3 +53,46 @@ body {
   color: var(--foreground);
   font-family: inherit;
 }
+
+/* Section divider — subtle top border between alternating sections */
+.section-divider {
+  border-top: 1px solid var(--border);
+}
+
+/* Hero image overlay */
+.hero-overlay {
+  background: linear-gradient(135deg, rgba(14, 42, 69, 0.92) 0%, rgba(2, 100, 129, 0.85) 100%);
+}
+
+/* Mega menu transition */
+.mega-menu-content {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+}
+.mega-menu-trigger:hover .mega-menu-content,
+.mega-menu-content:hover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Sticky sidebar */
+.sticky-sidebar {
+  position: sticky;
+  top: 6rem;
+}
+
+/* Course card image hover zoom */
+.course-card-img {
+  transition: transform 0.3s ease;
+}
+.course-card:hover .course-card-img {
+  transform: scale(1.05);
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}

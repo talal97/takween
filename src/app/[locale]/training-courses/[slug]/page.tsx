@@ -5,10 +5,10 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
+import { CalendarDays, Globe2 } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -68,75 +68,78 @@ export default async function CategoryCoursesPage({
 
   return (
     <div>
-      <section className="bg-muted/50">
-        <div className="mx-auto max-w-7xl px-4 py-10">
-          <h1 className="text-3xl font-bold text-navy">
+      <section className="bg-navy pb-10 pt-28 text-white">
+        <div className="mx-auto max-w-7xl px-4">
+          <h1 className="text-3xl font-bold sm:text-4xl">
             {localeText({ en: category.nameEn, ar: category.nameAr }, l)}
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-white/70">
             {localeText({ en: category.taglineEn, ar: category.taglineAr }, l) ||
               `${courseCount} ${l === "ar" ? "دورة" : "courses"}`}
           </p>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[260px_1fr]">
-        <aside className="space-y-4">
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="mb-3 font-semibold">Filters</h3>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <Label>Year</Label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    <YearChip label="All" href={`?`} active={!year} />
-                    {years.map((y) => (
-                      <YearChip key={y} label={String(y)} href={`?year=${y}`} active={year === String(y)} />
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <Label>Format</Label>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    <YearChip label="All" href={`?${year ? `year=${year}&` : ""}`} active={!format} />
-                    <YearChip label="Classroom" href={`?${year ? `year=${year}&` : ""}format=classroom`} active={format === "classroom"} />
-                    <YearChip label="Online" href={`?${year ? `year=${year}&` : ""}format=online`} active={format === "online"} />
-                  </div>
-                </div>
-                <div>
-                  <Badge variant="secondary">
-                    Showing {schedules.length} of {courseCount}
-                  </Badge>
+      <section className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[260px_1fr]">
+        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+          <div className="rounded-xl border bg-white p-5">
+            <h3 className="mb-4 font-semibold text-navy">{l === "ar" ? "الفلاتر" : "Filters"}</h3>
+            <div className="space-y-5 text-sm">
+              <div>
+                <Label className="text-muted-foreground">{l === "ar" ? "السنة" : "Year"}</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <YearChip label={l === "ar" ? "الكل" : "All"} href={`?`} active={!year} />
+                  {years.map((y) => (
+                    <YearChip key={y} label={String(y)} href={`?year=${y}`} active={year === String(y)} />
+                  ))}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <Label className="text-muted-foreground">{l === "ar" ? "النوع" : "Format"}</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <YearChip label={l === "ar" ? "الكل" : "All"} href={`?${year ? `year=${year}&` : ""}`} active={!format} />
+                  <YearChip label={l === "ar" ? "قاعة" : "Classroom"} href={`?${year ? `year=${year}&` : ""}format=classroom`} active={format === "classroom"} />
+                  <YearChip label={l === "ar" ? "أونلاين" : "Online"} href={`?${year ? `year=${year}&` : ""}format=online`} active={format === "online"} />
+                </div>
+              </div>
+              <Badge variant="secondary" className="w-full justify-center">
+                {schedules.length} {l === "ar" ? "نتيجة من" : "of"} {courseCount}
+              </Badge>
+            </div>
+          </div>
         </aside>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {schedules.length === 0 && (
-            <Card>
-              <CardContent className="py-10 text-center text-muted-foreground">No courses found.</CardContent>
-            </Card>
+            <div className="rounded-xl border bg-white py-10 text-center text-muted-foreground">
+              {l === "ar" ? "لم يتم العثور على دورات" : "No courses found."}
+            </div>
           )}
           {schedules.map((s) => (
-            <Card key={s.id}>
-              <CardContent className="pt-6">
-                <Link href={`/training-course/${s.course.slug}`} className="group">
-                  <div className="font-semibold text-navy group-hover:text-brand">
-                    {localeText({ en: s.course.titleEn, ar: s.course.titleAr }, l)}
-                  </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {localeText({ en: s.course.subtitleEn, ar: s.course.subtitleAr }, l)}
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-                    <Badge variant="secondary">{formatDateRange(s.startDate, s.endDate, l)}</Badge>
-                    <Badge variant="secondary">{s.venue.nameEn}</Badge>
-                    <span className="font-medium">{formatCurrency(Number(s.fee), s.currency)}</span>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
+            <Link
+              key={s.id}
+              href={`/training-course/${s.course.slug}`}
+              className="group flex gap-4 rounded-xl border bg-white p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              {s.course.image && (
+                <div className="relative h-28 w-36 shrink-0 overflow-hidden rounded-lg">
+                  <img src={s.course.image} alt="" className="course-card-img h-full w-full object-cover" loading="lazy" />
+                </div>
+              )}
+              <div className="flex-1">
+                <h3 className="font-semibold text-navy group-hover:text-brand">
+                  {localeText({ en: s.course.titleEn, ar: s.course.titleAr }, l)}
+                </h3>
+                <p className="mt-0.5 line-clamp-1 text-sm text-muted-foreground">
+                  {localeText({ en: s.course.subtitleEn, ar: s.course.subtitleAr }, l)}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  <span className="flex items-center gap-1"><CalendarDays size={13} className="text-brand" /> {formatDateRange(s.startDate, s.endDate, l)}</span>
+                  <span className="flex items-center gap-1"><Globe2 size={13} className="text-brand" /> {s.venue.nameEn}</span>
+                  <span className="font-semibold text-navy">{formatCurrency(Number(s.fee), s.currency)}</span>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       </section>

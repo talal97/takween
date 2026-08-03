@@ -19,7 +19,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
-  const course = await prisma.course.findUnique({ where: { slug } });
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+  const course = await prisma.course.findFirst({ where: { slug, locale: localeFilter } });
   const title = course ? localeText({ en: course.titleEn, ar: course.titleAr }, l) : "Course";
   return {
     title,
@@ -45,8 +46,9 @@ export default async function CoursePage({
   const t = await getTranslations("course");
   const tc = await getTranslations("common");
 
-  const course = await prisma.course.findUnique({
-    where: { slug },
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+  const course = await prisma.course.findFirst({
+    where: { slug, locale: localeFilter },
     include: {
       category: { include: { faqs: true } },
       schedules: { include: { venue: true }, orderBy: { startDate: "asc" } },

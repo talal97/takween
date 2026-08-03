@@ -46,6 +46,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
             <TableHeader>
               <TableRow>
                 <TableHead>Course</TableHead>
+                <TableHead>Locale</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Sessions</TableHead>
                 <TableHead>Featured</TableHead>
@@ -55,7 +56,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
             <TableBody>
               {courses.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
                     No courses yet. Create your first course.
                   </TableCell>
                 </TableRow>
@@ -63,8 +64,13 @@ export default async function CoursesPage({ searchParams }: { searchParams: Prom
               {courses.map((c) => (
                 <TableRow key={c.id}>
                   <TableCell>
-                    <div className="font-medium">{c.titleEn}</div>
+                    <div className="font-medium">{c.titleEn || c.titleAr || c.slug}</div>
                     <div className="text-xs text-muted-foreground">/training-course/{c.slug}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={c.locale === "both" ? "default" : "secondary"}>
+                      {c.locale === "en" ? "English" : c.locale === "ar" ? "Arabic" : "Both"}
+                    </Badge>
                   </TableCell>
                   <TableCell>{c.category?.nameEn}</TableCell>
                   <TableCell>

@@ -29,14 +29,16 @@ export const getNavigationCached = unstable_cache(getNavigation, ["navigation"],
   tags: [SITE_TAG],
 });
 
-export async function getHomePageData() {
+export async function getHomePageData(locale: Locale = "en") {
+  const localeFilter = locale === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+
   const [categories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts, totalCourses] =
     await Promise.all([
       prisma.category.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 12 }),
       prisma.region.findMany({ orderBy: { sort: "asc" }, include: { venues: { orderBy: { nameEn: "asc" } } } }),
       prisma.certificate.findMany({ orderBy: { sort: "asc" }, take: 8 }),
       prisma.course.findMany({
-        where: { featured: true },
+        where: { featured: true, locale: localeFilter },
         orderBy: { updatedAt: "desc" },
         take: 6,
         include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } }, category: true },
@@ -44,8 +46,8 @@ export async function getHomePageData() {
       prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 3 }),
       prisma.testimonial.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 3 }),
       prisma.client.findMany({ orderBy: { sort: "asc" }, take: 12 }),
-      prisma.course.groupBy({ by: ["categoryId"], _count: { _all: true } }),
-      prisma.course.count(),
+      prisma.course.groupBy({ by: ["categoryId"], where: { locale: localeFilter }, _count: { _all: true } }),
+      prisma.course.count({ where: { locale: localeFilter } }),
     ]);
   return {
     categories,

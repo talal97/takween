@@ -17,7 +17,8 @@ export default async function CertifiedCoursePage({
   const cert = await prisma.certificate.findUnique({ where: { slug }, include: { courses: true } });
   if (!cert) notFound();
 
-  const courseIds = cert.courses.map((c) => c.id);
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+  const courseIds = cert.courses.filter((c) => c.locale === localeFilter.in[0] || c.locale === localeFilter.in[1]).map((c) => c.id);
   const schedules = courseIds.length
     ? await prisma.schedule.findMany({
         where: { courseId: { in: courseIds } },

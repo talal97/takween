@@ -42,7 +42,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     clients,
     categoryCounts,
     totalCourses,
-  } = await getHomePageDataCached();
+  } = await getHomePageDataCached(l);
 
   const counts: Record<string, number> = {};
   categoryCounts.forEach((c) => {

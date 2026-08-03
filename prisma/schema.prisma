@@ -142,8 +142,9 @@ model Certificate {
 model Course {
   id             String  @id @default(cuid())
   code           String  @unique @default("")
-  slug           String  @unique
-  titleEn        String
+  slug           String
+  locale         String  @default("both") // "en" | "ar" | "both"
+  titleEn        String?
   titleAr        String?
   subtitleEn     String?
   subtitleAr     String?
@@ -185,6 +186,8 @@ model Course {
   seoTitleAr String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@unique([slug, locale])
 }
 
 model CourseRelation {

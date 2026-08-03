@@ -7,16 +7,26 @@ export default async function TrainingSubjectsPage({ params }: { params: Promise
   const { locale } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
+
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+
   const groups = await prisma.superCategory.findMany({
     orderBy: { sort: "asc" },
-    include: { categories: { orderBy: { nameEn: "asc" } } },
+    include: {
+      categories: {
+        orderBy: { nameEn: "asc" },
+        where: { courses: { some: { locale: localeFilter } } },
+      },
+    },
   });
+
+  const filteredGroups = groups.filter((g) => g.categories.length > 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <h1 className="text-3xl font-bold text-navy">{l === "ar" ? "الموضوعات التدريبية" : "Training Subjects"}</h1>
       <div className="mt-8 space-y-10">
-        {groups.map((g) => (
+        {filteredGroups.map((g) => (
           <section key={g.id}>
             <Link href={`/training-subjects/${g.slug}`}>
               <h2 className="text-xl font-bold text-navy hover:text-brand">{localeText({ en: g.nameEn, ar: g.nameAr }, l)}</h2>

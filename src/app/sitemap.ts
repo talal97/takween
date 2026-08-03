@@ -18,8 +18,9 @@ const STATIC_PATHS = [
 ];
 
 async function getDynamicSlugs() {
-  const [courses, categories, articles, certificates] = await Promise.all([
-    prisma.course.findMany({ select: { slug: true }, orderBy: { updatedAt: "desc" } }),
+  const [enCourses, arCourses, categories, articles, certificates] = await Promise.all([
+    prisma.course.findMany({ select: { slug: true }, where: { locale: { in: ["en", "both"] } }, orderBy: { updatedAt: "desc" } }),
+    prisma.course.findMany({ select: { slug: true }, where: { locale: { in: ["ar", "both"] } }, orderBy: { updatedAt: "desc" } }),
     prisma.category.findMany({ select: { slug: true, superCategoryId: true } }),
     prisma.article.findMany({ select: { slug: true }, where: { status: "published" } }),
     prisma.certificate.findMany({ select: { slug: true } }),
@@ -28,7 +29,7 @@ async function getDynamicSlugs() {
   // Only categories attached to a super-category have their own listing page.
   const listingCategories = categories.filter((c) => c.superCategoryId);
 
-  return { courses, categories: listingCategories, articles, certificates };
+  return { enCourses, arCourses, categories: listingCategories, articles, certificates };
 }
 
 function url(path: string, locale: string) {
@@ -36,11 +37,13 @@ function url(path: string, locale: string) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { courses, categories, articles, certificates } = await getDynamicSlugs();
+  const { enCourses, arCourses, categories, articles, certificates } = await getDynamicSlugs();
 
   const entries: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {
+    const courses = locale === "ar" ? arCourses : enCourses;
+
     for (const p of STATIC_PATHS) {
       entries.push({
         url: url(p === "" ? "" : p, locale),

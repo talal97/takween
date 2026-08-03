@@ -24,6 +24,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
   const initial = {
     code: course.code,
     slug: course.slug,
+    locale: course.locale,
     image: course.image ?? "",
     titleEn: course.titleEn,
     titleAr: course.titleAr ?? "",
@@ -63,7 +64,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   return (
     <div>
-      <PageHeader title="Edit Course" description={course.titleEn} />
+      <PageHeader title="Edit Course" description={course.titleEn || course.titleAr || course.slug} />
       <Card>
         <CardHeader>
           <h3 className="font-semibold">Course Details</h3>

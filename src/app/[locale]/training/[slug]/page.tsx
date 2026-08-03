@@ -15,8 +15,9 @@ export default async function VenuePage({ params }: { params: Promise<{ locale: 
   const venue = await prisma.venue.findUnique({ where: { slug }, include: { region: true } });
   if (!venue) notFound();
 
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const schedules = await prisma.schedule.findMany({
-    where: { venueId: venue.id, startDate: { gte: new Date() } },
+    where: { venueId: venue.id, startDate: { gte: new Date() }, course: { locale: localeFilter } },
     include: { course: true, venue: true },
     orderBy: { startDate: "asc" },
     take: 50,

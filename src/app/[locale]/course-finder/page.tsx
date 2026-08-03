@@ -20,9 +20,12 @@ export default async function CourseFinderPage({
   const sp = await searchParams;
   const q = ((sp.q as string) || "").trim().toLowerCase();
 
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+
   const courses = q
     ? await prisma.course.findMany({
         where: {
+          locale: localeFilter,
           OR: [
             { titleEn: { contains: q, mode: "insensitive" } },
             { titleAr: { contains: q, mode: "insensitive" } },
@@ -33,7 +36,11 @@ export default async function CourseFinderPage({
         include: { schedules: { include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
         take: 40,
       })
-    : await prisma.course.findMany({ include: { schedules: { include: { venue: true }, orderBy: { startDate: "asc" } }, category: true }, take: 60 });
+    : await prisma.course.findMany({
+        where: { locale: localeFilter },
+        include: { schedules: { include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
+        take: 60,
+      });
 
   return (
     <div>

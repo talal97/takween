@@ -9,7 +9,9 @@ export default async function NewTrainingCoursesPage({ params }: { params: Promi
   const { locale } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const courses = await prisma.course.findMany({
+    where: { locale: localeFilter },
     orderBy: { createdAt: "desc" },
     take: 24,
     include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } } },

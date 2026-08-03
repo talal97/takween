@@ -41,7 +41,7 @@ export default async function ProvidersPage() {
       type: "select",
       options: [
         { value: "", label: "All courses (global)" },
-        ...courses.map((c) => ({ value: c.id, label: c.titleEn })),
+        ...courses.map((c) => ({ value: c.id, label: c.titleEn || c.titleAr || c.slug })),
       ],
     },
     { key: "sort", label: "Sort order", type: "text" },

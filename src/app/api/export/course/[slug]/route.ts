@@ -5,7 +5,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
   const { slug } = await params;
   const format = (req.nextUrl.searchParams.get("format") || "xlsx").toLowerCase();
 
-  const course = await prisma.course.findUnique({
+  const course = await prisma.course.findFirst({
     where: { slug },
     include: {
       schedules: { orderBy: { startDate: "asc" }, include: { venue: true } },

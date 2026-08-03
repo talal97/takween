@@ -22,11 +22,17 @@ export default async function TrainingSubjectPage({
   });
 
   if (superCat) {
+    const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+    const filteredCategories = await prisma.category.findMany({
+      where: { superCategoryId: superCat.id, courses: { some: { locale: localeFilter } } },
+      orderBy: { nameEn: "asc" },
+    });
+
     return (
       <div className="mx-auto max-w-7xl px-4 py-10">
         <h1 className="text-3xl font-bold text-navy">{localeText({ en: superCat.nameEn, ar: superCat.nameAr }, l)}</h1>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {superCat.categories.map((c) => (
+          {filteredCategories.map((c) => (
             <Link key={c.id} href={`/training-courses/${c.slug}`} className="group rounded-lg border p-4 transition-shadow hover:shadow-md">
               <div className="font-semibold text-navy group-hover:text-brand">{localeText({ en: c.nameEn, ar: c.nameAr }, l)}</div>
               <div className="mt-1 text-sm text-muted-foreground">{localeText({ en: c.taglineEn, ar: c.taglineAr }, l)}</div>
@@ -40,8 +46,9 @@ export default async function TrainingSubjectPage({
   const category = await prisma.category.findUnique({ where: { slug } });
   if (!category) notFound();
 
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const schedules = await prisma.schedule.findMany({
-    where: { course: { categoryId: category.id } },
+    where: { course: { categoryId: category.id, locale: localeFilter } },
     include: { course: true, venue: true },
     orderBy: { startDate: "asc" },
   });

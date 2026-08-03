@@ -28,9 +28,10 @@ type DayRow = { day: number; title: string; topics: string };
 type CourseDraft = {
   code: string;
   slug: string;
+  locale: string;
   image: string;
-  titleEn: string;
-  titleAr: string;
+  titleEn: string | null;
+  titleAr: string | null;
   subtitleEn: string;
   subtitleAr: string;
   badgeEn: string;
@@ -57,6 +58,7 @@ type CourseDraft = {
 const emptyDraft: CourseDraft = {
   code: "",
   slug: "",
+  locale: "both",
   image: "",
   titleEn: "",
   titleAr: "",
@@ -167,24 +169,39 @@ export function CourseForm(props: CourseFormProps) {
     <form onSubmit={onSubmit} className="space-y-6">
       <section className="space-y-4 rounded border p-4">
         <h3 className="font-semibold">Basic Information</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Title (EN)" value={draft.titleEn} onChange={(v) => set("titleEn", v)} required />
-          <Field label="Title (AR)" value={draft.titleAr} onChange={(v) => set("titleAr", v)} rtl />
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Subtitle (EN)" value={draft.subtitleEn} onChange={(v) => set("subtitleEn", v)} />
-          <Field label="Subtitle (AR)" value={draft.subtitleAr} onChange={(v) => set("subtitleAr", v)} rtl />
-        </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Slug" value={draft.slug} onChange={(v) => set("slug", v)} placeholder="leed-green-associate" required />
           <Field label="Course Code" value={draft.code} onChange={(v) => set("code", v)} />
-          <Field label="Duration (days)" type="number" value={draft.durationDays} onChange={(v) => set("durationDays", v)} />
+          <Field label="Locale" type="select" value={draft.locale} onChange={(v) => set("locale", v)} required>
+            <option value="both">Both (English & Arabic)</option>
+            <option value="en">English Only</option>
+            <option value="ar">Arabic Only</option>
+          </Field>
         </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Duration (days)" type="number" value={draft.durationDays} onChange={(v) => set("durationDays", v)} />
+          <label className="flex items-center gap-2 pb-2 text-sm">
+            <input type="checkbox" checked={draft.featured} onChange={(e) => set("featured", e.target.checked)} />
+            Featured
+          </label>
+        </div>
+        {(draft.locale === "en" || draft.locale === "both") && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Title (EN)" value={draft.titleEn ?? ""} onChange={(v) => set("titleEn", v)} required={draft.locale === "en" || draft.locale === "both"} />
+            <Field label="Subtitle (EN)" value={draft.subtitleEn ?? ""} onChange={(v) => set("subtitleEn", v)} />
+          </div>
+        )}
+        {(draft.locale === "ar" || draft.locale === "both") && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Title (AR)" value={draft.titleAr ?? ""} onChange={(v) => set("titleAr", v)} rtl required={draft.locale === "ar" || draft.locale === "both"} />
+            <Field label="Subtitle (AR)" value={draft.subtitleAr ?? ""} onChange={(v) => set("subtitleAr", v)} rtl />
+          </div>
+        )}
         <div>
           <Label>Course Image</Label>
           <UploadInput value={draft.image} onChange={(v) => set("image", v)} kind="image" label="Image" />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div>
           <Field label="Category" type="select" value={draft.categoryId} onChange={(v) => set("categoryId", v)} required>
             <option value="">Select category</option>
             {props.categories.map((c) => (
@@ -193,29 +210,31 @@ export function CourseForm(props: CourseFormProps) {
               </option>
             ))}
           </Field>
-          <label className="flex items-center gap-2 pb-2 text-sm">
-            <input type="checkbox" checked={draft.featured} onChange={(e) => set("featured", e.target.checked)} />
-            Featured
-          </label>
         </div>
       </section>
 
       <section className="space-y-4 rounded border p-4">
         <h3 className="font-semibold">Course Content</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Area label="Introduction (EN)" value={draft.introEn} onChange={(v) => set("introEn", v)} />
-          <Area label="Introduction (AR)" value={draft.introAr} onChange={(v) => set("introAr", v)} rtl />
-          <Area label="Objectives (EN)" value={draft.objectivesEn} onChange={(v) => set("objectivesEn", v)} />
-          <Area label="Objectives (AR)" value={draft.objectivesAr} onChange={(v) => set("objectivesAr", v)} rtl />
-          <Area label="Training Methodology (EN)" value={draft.methodologyEn} onChange={(v) => set("methodologyEn", v)} />
-          <Area label="Training Methodology (AR)" value={draft.methodologyAr} onChange={(v) => set("methodologyAr", v)} rtl />
-          <Area label="Organisational Impact (EN)" value={draft.orgImpactEn} onChange={(v) => set("orgImpactEn", v)} />
-          <Area label="Organisational Impact (AR)" value={draft.orgImpactAr} onChange={(v) => set("orgImpactAr", v)} rtl />
-          <Area label="Personal Impact (EN)" value={draft.personalImpactEn} onChange={(v) => set("personalImpactEn", v)} />
-          <Area label="Personal Impact (AR)" value={draft.personalImpactAr} onChange={(v) => set("personalImpactAr", v)} rtl />
-          <Area label="Target Audience (EN)" value={draft.targetAudienceEn} onChange={(v) => set("targetAudienceEn", v)} />
-          <Area label="Target Audience (AR)" value={draft.targetAudienceAr} onChange={(v) => set("targetAudienceAr", v)} rtl />
-        </div>
+        {(draft.locale === "en" || draft.locale === "both") && (
+          <>
+            <Area label="Introduction (EN)" value={draft.introEn} onChange={(v) => set("introEn", v)} />
+            <Area label="Objectives (EN)" value={draft.objectivesEn} onChange={(v) => set("objectivesEn", v)} />
+            <Area label="Training Methodology (EN)" value={draft.methodologyEn} onChange={(v) => set("methodologyEn", v)} />
+            <Area label="Organisational Impact (EN)" value={draft.orgImpactEn} onChange={(v) => set("orgImpactEn", v)} />
+            <Area label="Personal Impact (EN)" value={draft.personalImpactEn} onChange={(v) => set("personalImpactEn", v)} />
+            <Area label="Target Audience (EN)" value={draft.targetAudienceEn} onChange={(v) => set("targetAudienceEn", v)} />
+          </>
+        )}
+        {(draft.locale === "ar" || draft.locale === "both") && (
+          <>
+            <Area label="Introduction (AR)" value={draft.introAr} onChange={(v) => set("introAr", v)} rtl />
+            <Area label="Objectives (AR)" value={draft.objectivesAr} onChange={(v) => set("objectivesAr", v)} rtl />
+            <Area label="Training Methodology (AR)" value={draft.methodologyAr} onChange={(v) => set("methodologyAr", v)} rtl />
+            <Area label="Organisational Impact (AR)" value={draft.orgImpactAr} onChange={(v) => set("orgImpactAr", v)} rtl />
+            <Area label="Personal Impact (AR)" value={draft.personalImpactAr} onChange={(v) => set("personalImpactAr", v)} rtl />
+            <Area label="Target Audience (AR)" value={draft.targetAudienceAr} onChange={(v) => set("targetAudienceAr", v)} rtl />
+          </>
+        )}
       </section>
 
       <section className="space-y-3 rounded border p-4">

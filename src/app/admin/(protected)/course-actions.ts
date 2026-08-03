@@ -29,8 +29,9 @@ const daySchema = z.object({
 const courseSchema = z.object({
   code: z.string().optional(),
   slug: z.string().min(1),
+  locale: z.enum(["en", "ar", "both"]).default("both"),
   image: z.string().optional(),
-  titleEn: z.string().min(1),
+  titleEn: z.string().optional(),
   titleAr: z.string().optional(),
   subtitleEn: z.string().optional(),
   subtitleAr: z.string().optional(),
@@ -67,6 +68,7 @@ export async function createCourse(
     data: {
       code: input.code || "",
       slug: slugify(input.slug),
+      locale: input.locale,
       titleEn: input.titleEn,
       titleAr: input.titleAr,
       subtitleEn: input.subtitleEn,

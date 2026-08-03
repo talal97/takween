@@ -10,8 +10,9 @@ export default async function TrainingCalendarPage({ params }: { params: Promise
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
 
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const schedules = await prisma.schedule.findMany({
-    where: { startDate: { gte: new Date() } },
+    where: { startDate: { gte: new Date() }, course: { locale: localeFilter } },
     include: { course: true, venue: true },
     orderBy: { startDate: "asc" },
     take: 100,

@@ -21,6 +21,7 @@ import {
   Download,
   Users,
   BarChart3,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +39,7 @@ const nav = [
   { href: "/admin/clients", label: "Clients", icon: Building2 },
   { href: "/admin/providers", label: "Providers", icon: Award },
   { href: "/admin/downloads", label: "Resources", icon: Download },
+  { href: "/admin/media", label: "Media", icon: FolderOpen },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/submissions", label: "Registrations", icon: Mail },
   { href: "/admin/users", label: "Users", icon: Users },

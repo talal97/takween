@@ -1,12 +1,25 @@
 import nodemailer from "nodemailer";
 import { getSettings } from "@/lib/settings";
 
+export function isSmtpEnvManaged() {
+  return !!process.env.SMTP_HOST;
+}
+
 export async function getTransporter() {
+  const host = process.env.SMTP_HOST;
+  if (host) {
+    return nodemailer.createTransport({
+      host,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: Number(process.env.SMTP_PORT || 587) === 465,
+      auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS || "" } : undefined,
+    });
+  }
   const s = await getSettings();
-  const host = s.smtp_host;
-  if (!host) return null;
+  const dbHost = s.smtp_host;
+  if (!dbHost) return null;
   return nodemailer.createTransport({
-    host,
+    host: dbHost,
     port: Number(s.smtp_port || 587),
     secure: Number(s.smtp_port) === 465,
     auth: s.smtp_user ? { user: s.smtp_user, pass: s.smtp_pass } : undefined,

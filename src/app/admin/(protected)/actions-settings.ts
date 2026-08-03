@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, revalidateSite } from "./actions-helpers";
+import { isSmtpEnvManaged } from "@/lib/mail";
 
 // ------------------------------------------------------------------
 // Registrations (admin management)
@@ -38,15 +39,14 @@ export async function updateRegistrationNote(id: string, adminNote: string) {
 // ------------------------------------------------------------------
 export async function testSmtp(smtp: { host: string; port: string; user: string; pass: string; from: string }) {
   await requireAdmin();
-  const nodemailer = (await import("nodemailer")).default;
-  const transporter = nodemailer.createTransport({
-    host: smtp.host,
-    port: Number(smtp.port),
-    auth: smtp.user ? { user: smtp.user, pass: smtp.pass } : undefined,
-  });
+  const { getTransporter } = await import("@/lib/mail");
+  const transporter = await getTransporter();
+  if (!transporter) throw new Error("SMTP not configured");
+  const from = smtp.from || process.env.MAIL_FROM || "no-reply@takween.com";
+  const to = process.env.SMTP_USER || smtp.user || from;
   await transporter.sendMail({
-    from: smtp.from,
-    to: smtp.user || smtp.from,
+    from,
+    to,
     subject: "Takween SMTP Test",
     text: "SMTP configuration is working correctly.",
   });
@@ -66,7 +66,8 @@ export async function saveSettings(
 ) {
   await requireAdmin();
   const all: Record<string, string> = { ...settings };
-  if (smtp.host) {
+  const envManaged = isSmtpEnvManaged();
+  if (!envManaged && smtp.host) {
     all.smtp_host = smtp.host;
     if (smtp.port) all.smtp_port = smtp.port;
     if (smtp.user) all.smtp_user = smtp.user;

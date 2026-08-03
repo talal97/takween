@@ -13,20 +13,22 @@ export function formatCurrency(amount: number, currency = "USD") {
   });
 }
 
-export function formatDateRange(start: Date, end: Date, locale = "en") {
-  const startStr = start.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", {
+export function formatDateRange(start: Date | string, end: Date | string, locale = "en") {
+  const s = new Date(start);
+  const e = new Date(end);
+  const startStr = s.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-  const endStr = end.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", {
+  const endStr = e.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
-  const sameYear = start.getFullYear() === end.getFullYear();
+  const sameYear = s.getFullYear() === e.getFullYear();
   if (sameYear) {
-    const sm = start.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", { day: "2-digit", month: "short" });
+    const sm = s.toLocaleDateString(locale === "ar" ? "ar" : "en-GB", { day: "2-digit", month: "short" });
     return `${sm} - ${endStr}`;
   }
   return `${startStr} - ${endStr}`;

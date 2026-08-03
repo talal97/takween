@@ -20,7 +20,7 @@ export default async function TrainingCalendarPage({ params }: { params: Promise
 
   const byMonth = new Map<string, typeof schedules>();
   for (const s of schedules) {
-    const key = s.startDate.toLocaleDateString(l === "ar" ? "ar" : "en-GB", { month: "long", year: "numeric" });
+    const key = new Date(s.startDate).toLocaleDateString(l === "ar" ? "ar" : "en-GB", { month: "long", year: "numeric" });
     if (!byMonth.has(key)) byMonth.set(key, []);
     byMonth.get(key)!.push(s);
   }

@@ -64,7 +64,7 @@ export default async function CategoryCoursesPage({
     prisma.course.count({ where: { categoryId: category.id } }),
   ]);
 
-  const years = [...new Set(yearsAll.map((y) => y.startDate.getFullYear()))].sort();
+  const years = [...new Set(yearsAll.map((y) => new Date(y.startDate).getFullYear()))].sort();
 
   return (
     <div>

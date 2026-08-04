@@ -187,7 +187,10 @@ model Course {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@unique([slug, locale])
+   @@unique([slug, locale])
+   @@index([categoryId])
+   @@index([featured, createdAt])
+   @@index([locale])
 }
 
 model CourseRelation {
@@ -209,8 +212,14 @@ model Schedule {
   endDate   DateTime
   fee       Decimal  @default(5950) @db.Decimal(10, 2)
   currency  String   @default("USD")
-  format    String   @default("classroom") // classroom | online | inhouse
-  active    Boolean  @default(true)
+   format    String   @default("classroom") // classroom | online | inhouse
+   active    Boolean  @default(true)
+
+   @@index([courseId])
+   @@index([venueId])
+   @@index([startDate])
+   @@index([courseId, active])
+   @@index([active, startDate])
 }
 
 model ProviderAssociation {
@@ -293,8 +302,13 @@ model Registration {
   billingInfo   Json?
   status        String   @default("new") // new | contacted
   adminNote     String?
-  locale        String   @default("en")
-  createdAt     DateTime @default(now())
+   locale        String   @default("en")
+   createdAt     DateTime @default(now())
+
+   @@index([email, createdAt])
+   @@index([status, createdAt])
+   @@index([countryIso, createdAt])
+   @@index([createdAt])
 }
 
 // ---------------------------------------------------------------
@@ -312,7 +326,10 @@ model Article {
   image        String?
   publishedAt  DateTime @default(now())
   status       String   @default("published")
-  type         String   @default("article") // article | press | case_study
+   type         String   @default("article") // article | press | case_study
+
+   @@index([status, publishedAt])
+   @@index([publishedAt])
 }
 
 model Download {

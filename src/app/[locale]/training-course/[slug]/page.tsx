@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AccordionBlock } from "@/components/site/faq-accordion";
 import { RegistrationForm } from "@/components/site/registration-form";
 import { Link } from "@/i18n/navigation";
+import { Locale } from "@/i18n/config";
 
 export async function generateMetadata({
   params,
@@ -18,17 +19,25 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
+  const l = (locale === "ar" ? "ar" : "en") as Locale;
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const course = await prisma.course.findFirst({ where: { slug, locale: localeFilter } });
   const title = course ? localeText({ en: course.titleEn, ar: course.titleAr }, l) : "Course";
+  const description = localeText({ en: course?.subtitleEn, ar: course?.subtitleAr }, l);
+  const alternates: { canonical?: string; languages?: Record<string, string> } = {
+    canonical: `/${locale}/training-course/${slug}`,
+    languages: {
+      "/en/training-course/[slug]": "/en/training-course/" + slug,
+      "/ar/training-course/[slug]": "/ar/training-course/" + slug,
+    },
+  };
   return {
     title,
-    description: course?.subtitleEn || undefined,
-    alternates: { canonical: `/${locale}/training-course/${slug}` },
+    description,
+    alternates,
     openGraph: {
       title,
-      description: course?.subtitleEn || undefined,
+      description,
       url: siteUrl(`/${locale}/training-course/${slug}`),
       images: course?.image ? [{ url: absoluteImage(course.image)! }] : undefined,
     },
@@ -41,7 +50,7 @@ export default async function CoursePage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
+  const l = (locale === "ar" ? "ar" : "en") as Locale;
   setRequestLocale(locale);
   const t = await getTranslations("course");
   const tc = await getTranslations("common");

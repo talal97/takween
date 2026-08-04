@@ -210,7 +210,7 @@ async function main() {
   // A couple of example courses bound to schedules
   // ---------------------------------------------------------------
   const leed = await prisma.course.upsert({
-    where: { slug: "leed-green-associate-exam-preparation-training" },
+    where: { slug_locale: { slug: "leed-green-associate-exam-preparation-training", locale: "both" } },
     update: {},
     create: {
       slug: "leed-green-associate-exam-preparation-training",
@@ -426,7 +426,7 @@ async function main() {
 
   for (const c of additionalCourses) {
     const course = await prisma.course.upsert({
-      where: { slug: c.slug },
+      where: { slug_locale: { slug: c.slug, locale: "both" } },
       update: {},
       create: {
         slug: c.slug,

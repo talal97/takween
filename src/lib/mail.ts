@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { getSettings } from "@/lib/settings";
+import { buildEmail, type EmailInput, type SubmissionType } from "@/lib/emails/templates";
 
 export function isSmtpEnvManaged() {
   return !!process.env.SMTP_HOST;
@@ -26,59 +27,136 @@ export async function getTransporter() {
   });
 }
 
-export async function sendRegistrationEmail(input: {
-  to: string;
-  courseTitle: string;
-  fullName: string;
-}) {
+function siteUrl(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL || "https://takween.com").replace(/\/$/, "");
+}
+
+export async function sendEmail(
+  input: EmailInput,
+  audience: "customer" | "admin",
+  to: string,
+): Promise<boolean> {
   const transporter = await getTransporter();
-  if (!transporter) return;
+  if (!transporter) return false;
   const s = await getSettings();
   const from = s.mail_from || s.contact_email || "no-reply@takween.com";
 
-  const text = `Dear ${input.fullName},\n\nThank you for your interest in "${input.courseTitle}".\nWe have received your registration and our team will contact you shortly.\n\nBest regards,\n${s.brand_name || "Takween"} Team`;
+  const { subject, html, text } = buildEmail(input, audience);
+  try {
+    await transporter.sendMail({ from, to, subject, html, text });
+    return true;
+  } catch (err) {
+    console.error(`[mail] failed to send ${audience} email (${input.type}):`, err);
+    return false;
+  }
+}
 
-  await transporter.sendMail({
-    from,
-    to: input.to,
-    subject: `Registration received: ${input.courseTitle}`,
-    text,
-  });
+export async function sendRegistrationEmail(input: {
+  type?: SubmissionType;
+  locale?: "en" | "ar";
+  to: string;
+  courseTitle: string;
+  courseCode?: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  company?: string;
+  jobTitle?: string;
+  country?: string;
+  startDate?: string;
+  endDate?: string;
+  venue?: string;
+  fee?: string;
+  currency?: string;
+  format?: string;
+  paymentMode?: string;
+  message?: string;
+  scheduleSummary?: string;
+}) {
+  const s = await getSettings();
+  const brand = s.brand_name || "Takween";
+  const type = input.type || "register";
+  const locale = input.locale || "en";
+  const common: EmailInput = {
+    type,
+    locale,
+    brand,
+    tagline: locale === "ar" ? "التدريب والتطوير المهني" : "Training & Professional Development",
+    fullName: input.fullName,
+    courseTitle: input.courseTitle,
+    courseCode: input.courseCode,
+    email: input.email,
+    phone: input.phone,
+    company: input.company,
+    designation: input.jobTitle,
+    country: input.country,
+    venue: input.venue,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    fee: input.fee,
+    currency: input.currency,
+    format: input.format,
+    paymentMode: input.paymentMode,
+    message: input.message,
+    scheduleSummary: input.scheduleSummary,
+    siteUrl: siteUrl(),
+  };
+  await sendEmail(common, "customer", input.to);
 }
 
 export async function sendAdminAlert(input: {
+  type?: SubmissionType;
+  locale?: "en" | "ar";
   courseTitle: string;
+  courseCode?: string;
   fullName: string;
   email: string;
-  phone: string;
-  company: string;
-  jobTitle: string;
-  startDate: string;
-  venue: string;
-  message: string;
+  phone?: string;
+  company?: string;
+  jobTitle?: string;
+  startDate?: string;
+  endDate?: string;
+  venue?: string;
+  fee?: string;
+  currency?: string;
+  format?: string;
+  paymentMode?: string;
+  message?: string;
+  scheduleSummary?: string;
+  country?: string;
 }) {
-  const transporter = await getTransporter();
-  if (!transporter) return;
   const s = await getSettings();
-  const from = s.mail_from || s.contact_email || "no-reply@takween.com";
+  const brand = s.brand_name || "Takween";
+  const type = input.type || "register";
+  const locale = input.locale || "en";
   const adminTo = s.contact_email || input.email;
 
-  const text =
-    `New training registration received.\n\n` +
-    `Course: ${input.courseTitle}\n` +
-    `Name: ${input.fullName}\n` +
-    `Email: ${input.email}\n` +
-    `Phone: ${input.phone || "-"}\n` +
-    `Company: ${input.company || "-"}\n` +
-    `Job Title: ${input.jobTitle || "-"}\n` +
-    `Preferred Start: ${input.startDate || "-"}\n` +
-    `Venue: ${input.venue || "-"}\n` +
-    `Message: ${input.message || "-"}\n`;
-
-  await transporter.sendMail({
-    from,
-    to: adminTo,
-    subject: `New course enquiry: ${input.courseTitle}`,
-    text,
-  });
+  await sendEmail(
+    {
+      type,
+      locale,
+      brand,
+      tagline: locale === "ar" ? "التدريب والتطوير المهني" : "Training & Professional Development",
+      fullName: input.fullName,
+      courseTitle: input.courseTitle,
+      courseCode: input.courseCode,
+      email: input.email,
+      phone: input.phone,
+      company: input.company,
+      designation: input.jobTitle,
+      country: input.country,
+      venue: input.venue,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      fee: input.fee,
+      currency: input.currency,
+      format: input.format,
+      paymentMode: input.paymentMode,
+      message: input.message,
+      scheduleSummary: input.scheduleSummary,
+      adminUrl: `${siteUrl()}/admin/submissions`,
+    },
+    "admin",
+    adminTo,
+  );
 }

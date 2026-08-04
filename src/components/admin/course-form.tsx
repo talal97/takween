@@ -89,6 +89,7 @@ interface CourseFormProps {
   categories: Category[];
   venues: Venue[];
   certificates: Cert[];
+  allCourses?: Array<{ id: string; titleEn: string | null; titleAr: string | null; code: string }>;
   id?: string;
   initial?: CourseDraft;
   existingDays?: Array<{ day: number; title: string; topics: string[] }>;
@@ -101,6 +102,7 @@ interface CourseFormProps {
     format: string;
   }>;
   existingCertIds?: string[];
+  existingRelatedIds?: string[];
 }
 
 export function CourseForm(props: CourseFormProps) {
@@ -124,6 +126,7 @@ export function CourseForm(props: CourseFormProps) {
     }))
   );
   const [certIds, setCertIds] = useState<string[]>(props.existingCertIds ?? []);
+  const [relatedIds, setRelatedIds] = useState<string[]>(props.existingRelatedIds ?? []);
   const [loading, setLoading] = useState(false);
 
   function set<K extends keyof CourseDraft>(key: K, value: CourseDraft[K]) {
@@ -155,10 +158,10 @@ export function CourseForm(props: CourseFormProps) {
     } as Parameters<typeof updateCourse>[1];
 
     if (props.id) {
-      await updateCourse(props.id, data, schedulePayload, dayPayload, certIds);
+      await updateCourse(props.id, data, schedulePayload, dayPayload, certIds, relatedIds);
       router.refresh();
     } else {
-      await createCourse(data, schedulePayload, dayPayload, certIds);
+      await createCourse(data, schedulePayload, dayPayload, certIds, relatedIds);
       router.push("/admin/courses");
       router.refresh();
     }
@@ -320,6 +323,30 @@ export function CourseForm(props: CourseFormProps) {
           ))}
         </div>
       </section>
+
+      {props.allCourses && props.allCourses.length > 0 && (
+        <section className="rounded border p-4">
+          <h3 className="mb-1 font-semibold">Related Courses</h3>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Select courses to display as related on this course&apos;s public page.
+          </p>
+          <div className="grid gap-1.5 sm:grid-cols-2">
+            {props.allCourses.map((c) => {
+              const title = c.titleEn || c.titleAr || c.code || "Untitled";
+              return (
+                <label key={c.id} className="flex items-center gap-2 rounded-md border border-input px-3 py-2 text-sm hover:bg-muted/40">
+                  <input
+                    type="checkbox"
+                    checked={relatedIds.includes(c.id)}
+                    onChange={(e) => setRelatedIds((prev) => (e.target.checked ? [...prev, c.id] : prev.filter((x) => x !== c.id)))}
+                  />
+                  <span className="truncate">{title}</span>
+                </label>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="flex justify-end gap-3">
         <Button type="button" variant="outline" onClick={() => router.push("/admin/courses")}>

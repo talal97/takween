@@ -72,10 +72,20 @@ body {
   transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
 }
 .mega-menu-trigger:hover .mega-menu-content,
-.mega-menu-content:hover {
+.mega-menu-trigger:focus-within .mega-menu-content,
+.mega-menu-content:hover,
+.mega-menu-content:focus-within {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+/* Transparent bridge so the pointer does not lose hover between the trigger and the panel */
+.mega-menu-content::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -20px;
+  height: 20px;
 }
 
 /* Sticky sidebar */

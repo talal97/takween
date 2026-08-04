@@ -22,8 +22,8 @@ export async function getTotalClicks(range?: DateRange) {
 export async function getUniquePages(range?: DateRange) {
   const r = range ?? defaultRange();
   const result = await prisma.$queryRaw<Array<{ path: string }>>`
-    SELECT DISTINCT path FROM page_views
-    WHERE created_at >= ${r.from} AND created_at <= ${r.to}
+    SELECT DISTINCT "path" FROM "PageView"
+    WHERE "createdAt" >= ${r.from} AND "createdAt" <= ${r.to}
   `;
   return result.length;
 }
@@ -31,9 +31,9 @@ export async function getUniquePages(range?: DateRange) {
 export async function getTopPages(range?: DateRange, limit = 10) {
   const r = range ?? defaultRange();
   const result = await prisma.$queryRaw<Array<{ path: string; count: bigint }>>`
-    SELECT path, COUNT(*) as count FROM page_views
-    WHERE created_at >= ${r.from} AND created_at <= ${r.to}
-    GROUP BY path
+    SELECT "path", COUNT(*) as count FROM "PageView"
+    WHERE "createdAt" >= ${r.from} AND "createdAt" <= ${r.to}
+    GROUP BY "path"
     ORDER BY count DESC
     LIMIT ${limit}
   `;
@@ -43,10 +43,10 @@ export async function getTopPages(range?: DateRange, limit = 10) {
 export async function getDailyVisits(range?: DateRange) {
   const r = range ?? defaultRange();
   const results = await prisma.$queryRaw<Array<{ date: string; count: bigint }>>`
-    SELECT DATE(created_at) as date, COUNT(*) as count
-    FROM page_views
-    WHERE created_at >= ${r.from} AND created_at <= ${r.to}
-    GROUP BY DATE(created_at)
+    SELECT DATE("createdAt") as date, COUNT(*) as count
+    FROM "PageView"
+    WHERE "createdAt" >= ${r.from} AND "createdAt" <= ${r.to}
+    GROUP BY DATE("createdAt")
     ORDER BY date ASC
   `;
   return results.map((row) => ({ date: row.date, count: Number(row.count) }));
@@ -55,9 +55,9 @@ export async function getDailyVisits(range?: DateRange) {
 export async function getLocaleBreakdown(range?: DateRange) {
   const r = range ?? defaultRange();
   const result = await prisma.$queryRaw<Array<{ locale: string; count: bigint }>>`
-    SELECT locale, COUNT(*) as count FROM page_views
-    WHERE created_at >= ${r.from} AND created_at <= ${r.to}
-    GROUP BY locale
+    SELECT "locale", COUNT(*) as count FROM "PageView"
+    WHERE "createdAt" >= ${r.from} AND "createdAt" <= ${r.to}
+    GROUP BY "locale"
     ORDER BY count DESC
   `;
   return result.map((row) => ({ locale: row.locale, count: Number(row.count) }));
@@ -66,9 +66,9 @@ export async function getLocaleBreakdown(range?: DateRange) {
 export async function getClickBreakdown(range?: DateRange, limit = 10) {
   const r = range ?? defaultRange();
   const result = await prisma.$queryRaw<Array<{ element: string; count: bigint }>>`
-    SELECT element, COUNT(*) as count FROM click_events
-    WHERE created_at >= ${r.from} AND created_at <= ${r.to}
-    GROUP BY element
+    SELECT "element", COUNT(*) as count FROM "ClickEvent"
+    WHERE "createdAt" >= ${r.from} AND "createdAt" <= ${r.to}
+    GROUP BY "element"
     ORDER BY count DESC
     LIMIT ${limit}
   `;

@@ -15,10 +15,10 @@ const mockRevalidatePath = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({ prisma: mockPrisma }));
 vi.mock("@/lib/require-admin", () => ({
-  requireOwner: (...args: any[]) => mockRequireOwner(...args),
+  requireOwner: (...args: unknown[]) => mockRequireOwner(...args),
 }));
 vi.mock("next/cache", () => ({
-  revalidatePath: (...args: any[]) => mockRevalidatePath(...args),
+  revalidatePath: (...args: unknown[]) => mockRevalidatePath(...args),
 }));
 
 function ownerSession(id = "owner-1", role = "owner") {

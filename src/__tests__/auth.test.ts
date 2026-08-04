@@ -4,6 +4,35 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // Since the module has side effects (top-level AUTH_SECRET check), we test
 // the exported `authConfig` and the authorize flow via mocks.
 
+type CredentialsProvider = {
+  options?: {
+    authorize?: (
+      credentials: Record<string, unknown> | undefined,
+      req: unknown,
+    ) => Promise<Record<string, unknown> | null>;
+  };
+};
+type AuthorizedCallback = (params: {
+  auth: unknown;
+  request: unknown;
+}) => boolean;
+type JwtCallback = (params: {
+  token: Record<string, unknown>;
+  user?: Record<string, unknown>;
+}) => Record<string, unknown>;
+type SessionCallback = (params: {
+  session: { user: Record<string, unknown> };
+  token: Record<string, unknown>;
+}) => { user: Record<string, unknown> };
+
+async function getAuth() {
+  const { authConfig } = await import("@/auth/auth.config");
+  const provider = authConfig.providers?.[0] as unknown as CredentialsProvider;
+  const authorize = provider.options?.authorize;
+  if (!authorize) throw new Error("credentials authorize is missing");
+  return { authConfig, authorize };
+}
+
 const mockPrisma = {
   user: {
     findUnique: vi.fn(),
@@ -24,13 +53,11 @@ describe("auth rate limiting", () => {
   });
 
   it("authorize returns null for missing credentials", async () => {
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     const result = await authorize(
       { email: undefined, password: undefined },
-      {} as any,
+      {},
     );
     expect(result).toBeNull();
   });
@@ -38,13 +65,11 @@ describe("auth rate limiting", () => {
   it("authorize returns null when user not found", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     const result = await authorize(
       { email: "test@example.com", password: "pass123" },
-      {} as any,
+      {},
     );
     expect(result).toBeNull();
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
@@ -61,13 +86,11 @@ describe("auth rate limiting", () => {
       passwordHash: "$2a$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ12",
     });
 
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     const result = await authorize(
       { email: "test@example.com", password: "wrongpassword" },
-      {} as any,
+      {},
     );
     expect(result).toBeNull();
   });
@@ -85,13 +108,11 @@ describe("auth rate limiting", () => {
       passwordHash: hash,
     });
 
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     const result = await authorize(
       { email: "admin@example.com", password: "correctpassword" },
-      {} as any,
+      {},
     );
     expect(result).toEqual({
       id: "user-1",
@@ -104,15 +125,13 @@ describe("auth rate limiting", () => {
   it("rate limiter blocks after MAX_ATTEMPTS", async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
 
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     // Make 6 rapid attempts (MAX_ATTEMPTS is 5)
     for (let i = 0; i < 6; i++) {
       await authorize(
         { email: "brute@example.com", password: "pass" },
-        {} as any,
+        {},
       );
     }
 
@@ -133,22 +152,20 @@ describe("auth rate limiting", () => {
       passwordHash: hash,
     });
 
-    const { authConfig } = await import("@/auth/auth.config");
-    const credentialsProvider = authConfig.providers?.[0] as any;
-    const authorize = credentialsProvider.options?.authorize;
+    const { authorize } = await getAuth();
 
     // Make 4 failed attempts
     for (let i = 0; i < 4; i++) {
       await authorize(
         { email: "reset@example.com", password: "wrong" },
-        {} as any,
+        {},
       );
     }
 
     // Successful login should reset counter
     const result = await authorize(
       { email: "reset@example.com", password: "pass" },
-      {} as any,
+      {},
     );
     expect(result).not.toBeNull();
     expect(result?.id).toBe("1");
@@ -157,7 +174,7 @@ describe("auth rate limiting", () => {
     for (let i = 0; i < 4; i++) {
       await authorize(
         { email: "reset@example.com", password: "wrong" },
-        {} as any,
+        {},
       );
     }
     // All should have reached findUnique (not blocked by rate limiter)
@@ -178,7 +195,7 @@ describe("auth config", () => {
 
   it("authorized callback blocks admin routes without session", async () => {
     const { authConfig } = await import("@/auth/auth.config");
-    const authorized = authConfig.callbacks?.authorized as Function;
+    const authorized = authConfig.callbacks?.authorized as unknown as AuthorizedCallback;
 
     const result = authorized({
       auth: null,
@@ -189,7 +206,7 @@ describe("auth config", () => {
 
   it("authorized callback allows admin routes with session", async () => {
     const { authConfig } = await import("@/auth/auth.config");
-    const authorized = authConfig.callbacks?.authorized as Function;
+    const authorized = authConfig.callbacks?.authorized as unknown as AuthorizedCallback;
 
     const result = authorized({
       auth: { user: { id: "1" } },
@@ -200,7 +217,7 @@ describe("auth config", () => {
 
   it("authorized callback allows non-admin routes without session", async () => {
     const { authConfig } = await import("@/auth/auth.config");
-    const authorized = authConfig.callbacks?.authorized as Function;
+    const authorized = authConfig.callbacks?.authorized as unknown as AuthorizedCallback;
 
     const result = authorized({
       auth: null,
@@ -211,7 +228,7 @@ describe("auth config", () => {
 
   it("jwt callback adds id and role to token", async () => {
     const { authConfig } = await import("@/auth/auth.config");
-    const jwt = authConfig.callbacks?.jwt as Function;
+    const jwt = authConfig.callbacks?.jwt as unknown as JwtCallback;
 
     const token = { name: "test" };
     const user = { id: "u1", role: "owner" };
@@ -223,13 +240,13 @@ describe("auth config", () => {
 
   it("session callback adds id and role to session", async () => {
     const { authConfig } = await import("@/auth/auth.config");
-    const session = authConfig.callbacks?.session as Function;
+    const session = authConfig.callbacks?.session as unknown as SessionCallback;
 
     const sess = { user: { name: "test" } };
     const token = { id: "u1", role: "admin" };
 
     const result = session({ session: sess, token });
     expect(result.user.id).toBe("u1");
-    expect((result.user as any).role).toBe("admin");
+    expect((result.user as Record<string, unknown>).role).toBe("admin");
   });
 });

@@ -34,7 +34,7 @@ export async function getHomePageData(locale: Locale = "en") {
 
   const [categories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts, totalCourses] =
     await Promise.all([
-      prisma.category.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 12 }),
+      prisma.category.findMany({ where: { featured: true, courses: { some: { locale: localeFilter } } }, orderBy: { sort: "asc" }, take: 12 }),
       prisma.region.findMany({ orderBy: { sort: "asc" }, include: { venues: { orderBy: { nameEn: "asc" } } } }),
       prisma.certificate.findMany({ orderBy: { sort: "asc" }, take: 8 }),
       prisma.course.findMany({

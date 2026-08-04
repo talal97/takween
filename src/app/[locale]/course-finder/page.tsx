@@ -50,12 +50,12 @@ export default async function CourseFinderPage({
           <p className="mt-2 text-white/70">{l === "ar" ? "ابحث عن دورة بالكلمة المفتاحية أو الكود أو العنوان" : "Search courses by keyword, code or title"}</p>
           <form method="get" className="mt-6 flex max-w-2xl gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 name="q"
                 defaultValue={q}
                 placeholder={l === "ar" ? "ابحث عن دورة..." : "Search for a course..."}
-                className="h-12 w-full rounded-lg border border-white/20 bg-white/10 pl-10 pr-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-brand focus:bg-white/15"
+                className="h-12 w-full rounded-lg border border-white/20 bg-white/10 ps-10 pe-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-brand focus:bg-white/15"
               />
             </div>
             <button type="submit" className="h-12 rounded-lg bg-brand px-6 text-sm font-semibold text-white hover:bg-brand-dark">

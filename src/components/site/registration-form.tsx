@@ -9,26 +9,34 @@ import { useLocale, useTranslations } from "next-intl";
 import { isoToFlag } from "@/lib/utils";
 
 type Schedule = { id: string; venueId: string; venueName: string; startDate: string; endDate: string; fee: number; currency: string; format: string };
+type RequestMode = "register" | "online" | "inhouse";
+
+const MODES: RequestMode[] = ["register", "online", "inhouse"];
 
 export function RegistrationForm({
   courseTitle,
   courseCode,
   schedules,
   countries,
+  initialType = "register",
 }: {
   courseTitle: string;
   courseCode: string;
   schedules: Schedule[];
   countries: Array<{ iso: string; nameEn: string; nameAr: string }>;
+  initialType?: RequestMode;
 }) {
   const t = useTranslations("form");
+  const tc = useTranslations("common");
   const locale = useLocale();
+  const [mode, setMode] = useState<RequestMode>(initialType);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     phone: "",
     countryIso: "",
     company: "",
+    designation: "",
     salutation: "Mr.",
     schedule: schedules[0]?.id || "",
     paymentMode: "invoice-me",
@@ -52,6 +60,12 @@ export function RegistrationForm({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  const modeLabels: Record<RequestMode, string> = {
+    register: tc("registerNow"),
+    online: tc("online"),
+    inhouse: tc("inHouse"),
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -60,17 +74,26 @@ export function RegistrationForm({
       return;
     }
     const schedule = schedules.find((s) => s.id === form.schedule);
+    const country = countries.find((c) => c.iso === form.countryIso);
+    const format = mode === "register" ? schedule?.format : mode;
     const res = await submitRegistration({
-      type: "register",
+      type: mode,
       courseTitle,
       courseCode,
       scheduleSummary: schedule ? `${schedule.venueName} ${schedule.startDate}` : undefined,
+      venueName: schedule?.venueName,
+      startDate: schedule?.startDate,
+      fee: schedule ? String(schedule.fee) : undefined,
+      currency: schedule?.currency,
+      format,
       salutation: form.salutation,
       fullName: form.fullName,
       email: form.email,
       phone: form.phone,
       countryIso: form.countryIso,
+      country: country ? (locale === "ar" && country.nameAr ? country.nameAr : country.nameEn) : undefined,
       company: form.company,
+      designation: form.designation,
       paymentMode: form.paymentMode,
       message: form.message,
       locale,
@@ -106,21 +129,44 @@ export function RegistrationForm({
       <div className="hidden" aria-hidden="true">
         <input tabIndex={-1} autoComplete="off" name="website" value="" onChange={() => {}} />
       </div>
+      <div className="grid grid-cols-3 gap-2">
+        {MODES.map((m) => (
+          <button
+            key={m}
+            type="button"
+            data-track={`register-mode-${m}`}
+            onClick={() => setMode(m)}
+            className={`rounded-md border px-2 py-2 text-xs font-semibold transition-colors ${
+              mode === m ? "border-brand bg-brand text-white" : "border-input bg-background text-muted-foreground hover:border-brand/40 hover:text-brand"
+            }`}
+          >
+            {modeLabels[m]}
+          </button>
+        ))}
+      </div>
       <div className="grid gap-2">
         <Label>{t("courseTitle")}</Label>
         <Input value={courseTitle} readOnly className="bg-muted" />
       </div>
-      <div className="grid gap-2">
-        <Label>{t("selectSchedule")}</Label>
-        <select value={form.schedule} onChange={(e) => set("schedule", e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-          {schedules.length === 0 && <option value="">—</option>}
-          {schedules.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.startDate} — {s.venueName} — {s.currency} {s.fee}
-            </option>
-          ))}
-        </select>
-      </div>
+      {mode !== "inhouse" && schedules.length > 0 && (
+        <div className="grid gap-2">
+          <Label>{t("selectSchedule")}</Label>
+          <select value={form.schedule} onChange={(e) => set("schedule", e.target.value)} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            {schedules.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.startDate} — {s.venueName} — {s.currency} {s.fee}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {mode === "inhouse" && (
+        <p className="rounded-md bg-brand-light px-3 py-2 text-xs text-brand">
+          {locale === "ar"
+            ? "سيتم تخصيص هذه الدورة وتقديمها في موقع مؤسستكم. سنتواصل معكم لمناقشة التفاصيل."
+            : "This course will be delivered on-site at your organisation. Our team will contact you to discuss the details."}
+        </p>
+      )}
       <div className="grid gap-2">
         <Label>{t("fullName")}</Label>
         <Input value={form.fullName} onChange={(e) => set("fullName", e.target.value)} required />
@@ -154,9 +200,13 @@ export function RegistrationForm({
           </select>
         </div>
         <div className="grid gap-2">
-          <Label>{t("company")}</Label>
-          <Input value={form.company} onChange={(e) => set("company", e.target.value)} />
+          <Label>{t("designation")}</Label>
+          <Input value={form.designation} onChange={(e) => set("designation", e.target.value)} />
         </div>
+      </div>
+      <div className="grid gap-2">
+        <Label>{t("company")}</Label>
+        <Input value={form.company} onChange={(e) => set("company", e.target.value)} />
       </div>
       <div className="grid gap-2">
         <Label>{t("paymentMode")}</Label>
@@ -190,7 +240,7 @@ export function RegistrationForm({
         />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" className="w-full">{t("registerNow")}</Button>
+      <Button type="submit" data-track={`register-submit-${mode}`} className="w-full">{modeLabels[mode]}</Button>
     </form>
   );
 }

@@ -6,17 +6,19 @@ import { PageHeader } from "@/components/admin/page-header";
 
 export default async function EditCoursePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [course, categories, venues, certificates] = await Promise.all([
+  const [course, categories, venues, certificates, allCourses] = await Promise.all([
     prisma.course.findUnique({
       where: { id },
       include: {
         schedules: { include: { venue: true } },
         certificates: true,
+        relatedAsSource: true,
       },
     }),
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
     prisma.venue.findMany({ orderBy: { nameEn: "asc" } }),
     prisma.certificate.findMany({ orderBy: { nameEn: "asc" } }),
+    prisma.course.findMany({ where: { id: { not: id } }, select: { id: true, titleEn: true, titleAr: true, code: true }, orderBy: { titleEn: "asc" } }),
   ]);
 
   if (!course) notFound();
@@ -61,6 +63,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     format: s.format,
   }));
   const existingCertIds = course.certificates.map((c) => c.id);
+  const existingRelatedIds = course.relatedAsSource.map((r) => r.relatedId);
 
   return (
     <div>
@@ -74,11 +77,13 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
             categories={categories}
             venues={venues}
             certificates={certificates}
+            allCourses={allCourses}
             id={course.id}
             initial={initial}
             existingDays={existingDays}
             existingSchedules={existingSchedules}
             existingCertIds={existingCertIds}
+            existingRelatedIds={existingRelatedIds}
           />
         </CardContent>
       </Card>

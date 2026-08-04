@@ -60,7 +60,8 @@ export async function createCourse(
   data: z.infer<typeof courseSchema>,
   schedules: z.infer<typeof scheduleSchema>[],
   days: z.infer<typeof daySchema>[],
-  certificateIds: string[]
+  certificateIds: string[],
+  relatedIds: string[]
 ) {
   await requireAdmin();
   const input = courseSchema.parse(data);
@@ -96,6 +97,8 @@ export async function createCourse(
       dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
       certificates:
         certificateIds.length > 0 ? { connect: certificateIds.map((id) => ({ id })) } : undefined,
+      relatedAsSource:
+        relatedIds.length > 0 ? { create: relatedIds.map((id) => ({ relatedId: id })) } : undefined,
       schedules: schedules.length > 0
         ? { create: schedules.filter((s) => s.startDate).map((s) => ({ ...s, startDate: new Date(s.startDate), endDate: new Date(s.endDate) })) }
         : undefined,
@@ -111,13 +114,15 @@ export async function updateCourse(
   data: z.infer<typeof courseSchema>,
   schedules: z.infer<typeof scheduleSchema>[],
   days: z.infer<typeof daySchema>[],
-  certificateIds: string[]
+  certificateIds: string[],
+  relatedIds: string[]
 ) {
   await requireAdmin();
   const input = courseSchema.parse(data);
 
   await prisma.$transaction(async (tx) => {
     await tx.schedule.deleteMany({ where: { courseId: id } });
+    await tx.courseRelation.deleteMany({ where: { courseId: id } });
     await tx.course.update({
       where: { id },
       data: {
@@ -125,6 +130,8 @@ export async function updateCourse(
         slug: slugify(input.slug),
         dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
         certificates: certificateIds.length > 0 ? { set: certificateIds.map((cid) => ({ id: cid })) } : { set: [] },
+        relatedAsSource:
+          relatedIds.length > 0 ? { create: relatedIds.map((rid) => ({ relatedId: rid })) } : undefined,
         schedules: {
           create: schedules.filter((s) => s.startDate).map((s) => ({
             venueId: s.venueId,
@@ -139,7 +146,6 @@ export async function updateCourse(
     });
   });
   revalidatePath("/admin/courses");
-  revalidateSite();
   revalidatePath(`/admin/courses/${id}`);
   revalidateSite();
 }

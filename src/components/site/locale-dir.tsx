@@ -1,13 +1,10 @@
-"use client";
-
-import { useLocale } from "next-intl";
-import { useEffect } from "react";
-
-export function LocaleDir() {
-  const locale = useLocale();
-  useEffect(() => {
-    document.documentElement.lang = locale;
-    document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
-  }, [locale]);
-  return null;
+export function LocaleDir({ locale }: { locale: "en" | "ar" }) {
+  const dir = locale === "ar" ? "rtl" : "ltr";
+  return (
+    <script
+      dangerouslySetInnerHTML={{
+        __html: `document.documentElement.lang=${JSON.stringify(locale)};document.documentElement.dir=${JSON.stringify(dir)};`,
+      }}
+    />
+  );
 }

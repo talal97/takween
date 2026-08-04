@@ -51,12 +51,39 @@ export default async function CoursePage({
     where: { slug, locale: localeFilter },
     include: {
       category: { include: { faqs: true } },
-      schedules: { include: { venue: true }, orderBy: { startDate: "asc" } },
+      schedules: { where: { endDate: { gte: new Date() } }, include: { venue: true }, orderBy: { startDate: "asc" } },
       certificates: true,
-      relatedAsSource: { include: { related: { include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } } } } } },
+      relatedAsSource: { include: { related: { include: { schedules: { where: { endDate: { gte: new Date() } }, orderBy: { startDate: "asc" }, include: { venue: true } } } } } },
     },
   });
-  if (!course) notFound();
+
+  if (!course) {
+    // The slug exists but not for this locale — offer the localized version.
+    const anyLocale = await prisma.course.findFirst({ where: { slug }, select: { locale: true } });
+    if (anyLocale) {
+      const targetLocale = l === "ar" ? "en" : "ar";
+      return (
+        <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
+          <h1 className="text-3xl font-bold text-navy">
+            {l === "ar" ? "هذه الدورة متوفرة باللغة الإنجليزية" : "This course is available in Arabic"}
+          </h1>
+          <p className="mt-3 max-w-md text-muted-foreground">
+            {l === "ar"
+              ? "تم نشر هذه الدورة في النسخة الإنجليزية من الموقع."
+              : "This course was published on the Arabic version of the site."}
+          </p>
+          <Link
+            href={`/training-course/${slug}`}
+            locale={targetLocale}
+            className="mt-6 rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            {l === "ar" ? "عرض النسخة الإنجليزية" : "View the Arabic version"}
+          </Link>
+        </div>
+      );
+    }
+    notFound();
+  }
 
   const [countries, providers] = await Promise.all([
     prisma.country.findMany({ orderBy: { nameEn: "asc" } }),
@@ -72,12 +99,13 @@ export default async function CoursePage({
     explicitRelated.length > 0
       ? explicitRelated
       : await prisma.course.findMany({
-          where: { categoryId: course.categoryId, id: { not: course.id } },
-          include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } } },
+          where: { categoryId: course.categoryId, id: { not: course.id }, locale: localeFilter },
+          include: { schedules: { where: { endDate: { gte: new Date() } }, orderBy: { startDate: "asc" }, include: { venue: true } } },
           take: 3,
         });
 
-  const days = (course.dayOutlineEn as Array<{ day: number; title: string; topics: string[] }> | null) ?? [];
+  const rawOutline = l === "ar" && course.dayOutlineAr ? course.dayOutlineAr : course.dayOutlineEn;
+  const days = (rawOutline as Array<{ day: number; title: string; topics: string[] }> | null) ?? [];
 
   const schedules = course.schedules.map((s) => ({
     id: s.id,
@@ -132,6 +160,11 @@ export default async function CoursePage({
         <Card>
           <CardContent className="pt-6">
             <h2 className="mb-4 font-semibold text-navy">{t("scheduledDates")}</h2>
+            {course.schedules.length === 0 ? (
+              <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                {l === "ar" ? "لا توجد مواعيد قادمة — يرجى التواصل معنا للاستفسار." : "No upcoming dates — please contact us to enquire."}
+              </p>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -152,6 +185,7 @@ export default async function CoursePage({
                 </tbody>
               </table>
             </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -325,6 +359,7 @@ function DownloadLink({ slug, format, label }: { slug: string; format: "pdf" | "
   return (
     <a
       href={`/api/export/course/${slug}?format=${format}`}
+      data-track={`download-${format}`}
       className="rounded-lg border border-brand/30 bg-brand-light px-4 py-2.5 text-center text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white"
     >
       {label}

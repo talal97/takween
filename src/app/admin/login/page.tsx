@@ -12,10 +12,14 @@ export default async function LoginPage() {
   if (session?.user) redirect("/admin");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <div className="flex flex-col items-center gap-4">
-        <span className="text-2xl font-bold text-brand">Takween</span>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-navy via-brand-dark to-brand p-4">
+      <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-brand-light/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-gold/10 blur-3xl" />
+      <div className="relative w-full max-w-md">
         <LoginForm />
+        <p className="mt-6 text-center text-xs text-white/60">
+          Takween Training Institute — Authorized personnel only
+        </p>
       </div>
     </div>
   );

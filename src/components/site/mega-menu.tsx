@@ -15,13 +15,17 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
   });
 
   return (
-    <div className="mega-menu-trigger relative">
-      <button className="flex items-center gap-1 py-4 text-sm font-medium text-white transition-colors hover:text-gold">
+    <div className="mega-menu-trigger">
+      <button
+        type="button"
+        aria-expanded="false"
+        className="flex items-center gap-1 py-4 text-sm font-medium text-white transition-colors hover:text-gold"
+      >
         <span>{locale === "ar" ? "الدورات" : "Courses"}</span>
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
 
-      <div className="mega-menu-content absolute left-0 top-full z-50 w-full border-t-2 border-brand bg-white shadow-xl">
+      <div className="mega-menu-content absolute inset-x-0 top-full z-50 border-t-2 border-brand bg-white shadow-xl">
         <div className="mx-auto max-w-7xl px-6 py-6">
           <div className="mb-4 border-b border-brand/20 pb-3">
             <span className="text-sm font-semibold text-brand">
@@ -32,7 +36,7 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
             {superCategories.map((sc) => (
               <div key={sc.id} className="space-y-2">
                 <Link
-                  href={`/training-courses/${sc.slug}`}
+                  href={`/training-subjects/${sc.slug}`}
                   className="group/cat flex items-center gap-2"
                 >
                   {sc.image && (
@@ -47,7 +51,7 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
                     {localeText({ en: sc.nameEn, ar: sc.nameAr }, locale)}
                   </span>
                 </Link>
-                <ul className="space-y-1 pl-7">
+                <ul className="space-y-1 ps-7">
                   {sc.categories.map((cat) => (
                     <li key={cat.id}>
                       <Link
@@ -60,8 +64,8 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
                   ))}
                 </ul>
                 <Link
-                  href={`/training-courses/${sc.slug}`}
-                  className="ml-7 inline-block text-xs font-semibold text-brand hover:underline"
+                  href={`/training-subjects/${sc.slug}`}
+                  className="ms-7 inline-block text-xs font-semibold text-brand hover:underline"
                 >
                   {locale === "ar" ? "عرض الكل ←" : "View all →"}
                 </Link>

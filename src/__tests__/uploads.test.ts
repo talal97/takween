@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import path from "path";
 import {
   safeExt,
   safeJoin,
@@ -28,7 +29,7 @@ describe("safeJoin", () => {
   it("resolves paths within upload dir", () => {
     const result = safeJoin("photos/image.jpg");
     expect(result).not.toBeNull();
-    expect(result).toContain("photos/image.jpg");
+    expect(result).toContain(path.join("photos", "image.jpg"));
   });
   it("rejects path traversal with ..", () => {
     expect(safeJoin("../../etc/passwd")).toBeNull();

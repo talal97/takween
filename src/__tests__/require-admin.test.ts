@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 const mockAuth = vi.fn();
 
 vi.mock("@/auth", () => ({
-  auth: (...args: any[]) => mockAuth(...args),
+  auth: (...args: unknown[]) => mockAuth(...args),
 }));
 
 describe("requireAdmin", () => {

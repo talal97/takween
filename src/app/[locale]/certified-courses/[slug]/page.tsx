@@ -15,18 +15,15 @@ export default async function CertifiedCoursePage({
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
 
-  const cert = await prisma.certificate.findUnique({ where: { slug }, include: { courses: true } });
+  const cert = await prisma.certificate.findUnique({ where: { slug } });
   if (!cert) notFound();
 
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
-  const courseIds = cert.courses.filter((c) => c.locale === localeFilter.in[0] || c.locale === localeFilter.in[1]).map((c) => c.id);
-  const schedules = courseIds.length
-    ? await prisma.schedule.findMany({
-        where: { courseId: { in: courseIds } },
-        include: { course: true, venue: true },
-        orderBy: { startDate: "asc" },
-      })
-    : [];
+  const schedules = await prisma.schedule.findMany({
+    where: { course: { locale: localeFilter, certificates: { some: { id: cert.id } } } },
+    include: { course: true, venue: true },
+    orderBy: { startDate: "asc" },
+  });
 
   return (
     <div>

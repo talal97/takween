@@ -365,6 +365,7 @@ model PageView {
 
   @@index([path])
   @@index([createdAt])
+  @@index([createdAt, path])
 }
 
 model ClickEvent {
@@ -377,4 +378,5 @@ model ClickEvent {
 
   @@index([element])
   @@index([createdAt])
+  @@index([createdAt, element])
 }

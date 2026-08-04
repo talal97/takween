@@ -7,15 +7,22 @@ import { prisma } from "@/lib/prisma";
 // group so the public site does not depend on protected internals.
 
 const registrationSchema = z.object({
-  type: z.string().default("register"),
+  type: z.enum(["register", "contact", "enquiry", "online", "inhouse"]).default("register"),
   courseTitle: z.string().min(1),
   courseCode: z.string().optional(),
   scheduleSummary: z.string().optional(),
+  venueName: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  fee: z.string().optional(),
+  currency: z.string().optional(),
+  format: z.string().optional(),
   salutation: z.string().optional(),
   fullName: z.string().min(1),
   email: z.string().email(),
   phone: z.string().optional(),
   countryIso: z.string().optional(),
+  country: z.string().optional(),
   company: z.string().optional(),
   designation: z.string().optional(),
   message: z.string().optional(),
@@ -56,21 +63,31 @@ export async function submitRegistration(data: z.infer<typeof registrationSchema
   await import("next/cache").then(({ revalidatePath }) => revalidatePath("/admin/submissions"));
 
   const { sendRegistrationEmail, sendAdminAlert } = await import("@/lib/mail");
-  await sendRegistrationEmail({
-    to: input.email,
+  const locale: "ar" | "en" = input.locale === "ar" ? "ar" : "en";
+  const mailDetails = {
+    type: input.type,
+    locale,
     courseTitle: input.courseTitle,
-    fullName: input.fullName,
-  }).catch(() => {});
-  await sendAdminAlert({
-    courseTitle: input.courseTitle,
+    courseCode: input.courseCode,
     fullName: input.fullName,
     email: input.email,
-    phone: input.phone ?? "",
-    company: input.company ?? "",
+    phone: input.phone,
+    company: input.company,
+    country: input.country,
+    venue: input.venueName,
+    startDate: input.startDate,
+    endDate: input.endDate,
+    fee: input.fee,
+    currency: input.currency,
+    format: input.format,
+    paymentMode: input.paymentMode,
+    message: input.message,
+    scheduleSummary: input.scheduleSummary,
+  };
+  await sendRegistrationEmail({ to: input.email, ...mailDetails }).catch(() => {});
+  await sendAdminAlert({
+    ...mailDetails,
     jobTitle: input.designation ?? "",
-    startDate: input.scheduleSummary ?? "",
-    venue: "",
-    message: input.message ?? "",
   }).catch(() => {});
 
   return { ok: true };

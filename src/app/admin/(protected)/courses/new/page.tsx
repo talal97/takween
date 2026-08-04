@@ -4,10 +4,11 @@ import { CourseForm } from "@/components/admin/course-form";
 import { PageHeader } from "@/components/admin/page-header";
 
 export default async function NewCoursePage() {
-  const [categories, venues, certificates] = await Promise.all([
+  const [categories, venues, certificates, allCourses] = await Promise.all([
     prisma.category.findMany({ orderBy: { nameEn: "asc" } }),
     prisma.venue.findMany({ orderBy: { nameEn: "asc" } }),
     prisma.certificate.findMany({ orderBy: { nameEn: "asc" } }),
+    prisma.course.findMany({ select: { id: true, titleEn: true, titleAr: true, code: true }, orderBy: { titleEn: "asc" } }),
   ]);
 
   return (
@@ -18,7 +19,7 @@ export default async function NewCoursePage() {
           <h3 className="font-semibold">Course Details</h3>
         </CardHeader>
         <CardContent>
-          <CourseForm categories={categories} venues={venues} certificates={certificates} />
+          <CourseForm categories={categories} venues={venues} certificates={certificates} allCourses={allCourses} />
         </CardContent>
       </Card>
     </div>

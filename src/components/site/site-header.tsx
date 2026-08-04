@@ -17,11 +17,11 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
       <div className="border-b border-white/10 bg-black/20 text-white/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 text-xs">
           <div className="flex items-center gap-5">
-            <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} className="flex items-center gap-1.5 hover:text-white transition-colors">
+            <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} data-track="header-phone" className="flex items-center gap-1.5 hover:text-white transition-colors">
               <Phone className="h-3 w-3" />
               {phone}
             </a>
-            <a href={`mailto:${email}`} className="hidden items-center gap-1.5 hover:text-white transition-colors sm:flex">
+            <a href={`mailto:${email}`} data-track="header-email" className="hidden items-center gap-1.5 hover:text-white transition-colors sm:flex">
               <Mail className="h-3 w-3" />
               {email}
             </a>
@@ -55,6 +55,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
           </Link>
           <Link
             href="/course-finder"
+            data-track="nav-course-finder"
             className="px-3 py-5 text-sm font-medium text-white/90 transition-colors hover:text-gold uppercase"
           >
             {t("courseFinder")}
@@ -76,6 +77,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
           </Link>
           <Link
             href="/contact-us"
+            data-track="nav-contact"
             className="px-3 py-5 text-sm font-medium text-white/90 transition-colors hover:text-gold uppercase"
           >
             {t("contact")}

@@ -9,50 +9,46 @@ import { requireAdmin, revalidateSite } from "./actions-helpers";
 // ------------------------------------------------------------------
 // Certificates
 // ------------------------------------------------------------------
-export async function createCertificate(data: {
-  code: string;
-  nameEn: string;
-  nameAr?: string;
-  slug?: string;
-  description?: string;
-  logo?: string;
-  sort?: number;
-}) {
+const certificateSchema = z.object({
+  code: z.string().min(1),
+  nameEn: z.string().min(1),
+  nameAr: z.string().optional(),
+  slug: z.string().optional(),
+  description: z.string().optional(),
+  logo: z.string().optional(),
+  sort: z.coerce.number().optional(),
+});
+
+export async function createCertificate(data: z.infer<typeof certificateSchema>) {
   await requireAdmin();
+  const input = certificateSchema.parse(data);
   await prisma.certificate.create({
     data: {
-      code: data.code,
-      nameEn: data.nameEn,
-      nameAr: data.nameAr,
-      slug: data.slug || slugify(data.nameEn),
-      description: data.description,
-      logo: data.logo,
-      sort: Number(data.sort ?? 0),
+      code: input.code,
+      nameEn: input.nameEn,
+      nameAr: input.nameAr,
+      slug: input.slug || slugify(input.nameEn),
+      description: input.description,
+      logo: input.logo,
+      sort: Number(input.sort ?? 0),
     },
   });
   revalidatePath("/admin/certificates");
   revalidateSite();
 }
 
-export async function updateCertificate(id: string, data: {
-  code: string;
-  nameEn: string;
-  nameAr?: string;
-  slug?: string;
-  description?: string;
-  logo?: string;
-  sort?: number;
-}) {
+export async function updateCertificate(id: string, data: z.infer<typeof certificateSchema>) {
   await requireAdmin();
+  const input = certificateSchema.parse(data);
   await prisma.certificate.update({
     where: { id },
     data: {
-      code: data.code,
-      nameEn: data.nameEn,
-      nameAr: data.nameAr,
-      description: data.description,
-      logo: data.logo,
-      sort: Number(data.sort ?? 0),
+      code: input.code,
+      nameEn: input.nameEn,
+      nameAr: input.nameAr,
+      description: input.description,
+      logo: input.logo,
+      sort: Number(input.sort ?? 0),
     },
   });
   revalidatePath("/admin/certificates");
@@ -73,7 +69,6 @@ export async function linkCertificate(courseId: string, certificateId: string) {
     data: { certificates: { connect: { id: certificateId } } },
   });
   revalidatePath("/admin/courses");
-  revalidateSite();
   revalidatePath(`/admin/courses/${courseId}`);
   revalidateSite();
 }
@@ -85,7 +80,6 @@ export async function unlinkCertificate(courseId: string, certificateId: string)
     data: { certificates: { disconnect: { id: certificateId } } },
   });
   revalidatePath("/admin/courses");
-  revalidateSite();
   revalidatePath(`/admin/courses/${courseId}`);
   revalidateSite();
 }
@@ -112,16 +106,18 @@ const testimonialSchema = z.object({
 
 export async function createTestimonial(data: z.infer<typeof testimonialSchema>) {
   await requireAdmin();
-  await prisma.testimonial.create({ data: { ...data, courseId: data.courseId || null } });
+  const input = testimonialSchema.parse(data);
+  await prisma.testimonial.create({ data: { ...input, courseId: input.courseId || null } });
   revalidatePath("/admin/testimonials");
   revalidateSite();
 }
 
 export async function updateTestimonial(id: string, data: z.infer<typeof testimonialSchema>) {
   await requireAdmin();
+  const input = testimonialSchema.parse(data);
   await prisma.testimonial.update({
     where: { id },
-    data: { ...data, courseId: data.courseId || null },
+    data: { ...input, courseId: input.courseId || null },
   });
   revalidatePath("/admin/testimonials");
   revalidateSite();
@@ -143,14 +139,16 @@ const articleSchema = z.object({
 
 export async function createArticle(data: z.infer<typeof articleSchema>) {
   await requireAdmin();
-  await prisma.article.create({ data: { ...data, slug: slugify(data.slug) } });
+  const input = articleSchema.parse(data);
+  await prisma.article.create({ data: { ...input, slug: slugify(input.slug) } });
   revalidatePath("/admin/articles");
   revalidateSite();
 }
 
 export async function updateArticle(id: string, data: z.infer<typeof articleSchema>) {
   await requireAdmin();
-  await prisma.article.update({ where: { id }, data: { ...data, slug: slugify(data.slug) } });
+  const input = articleSchema.parse(data);
+  await prisma.article.update({ where: { id }, data: { ...input, slug: slugify(input.slug) } });
   revalidatePath("/admin/articles");
   revalidateSite();
 }

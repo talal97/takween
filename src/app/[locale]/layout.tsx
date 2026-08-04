@@ -29,7 +29,7 @@ export default async function LocaleLayout({
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJson) }} />
-      <LocaleDir />
+          <LocaleDir locale={locale as "en" | "ar"} />
       <NextIntlClientProvider messages={messages}>
         <div className="flex min-h-screen flex-col">
           {process.env.NODE_ENV === "production" && <Tracker />}

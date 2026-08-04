@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export function Tracker() {
   const pathname = usePathname();
-  const lastPath = useRef(pathname);
+  const lastPath = useRef<string | null>(null);
 
   useEffect(() => {
     if (pathname === lastPath.current) return;
@@ -14,16 +14,27 @@ export function Tracker() {
   }, [pathname]);
 
   useEffect(() => {
-    sendPageview(pathname);
-  }, [pathname]);
+    function onClick(e: MouseEvent) {
+      const el = (e.target as Element | null)?.closest?.("[data-track]");
+      if (!el) return;
+      const element = el.getAttribute("data-track");
+      if (!element) return;
+      trackClick(element);
+    }
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   return null;
 }
 
+function localeOf(path: string): "en" | "ar" {
+  return path.startsWith("/ar") ? "ar" : "en";
+}
+
 function sendPageview(path: string) {
   try {
-    const locale = path.startsWith("/ar") ? "ar" : "en";
-    const body = JSON.stringify({ path, locale, referrer: document.referrer || null });
+    const body = JSON.stringify({ path, locale: localeOf(path), referrer: document.referrer || null });
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/analytics/pageview", new Blob([body], { type: "application/json" }));
     } else {
@@ -37,8 +48,7 @@ function sendPageview(path: string) {
 export function trackClick(element: string, metadata?: Record<string, string>) {
   try {
     const path = window.location.pathname;
-    const locale = path.startsWith("/ar") ? "ar" : "en";
-    const body = JSON.stringify({ element, path, locale, metadata });
+    const body = JSON.stringify({ element, path, locale: localeOf(path), metadata });
     if (navigator.sendBeacon) {
       navigator.sendBeacon("/api/analytics/click", new Blob([body], { type: "application/json" }));
     } else {

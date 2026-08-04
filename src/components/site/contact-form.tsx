@@ -93,7 +93,7 @@ export function ContactForm({ label }: { label: string }) {
         </div>
         <Input value={captcha} onChange={(e) => setCaptcha(e.target.value)} required />
       </div>
-      <Button type="submit" className="w-full">{label}</Button>
+      <Button type="submit" data-track="contact-submit" className="w-full">{label}</Button>
     </form>
   );
 }

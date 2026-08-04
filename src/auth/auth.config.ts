@@ -21,8 +21,18 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 type Attempt = { count: number; resetAt: number };
 const attempts = new Map<string, Attempt>();
 
+function pruneExpired(now: number) {
+  // Sweep expired entries occasionally so the in-memory map cannot grow
+  // unbounded on a long-running instance.
+  if (attempts.size < 1024) return;
+  for (const [key, entry] of attempts) {
+    if (now > entry.resetAt) attempts.delete(key);
+  }
+}
+
 function checkRateLimit(key: string): boolean {
   const now = Date.now();
+  pruneExpired(now);
   const entry = attempts.get(key);
   if (!entry || now > entry.resetAt) {
     attempts.set(key, { count: 1, resetAt: now + WINDOW_MS });

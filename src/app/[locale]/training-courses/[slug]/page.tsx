@@ -43,13 +43,15 @@ export default async function CategoryCoursesPage({
   const category = await prisma.category.findUnique({ where: { slug } });
   if (!category) notFound();
 
+  const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
+
   const yearsAll = await prisma.schedule.findMany({
-    where: { course: { categoryId: category.id } },
+    where: { course: { categoryId: category.id, locale: localeFilter } },
     select: { startDate: true },
   });
 
   const where: Prisma.ScheduleWhereInput = {
-    course: { categoryId: category.id },
+    course: { categoryId: category.id, locale: localeFilter },
     ...(format ? { format } : {}),
     ...(venue ? { venueId: venue } : {}),
     ...(year ? { startDate: { gte: new Date(`${year}-01-01`), lt: new Date(`${Number(year) + 1}-01-01`) } } : {}),
@@ -61,7 +63,7 @@ export default async function CategoryCoursesPage({
       include: { course: true, venue: true },
       orderBy: { startDate: "asc" },
     }),
-    prisma.course.count({ where: { categoryId: category.id } }),
+    prisma.course.count({ where: { categoryId: category.id, locale: localeFilter } }),
   ]);
 
   const years = [...new Set(yearsAll.map((y) => new Date(y.startDate).getFullYear()))].sort();

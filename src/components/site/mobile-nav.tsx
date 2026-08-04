@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Menu, X } from "lucide-react";
@@ -22,19 +22,33 @@ export function MobileNav() {
   const locale = useLocale();
   const ar = locale === "ar";
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
     <div className="lg:hidden">
       <button
         onClick={() => setOpen(true)}
         aria-label="Menu"
-        className="flex h-10 w-10 items-center justify-center rounded-md border text-navy"
+        aria-expanded={open}
+        className="flex h-10 w-10 items-center justify-center rounded-md border border-white/25 text-white"
       >
         <Menu className="h-5 w-5" />
       </button>
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="absolute inset-y-0 right-0 flex w-72 max-w-[80%] flex-col bg-white shadow-xl">
+          <div className="absolute inset-y-0 end-0 flex w-72 max-w-[80%] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b px-4 py-3">
               <span className="text-lg font-extrabold text-brand">{ar ? "تكوين" : "Takween"}</span>
               <button onClick={() => setOpen(false)} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded border">
@@ -54,7 +68,7 @@ export function MobileNav() {
               ))}
             </nav>
             <div className="border-t p-4">
-<Link
+              <Link
                 href="/"
                 locale={ar ? "en" : "ar"}
                 onClick={() => setOpen(false)}

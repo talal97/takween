@@ -376,14 +376,13 @@ model PageView {
   path      String
   locale    String   @default("en")
   referrer  String?
-  userAgent String?  @map("user_agent")
+  userAgent String?
   country   String?
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now())
 
   @@index([path])
   @@index([createdAt])
   @@index([createdAt, path])
-  @@map("page_views")
 }
 
 model ClickEvent {
@@ -392,10 +391,9 @@ model ClickEvent {
   path      String
   locale    String   @default("en")
   metadata  Json?
-  createdAt DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now())
 
   @@index([element])
   @@index([createdAt])
   @@index([createdAt, element])
-  @@map("click_events")
 }

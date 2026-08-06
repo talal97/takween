@@ -31,11 +31,12 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value:
               "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com; " +
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: www.googletagmanager.com; " +
               "style-src 'self' 'unsafe-inline'; " +
               "img-src 'self' https: data: blob:; " +
               "font-src 'self' data:; " +
               "connect-src 'self' www.googletagmanager.com; " +
+              "worker-src 'self' blob:; " +
               "frame-ancestors 'self'; " +
               "base-uri 'self'; " +
               "form-action 'self'",

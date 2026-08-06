@@ -105,6 +105,21 @@ export default async function CoursePage({
   ]);
   const faqs = course.category.faqs;
 
+  const settingsRaw = await prisma.siteSetting.findUnique({ where: { key: "payment_methods" } });
+  let paymentMethods: Array<{ id: string; label_en: string; label_ar: string; enabled: boolean }> = [];
+  if (settingsRaw?.value) {
+    try {
+      const parsed = JSON.parse(settingsRaw.value);
+      if (Array.isArray(parsed)) paymentMethods = parsed.filter((m: { enabled?: boolean }) => m.enabled !== false);
+    } catch {}
+  }
+  if (paymentMethods.length === 0) {
+    paymentMethods = [
+      { id: "invoice-me", label_en: "Invoice Me", label_ar: "فاتورة شخصية", enabled: true },
+      { id: "invoice-company", label_en: "Invoice Company", label_ar: "فاتورة الشركة", enabled: true },
+    ];
+  }
+
   const explicitRelated = course.relatedAsSource.map((r) => r.related);
   const related =
     explicitRelated.length > 0
@@ -281,6 +296,7 @@ export default async function CoursePage({
                 courseCode={course.code}
                 schedules={schedules}
                 countries={countries.map((c) => ({ iso: c.iso, nameEn: c.nameEn, nameAr: c.nameAr ?? "" }))}
+                paymentMethods={paymentMethods.map((m) => ({ id: m.id, label_en: m.label_en, label_ar: m.label_ar }))}
               />
             </CardContent>
           </Card>

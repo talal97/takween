@@ -19,17 +19,25 @@ export function RegistrationForm({
   courseCode,
   schedules,
   countries,
+  paymentMethods,
   initialType = "register",
 }: {
   courseTitle: string;
   courseCode: string;
   schedules: Schedule[];
   countries: Array<{ iso: string; nameEn: string; nameAr: string }>;
+  paymentMethods?: Array<{ id: string; label_en: string; label_ar: string }>;
   initialType?: RequestMode;
 }) {
   const t = useTranslations("form");
   const tc = useTranslations("common");
   const locale = useLocale();
+  const resolvedMethods = paymentMethods && paymentMethods.length > 0
+    ? paymentMethods
+    : [
+        { id: "invoice-me", label_en: "Invoice Me", label_ar: "فاتورة شخصية" },
+        { id: "invoice-company", label_en: "Invoice Company", label_ar: "فاتورة الشركة" },
+      ];
   const [mode, setMode] = useState<RequestMode>(initialType);
   const [form, setForm] = useState({
     fullName: "",
@@ -40,7 +48,7 @@ export function RegistrationForm({
     designation: "",
     salutation: "Mr.",
     schedule: schedules[0]?.id || "",
-    paymentMode: "invoice-me",
+    paymentMode: resolvedMethods[0]?.id || "invoice-me",
     message: "",
   });
   const [done, setDone] = useState(false);
@@ -222,8 +230,11 @@ export function RegistrationForm({
       <div className="grid gap-2">
         <Label>{t("paymentMode")}</Label>
         <select value={form.paymentMode} onChange={(e) => set("paymentMode", e.target.value)} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
-          <option value="invoice-me">{t("invoiceMe")}</option>
-          <option value="invoice-company">{t("invoiceCompany")}</option>
+          {resolvedMethods.map((m) => (
+            <option key={m.id} value={m.id}>
+              {locale === "ar" && m.label_ar ? m.label_ar : m.label_en}
+            </option>
+          ))}
         </select>
       </div>
       <div className="grid gap-2">

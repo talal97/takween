@@ -5,6 +5,7 @@ import { SettingsForm } from "@/components/admin/settings-form";
 import { SmtpForm } from "@/components/admin/smtp-form";
 import { ThemeForm } from "@/components/admin/theme-form";
 import { SiteContentForm } from "@/components/admin/site-content-form";
+import { PaymentMethodsForm } from "@/components/admin/payment-methods-form";
 import { isSmtpEnvManaged } from "@/lib/mail";
 
 export default async function SettingsPage() {
@@ -35,6 +36,12 @@ export default async function SettingsPage() {
           <CardHeader><h3 className="font-semibold">Site Contact Info</h3></CardHeader>
           <CardContent>
             <SettingsForm initial={map} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><h3 className="font-semibold">Payment Methods</h3></CardHeader>
+          <CardContent>
+            <PaymentMethodsForm initial={map} />
           </CardContent>
         </Card>
         <Card>

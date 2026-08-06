@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { clearStaleSessionCookie } from "@/lib/auth-helpers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
@@ -34,6 +35,7 @@ export default async function AdminDashboardPage() {
   try {
     session = await auth();
   } catch {
+    await clearStaleSessionCookie();
     redirect("/admin/login");
   }
   if (!session?.user) redirect("/admin/login");

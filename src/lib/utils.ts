@@ -47,3 +47,22 @@ export function isoToFlag(iso: string): string {
   const codePoints = [...iso.toUpperCase()].map((c) => 0x1f1e6 - 65 + c.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
 }
+
+/**
+ * Parse simple markdown-like page content into React-ready blocks.
+ * Format: "## Heading\n\nParagraph text\n\n## Next heading\n\nMore text"
+ * Returns an array of { type: "heading" | "paragraph", text: string }.
+ */
+export function parsePageContent(raw: string): Array<{ type: "heading" | "paragraph"; text: string }> {
+  if (!raw?.trim()) return [];
+  return raw
+    .split(/\n\n+/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => {
+      if (block.startsWith("## ")) {
+        return { type: "heading" as const, text: block.slice(3) };
+      }
+      return { type: "paragraph" as const, text: block.replace(/\n/g, " ") };
+    });
+}

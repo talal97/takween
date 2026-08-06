@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import PlainLink from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getSettingsCached } from "@/lib/settings";
 import { MobileNav } from "@/components/site/mobile-nav";
@@ -27,7 +28,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="hover:text-white transition-colors">Admin</Link>
+            <PlainLink href="/admin" className="hover:text-white transition-colors">Admin</PlainLink>
             <span className="text-white/30">|</span>
             {locale === "ar" ? (
               <Link href="/" locale="en" className="font-semibold text-gold hover:underline">English</Link>
@@ -74,6 +75,12 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
             className="px-3 py-5 text-sm font-medium text-white/90 transition-colors hover:text-gold uppercase"
           >
             {t("certificates")}
+          </Link>
+          <Link
+            href="/countries"
+            className="px-3 py-5 text-sm font-medium text-white/90 transition-colors hover:text-gold uppercase"
+          >
+            {t("countries")}
           </Link>
           <Link
             href="/contact-us"

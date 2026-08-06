@@ -2,9 +2,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { getSettingsCached } from "@/lib/settings";
-import { localeText, getHomePageDataCached } from "@/lib/data";
+import { localeText, getHomePageDataCached, getCountriesCached } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { QuickSearch } from "@/components/site/quick-search";
+import { CountriesGrid } from "@/components/site/countries-grid";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Users, Award, Building2, MonitorPlay, Users as UsersIcon, Globe2, ShieldCheck, Quote, ArrowRight, CheckCircle2 } from "lucide-react";
 
@@ -41,6 +42,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     categoryCounts,
     totalCourses,
   } = await getHomePageDataCached(l);
+
+  const countries = await getCountriesCached();
 
   const counts: Record<string, number> = {};
   categoryCounts.forEach((c) => {
@@ -191,6 +194,22 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ============ COUNTRIES ============ */}
+      <section className="section-divider mx-auto max-w-7xl px-4 py-20">
+        <div className="text-center">
+          <span className="text-sm font-semibold uppercase tracking-wider text-brand">{t("countriesSubtitle")}</span>
+          <h2 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">{t("countriesTitle")}</h2>
+        </div>
+        <div className="mt-10">
+          <CountriesGrid countries={countries} locale={l} compact />
+        </div>
+        <div className="mt-8 text-center">
+          <Link href="/countries" className="inline-flex items-center gap-1 text-sm font-semibold text-brand hover:underline">
+            {l === "ar" ? "عرض كل الدول" : "View all countries"} <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 

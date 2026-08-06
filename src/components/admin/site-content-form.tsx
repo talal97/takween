@@ -13,6 +13,7 @@ type Field = {
   label: string;
   bilingual?: boolean;
   long?: boolean;
+  rows?: number;
 };
 
 type Group = { title: string; hint: string; fields: Field[] };
@@ -65,6 +66,17 @@ const GROUPS: Group[] = [
       { key: "social_youtube", label: "YouTube" },
     ],
   },
+  {
+    title: "Static Pages",
+    hint: "Edit About Us, Privacy Policy and Terms of Service. Use ## Heading for section titles, paragraphs separated by blank lines.",
+    fields: [
+      { key: "about_title", label: "About Us — Page title", bilingual: true },
+      { key: "about_subtitle", label: "About Us — Subtitle", bilingual: true },
+      { key: "page_about", label: "About Us — Body content", bilingual: true, long: true, rows: 8 },
+      { key: "page_privacy", label: "Privacy Policy — Full content", bilingual: true, long: true, rows: 10 },
+      { key: "page_terms", label: "Terms of Service — Full content", bilingual: true, long: true, rows: 10 },
+    ],
+  },
 ];
 
 export function SiteContentForm({ initial }: { initial: Record<string, string> }) {
@@ -109,7 +121,7 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
                   <div>
                     <Label>{f.label} — English</Label>
                     {f.long ? (
-                      <Textarea value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={3} />
+                      <Textarea value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={f.rows || 3} />
                     ) : (
                       <Input value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} />
                     )}
@@ -117,7 +129,7 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
                   <div>
                     <Label>{f.label} — عربي</Label>
                     {f.long ? (
-                      <Textarea value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={3} />
+                      <Textarea value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={f.rows || 3} />
                     ) : (
                       <Input value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} />
                     )}

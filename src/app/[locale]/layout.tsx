@@ -4,9 +4,11 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { WhatsAppButton } from "@/components/site/whatsapp-button";
 import { LocaleDir } from "@/components/site/locale-dir";
 import { organizationJsonLd } from "@/lib/seo";
 import { Tracker } from "@/components/analytics/tracker";
+import { getSettingsCached } from "@/lib/settings";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -25,6 +27,8 @@ export default async function LocaleLayout({
 
   const messages = await getMessages();
   const orgJson = await organizationJsonLd();
+  const settings = await getSettingsCached();
+  const whatsappPhone = settings.whatsapp_phone || "";
 
   return (
     <>
@@ -38,6 +42,7 @@ export default async function LocaleLayout({
           <SiteFooter locale={locale as "en" | "ar"} />
         </div>
       </NextIntlClientProvider>
+      <WhatsAppButton phone={whatsappPhone} />
     </>
   );
 }

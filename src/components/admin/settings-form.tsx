@@ -12,7 +12,9 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
   const [form, setForm] = useState({
     contact_phone: initial.contact_phone ?? "+971 (04) 425 0700",
     contact_email: initial.contact_email ?? "info@takween.com",
+    admin_alert_email: initial.admin_alert_email ?? "",
     brand_name: initial.brand_name ?? "Takween",
+    whatsapp_phone: initial.whatsapp_phone ?? "",
   });
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -28,8 +30,16 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
         <Input value={form.contact_email} onChange={(e) => set("contact_email", e.target.value)} />
       </div>
       <div>
+        <Label>Admin Alert Email</Label>
+        <Input value={form.admin_alert_email} onChange={(e) => set("admin_alert_email", e.target.value)} placeholder="receives new signup alerts" />
+      </div>
+      <div>
         <Label>Brand Name</Label>
         <Input value={form.brand_name} onChange={(e) => set("brand_name", e.target.value)} />
+      </div>
+      <div>
+        <Label>WhatsApp Number</Label>
+        <Input value={form.whatsapp_phone} onChange={(e) => set("whatsapp_phone", e.target.value)} placeholder="+971501234567" />
       </div>
       <div className="flex items-end">
         <Button

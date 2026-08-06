@@ -65,6 +65,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
             <li><Link href="/training" className="transition-colors hover:text-white">{t("trainingVenues")}</Link></li>
             <li><Link href="/training-calendar" className="transition-colors hover:text-white">{t("calendar")}</Link></li>
             <li><Link href="/certificates" className="transition-colors hover:text-white">{t("certificates")}</Link></li>
+            <li><Link href="/countries" className="transition-colors hover:text-white">{t("countries")}</Link></li>
             <li><Link href="/new-training-courses" className="transition-colors hover:text-white">{t("new")}</Link></li>
           </ul>
         </div>

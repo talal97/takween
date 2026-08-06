@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { clearStaleSessionCookie } from "@/lib/auth-helpers";
 import { AdminSidebar } from "@/components/admin/sidebar";
 
 export const metadata = { title: "Takween Admin" };
@@ -9,7 +10,7 @@ export default async function AdminGuardLayout({ children }: { children: React.R
   try {
     session = await auth();
   } catch {
-    // JWTSessionError — stale or missing secret cookie. Force re-login.
+    await clearStaleSessionCookie();
   }
   if (!session?.user) redirect("/admin/login");
 

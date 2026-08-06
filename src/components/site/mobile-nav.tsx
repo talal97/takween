@@ -11,6 +11,7 @@ const items: Array<{ href: string; en: string; ar: string }> = [
   { href: "/training-subjects", en: "Courses", ar: "الدورات" },
   { href: "/training", en: "Venues", ar: "المواقع" },
   { href: "/certificates", en: "Certificates", ar: "الشهادات" },
+  { href: "/countries", en: "Countries", ar: "الدول" },
   { href: "/training-calendar", en: "Calendar", ar: "التقويم" },
   { href: "/resources", en: "Resources", ar: "الموارد" },
   { href: "/about-us", en: "About Us", ar: "من نحن" },

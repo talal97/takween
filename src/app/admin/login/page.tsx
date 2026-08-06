@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { clearStaleSessionCookie } from "@/lib/auth-helpers";
 import { LoginForm } from "@/components/admin/login-form";
 
 export default async function LoginPage() {
@@ -7,7 +8,7 @@ export default async function LoginPage() {
   try {
     session = await auth();
   } catch {
-    // JWTSessionError — stale or missing secret cookie. Treat as logged-out.
+    await clearStaleSessionCookie();
   }
   if (session?.user) redirect("/admin");
 

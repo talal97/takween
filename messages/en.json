@@ -18,7 +18,8 @@
                        "arabic":  "العربية",
                        "english":  "English",
                        "selectYourCategory":  "Select your Category",
-                       "selectYourVenue":  "Select your Venue"
+                       "selectYourVenue":  "Select your Venue",
+                       "countries":  "Countries"
                    },
     "common":  {
                    "registerNow":  "Register Now",
@@ -54,7 +55,10 @@
                  "aboutTitle":  "About Us",
                  "clientsTitle":  "Partner with the World\u0027s Most Innovative Training Provider",
                  "articlesTitle":  "Latest Articles",
-                 "requestCallback":  "Request a Call Back"
+                  "requestCallback":  "Request a Call Back",
+                  "countriesTitle":  "Countries We Operate In",
+                  "countriesSubtitle":  "Training delivered across 5 continents",
+                  "venueCount":  "venues"
              },
     "course":  {
                    "scheduledDates":  "Scheduled Dates",

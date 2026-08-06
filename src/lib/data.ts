@@ -66,3 +66,22 @@ export const getHomePageDataCached = unstable_cache(getHomePageData, ["home-page
   revalidate: 300,
   tags: [SITE_TAG],
 });
+
+export async function getCountries() {
+  const countries = await prisma.country.findMany({ orderBy: { sort: "asc" } });
+  const venues = await prisma.venue.findMany({ select: { country: true } });
+  const venueCountByCountry: Record<string, number> = {};
+  venues.forEach((v) => {
+    const key = v.country.trim().toLowerCase();
+    venueCountByCountry[key] = (venueCountByCountry[key] || 0) + 1;
+  });
+  return countries.map((c) => {
+    const lookup = c.nameEn.trim().toLowerCase();
+    return { ...c, venueCount: venueCountByCountry[lookup] || 0 };
+  });
+}
+
+export const getCountriesCached = unstable_cache(getCountries, ["countries-list"], {
+  revalidate: 300,
+  tags: [SITE_TAG],
+});

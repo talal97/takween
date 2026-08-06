@@ -129,7 +129,7 @@ export async function sendAdminAlert(input: {
   const brand = s.brand_name || "Takween";
   const type = input.type || "register";
   const locale = input.locale || "en";
-  const adminTo = s.contact_email || input.email;
+  const adminTo = s.admin_alert_email || s.contact_email || input.email;
 
   await sendEmail(
     {

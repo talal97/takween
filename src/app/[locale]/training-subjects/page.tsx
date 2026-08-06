@@ -1,13 +1,27 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSettingsCached } from "@/lib/settings";
 import { localeText } from "@/lib/data";
 import { ArrowRight } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "الموضوعات التدريبية" : "Training Subjects";
+  const description = locale === "ar" ? "تصفح تخصصاتنا التدريبية" : "Browse our training categories and find the right course for you";
+  return buildPageMetadata({ title, description, locale, path: "/training-subjects" });
+}
 
 export default async function TrainingSubjectsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
+
+  const [settings] = await Promise.all([getSettingsCached()]);
+  const s = (k: string, fb: string) => settings[`${k}_${l}`] || fb;
 
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
 
@@ -26,10 +40,11 @@ export default async function TrainingSubjectsPage({ params }: { params: Promise
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
-          <h1 className="text-3xl font-bold sm:text-4xl">{l === "ar" ? "الموضوعات التدريبية" : "Training Subjects"}</h1>
-          <p className="mt-2 text-white/70">{l === "ar" ? "تصفح تخصصاتنا التدريبية" : "Browse our training categories and find the right course for you"}</p>
+          <h1 className="text-3xl font-bold sm:text-4xl">{s("page_subjects_title", l === "ar" ? "الموضوعات التدريبية" : "Training Subjects")}</h1>
+          <p className="mt-2 text-white/70">{s("page_subjects_subtitle", l === "ar" ? "تصفح تخصصاتنا التدريبية" : "Browse our training categories and find the right course for you")}</p>
         </div>
       </section>
 

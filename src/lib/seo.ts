@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSettingsCached } from "@/lib/settings";
+import type { Metadata } from "next";
 
 export function siteUrl(path = "") {
   const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://takween.com").replace(/\/$/, "");
@@ -68,4 +69,33 @@ export async function courseEventSchedules(courseId: string) {
     endDate: s.endDate.toISOString(),
     location: { "@type": "Place", name: s.venue.nameEn, address: { "@type": "PostalAddress", addressCountry: s.venue.country } },
   }));
+}
+
+export function buildPageMetadata(opts: {
+  title: string;
+  description?: string;
+  locale: string;
+  path: string;
+  image?: string;
+}): Metadata {
+  const { title, description, locale, path, image } = opts;
+  const brand = "Takween";
+  const fullTitle = `${title} | ${brand}`;
+  return {
+    title: fullTitle,
+    description,
+    alternates: {
+      canonical: siteUrl(`/${locale}${path}`),
+      languages: {
+        [`/en${path}`]: `/en${path}`,
+        [`/ar${path}`]: `/ar${path}`,
+      },
+    },
+    openGraph: {
+      title: fullTitle,
+      description,
+      url: siteUrl(`/${locale}${path}`),
+      images: image ? [{ url: absoluteImage(image)! }] : undefined,
+    },
+  };
 }

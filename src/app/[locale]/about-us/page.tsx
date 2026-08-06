@@ -3,6 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { PageHeader } from "@/components/site/page-header";
 import { parsePageContent } from "@/lib/utils";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const settings = await getSettings();
+  const title = settings[`about_title_${l}`] || (l === "ar" ? "من نحن" : "About Us");
+  const description = settings[`about_subtitle_${l}`] || (l === "ar" ? "تعرف على تكوين ورؤيتها" : "Learn more about Takween and our vision");
+  return buildPageMetadata({ title, description, locale, path: "/about-us" });
+}
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -23,6 +35,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div>
+      <Breadcrumb />
       <PageHeader title={title} subtitle={subtitle} />
       <div className="mx-auto max-w-4xl px-4 py-10">
         {body.length > 0 ? (

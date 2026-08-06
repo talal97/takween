@@ -18,7 +18,7 @@ const items: Array<{ href: string; en: string; ar: string }> = [
   { href: "/contact-us", en: "Contact Us", ar: "اتصل بنا" },
 ];
 
-export function MobileNav() {
+export function MobileNav({ brandName = "Takween" }: { brandName?: string }) {
   const [open, setOpen] = useState(false);
   const locale = useLocale();
   const ar = locale === "ar";
@@ -51,7 +51,7 @@ export function MobileNav() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
           <div className="absolute inset-y-0 end-0 flex w-72 max-w-[80%] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b px-4 py-3">
-              <span className="text-lg font-extrabold text-brand">{ar ? "تكوين" : "Takween"}</span>
+              <span className="text-lg font-extrabold text-brand">{ar ? "تكوين" : brandName}</span>
               <button onClick={() => setOpen(false)} aria-label="Close" className="flex h-9 w-9 items-center justify-center rounded border">
                 <X className="h-5 w-5" />
               </button>

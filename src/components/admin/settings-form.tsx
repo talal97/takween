@@ -16,11 +16,31 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
     brand_name: initial.brand_name ?? "Takween",
     whatsapp_phone: initial.whatsapp_phone ?? "",
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
+
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <form onSubmit={(e) => e.preventDefault()} className="grid gap-4 sm:grid-cols-2">
+      {error && (
+        <div className="col-span-full rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
       <div>
         <Label>Contact Phone</Label>
         <Input value={form.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} />
@@ -42,14 +62,8 @@ export function SettingsForm({ initial }: { initial: Record<string, string> }) {
         <Input value={form.whatsapp_phone} onChange={(e) => set("whatsapp_phone", e.target.value)} placeholder="+971501234567" />
       </div>
       <div className="flex items-end">
-        <Button
-          type="button"
-          onClick={async () => {
-            await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
-            router.refresh();
-          }}
-        >
-          Save Contact Info
+        <Button type="button" onClick={handleSave} disabled={saving}>
+          {saving ? "Saving…" : "Save Contact Info"}
         </Button>
       </div>
     </form>

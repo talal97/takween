@@ -8,7 +8,11 @@ import { deleteTestimonial } from "../actions-content";
 import { TestimonialForm } from "@/components/admin/testimonial-form";
 
 export default async function TestimonialsPage() {
-  const items = await prisma.testimonial.findMany({ orderBy: { sort: "asc" } });
+  const [items, courses, categories] = await Promise.all([
+    prisma.testimonial.findMany({ orderBy: { sort: "asc" } }),
+    prisma.course.findMany({ select: { id: true, titleEn: true }, orderBy: { titleEn: "asc" } }),
+    prisma.category.findMany({ select: { id: true, nameEn: true }, orderBy: { nameEn: "asc" } }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -16,7 +20,7 @@ export default async function TestimonialsPage() {
 
       <Card>
         <CardHeader><h3 className="font-semibold">Add Testimonial</h3></CardHeader>
-        <CardContent><TestimonialForm /></CardContent>
+        <CardContent><TestimonialForm courses={courses} categories={categories} /></CardContent>
       </Card>
 
       <Card>

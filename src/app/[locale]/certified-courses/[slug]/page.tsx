@@ -5,6 +5,21 @@ import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { CalendarDays, Globe2 } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const cert = await prisma.certificate.findUnique({ where: { slug } });
+  const title = cert ? localeText({ en: cert.nameEn, ar: cert.nameAr }, l) : "Certificate";
+  return buildPageMetadata({ title, locale, path: `/certified-courses/${slug}` });
+}
 
 export default async function CertifiedCoursePage({
   params,
@@ -27,6 +42,7 @@ export default async function CertifiedCoursePage({
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <div className="flex items-center gap-4">

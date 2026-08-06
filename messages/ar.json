@@ -19,7 +19,8 @@
                        "english":  "English",
                        "selectYourCategory":  "اختر الفئة",
                        "selectYourVenue":  "اختر مكان التدريب",
-                       "countries":  "الدول"
+                       "countries":  "الدول",
+                       "company":  "الشركة"
                    },
     "common":  {
                    "registerNow":  "سجّل الآن",
@@ -105,8 +106,41 @@
                  "captchaPlaceholder":  "أدخل الرمز",
                  "captchaInvalid":  "الرمز غير صحيح، يرجى المحاولة مرة أخرى.",
                  "tooMany":  "محاولات كثيرة جداً. يرجى المحاولة لاحقاً.",
-                 "refresh":  "تحديث"
-             },
+                  "refresh":  "تحديث",
+                  "successRef":  "رقم المرجع الخاص بك",
+                  "successBrowse":  "تصفح دورات أخرى",
+                  "successNewMessage":  "إرسال رسالة أخرى"
+              },
+    "breadcrumbs":  {
+                        "home":  "الرئيسية",
+                        "trainingSectors":  "القطاعات التدريبية",
+                        "courses":  "الدورات",
+                        "course":  "الدورة",
+                        "trainingVenues":  "أماكن التدريب",
+                        "trainingCalendar":  "الرزنامة التدريبية",
+                        "certificates":  "البرامج الشاملة",
+                        "certifiedCourses":  "الدورات المعتمدة",
+                        "countries":  "الدول",
+                        "resources":  "الموارد",
+                        "about":  "من نحن",
+                        "contact":  "اتصل بنا",
+                        "privacy":  "سياسة الخصوصية",
+                        "terms":  "شروط الخدمة",
+                        "newCourses":  "الدورات الجديدة",
+                        "courseFinder":  "البحث عن دورة"
+                    },
+    "share":  {
+                  "share":  "مشاركة",
+                  "copyLink":  "نسخ الرابط",
+                  "copied":  "تم النسخ!",
+                  "emailCourse":  "إرسال الدورة بالبريد",
+                  "addToCalendar":  "إضافة للتقويم"
+              },
+    "cookieConsent":  {
+                          "message":  "نستخدم ملفات تعريف الارتباط الأساسية لعمليات الموقع. لا يتم استخدام ملفات تعريف ارتباط التتبع.",
+                          "accept":  "قبول",
+                          "learnMore":  "اعرف المزيد"
+                      },
     "errors":  {
                    "error":  {
                                  "title":  "حدث خطأ ما",

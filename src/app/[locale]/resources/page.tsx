@@ -1,25 +1,41 @@
 import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSettingsCached } from "@/lib/settings";
 import { localeText } from "@/lib/data";
 import { readableDate } from "@/lib/utils";
 import { Download } from "lucide-react";
 import { PageHeader } from "@/components/site/page-header";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const settings = await getSettingsCached();
+  const title = settings[`page_resources_title_${l}`] || (l === "ar" ? "الموارد" : "Resources");
+  const description = settings[`page_resources_subtitle_${l}`] || (l === "ar" ? "الكتالوجات والمقالات والمنشورات" : "Catalogues, articles and publications");
+  return buildPageMetadata({ title, description, locale, path: "/resources" });
+}
 
 export default async function ResourcesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
-  const [articles, downloads] = await Promise.all([
+  const [articles, downloads, settings] = await Promise.all([
     prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" } }),
     prisma.download.findMany({ orderBy: { sort: "asc" } }),
+    getSettingsCached(),
   ]);
+  const s = (k: string, fb: string) => settings[`${k}_${l}`] || fb;
 
   return (
     <div>
+      <Breadcrumb />
       <PageHeader
-        title={l === "ar" ? "الموارد" : "Resources"}
-        subtitle={l === "ar" ? "الكتالوجات والمقالات والمنشورات" : "Catalogues, articles and publications"}
+        title={s("page_resources_title", l === "ar" ? "الموارد" : "Resources")}
+        subtitle={s("page_resources_subtitle", l === "ar" ? "الكتالوجات والمقالات والمنشورات" : "Catalogues, articles and publications")}
       />
       <div className="mx-auto max-w-5xl px-4 py-10">
         {downloads.length > 0 && (

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { CalendarDays, Globe2 } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
 
 export async function generateMetadata({
   params,
@@ -70,6 +71,7 @@ export default async function CategoryCoursesPage({
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">

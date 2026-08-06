@@ -10,6 +10,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
   const email = settings.contact_email || "info@takween.com";
   const address = settings.contact_address || "";
   const tagline = settings[`brand_tagline_${locale}`] || "";
+  const brandName = settings.brand_name || "Takween";
   const socials: Array<{ key: string; icon: typeof Facebook }> = [
     { key: "social_facebook", icon: Facebook },
     { key: "social_instagram", icon: Instagram },
@@ -24,7 +25,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
         {/* Brand + socials */}
         <div>
           <div className="text-2xl font-extrabold text-white">
-            {locale === "ar" ? "تكوين" : "Takween"}
+            {locale === "ar" ? "تكوين" : brandName}
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/60">
             {tagline ||
@@ -73,20 +74,19 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
         {/* Company */}
         <div>
           <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/90">
-            {locale === "ar" ? "الشركة" : "Company"}
+            {t("company")}
           </h4>
           <ul className="space-y-2.5 text-sm text-white/60">
             <li><Link href="/about-us" className="transition-colors hover:text-white">{t("about")}</Link></li>
-            <li><Link href="/resources" className="transition-colors hover:text-white">{locale === "ar" ? "الموارد" : "Resources"}</Link></li>
+            <li><Link href="/resources" className="transition-colors hover:text-white">{t("resources")}</Link></li>
             <li><Link href="/contact-us" className="transition-colors hover:text-white">{t("contact")}</Link></li>
-            <li><Link href="/contact-us#careers" className="transition-colors hover:text-white">{locale === "ar" ? "الوظائف" : "Careers"}</Link></li>
           </ul>
         </div>
 
         {/* Contact */}
         <div>
           <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-white/90">
-            {locale === "ar" ? "اتصل بنا" : "Contact Us"}
+            {t("contact")}
           </h4>
           <ul className="space-y-3 text-sm text-white/60">
             <li className="flex items-start gap-2">
@@ -111,7 +111,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-white/40 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {locale === "ar" ? "تكوين" : "Takween"} — {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
+            © {new Date().getFullYear()} {locale === "ar" ? "تكوين" : brandName} — {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
           </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="transition-colors hover:text-white/70">{locale === "ar" ? "الخصوصية" : "Privacy Policy"}</Link>

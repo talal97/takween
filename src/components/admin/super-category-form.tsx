@@ -20,6 +20,7 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
     featured: initial?.featured ?? false,
   });
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -28,19 +29,28 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const payload = { ...form, sort: Number(form.sort) };
-    if (initial?.id) {
-      await updateSuperCategory(initial.id, payload);
-    } else {
-      await createSuperCategory(payload);
+    setError("");
+    try {
+      const payload = { ...form, sort: Number(form.sort) };
+      if (initial?.id) {
+        await updateSuperCategory(initial.id, payload);
+      } else {
+        await createSuperCategory(payload);
+      }
+      router.refresh();
+      if (!initial?.id) setForm({ slug: "", nameEn: "", nameAr: "", image: "", sort: "0", featured: false });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setBusy(false);
     }
-    setBusy(false);
-    router.refresh();
-    if (!initial?.id) setForm({ slug: "", nameEn: "", nameAr: "", image: "", sort: "0", featured: false });
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Slug" value={form.slug} onChange={(v) => set("slug", v)} required />
         <Field label="Name (EN)" value={form.nameEn} onChange={(v) => set("nameEn", v)} required />

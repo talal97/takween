@@ -5,6 +5,16 @@ import { localeText } from "@/lib/data";
 import { formatDateRange } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Globe2, Search } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "البحث عن دورة" : "Course Finder";
+  const description = locale === "ar" ? "ابحث عن دورة بالكلمة المفتاحية أو الكود أو العنوان" : "Search courses by keyword, code or title";
+  return buildPageMetadata({ title, description, locale, path: "/course-finder" });
+}
 
 export default async function CourseFinderPage({
   params,
@@ -44,6 +54,7 @@ export default async function CourseFinderPage({
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">{t("courseFinder")}</h1>

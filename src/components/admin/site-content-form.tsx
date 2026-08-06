@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { UploadInput } from "@/components/admin/upload-input";
 
 type Field = {
   key: string;
@@ -14,6 +15,7 @@ type Field = {
   bilingual?: boolean;
   long?: boolean;
   rows?: number;
+  type?: "text" | "upload";
 };
 
 type Group = { title: string; hint: string; fields: Field[] };
@@ -25,9 +27,29 @@ const GROUPS: Group[] = [
     fields: [
       { key: "hero_title", label: "Hero headline", bilingual: true },
       { key: "hero_subtitle", label: "Hero subtitle", bilingual: true, long: true },
+      { key: "hero_image", label: "Hero background image", type: "upload" },
+      { key: "hero_badge", label: "Hero badge text (e.g. Globally Accredited Training)", bilingual: true },
+      { key: "stat_courses", label: "Stats label — Courses", bilingual: true },
+      { key: "stat_venues", label: "Stats label — Venues", bilingual: true },
+      { key: "stat_subjects", label: "Stats label — Subjects", bilingual: true },
       { key: "about_text", label: "About / why us paragraph", bilingual: true, long: true },
+      { key: "badge_accredited", label: "About badge — Accredited", bilingual: true },
+      { key: "badge_trainers", label: "About badge — Trainers", bilingual: true },
+      { key: "badge_programmes", label: "About badge — Programmes", bilingual: true },
       { key: "cta_title", label: "Bottom CTA title", bilingual: true },
       { key: "cta_subtitle", label: "Bottom CTA subtitle", bilingual: true },
+    ],
+  },
+  {
+    title: "Training Formats",
+    hint: "Three training format cards on the homepage.",
+    fields: [
+      { key: "format_classroom_title", label: "Classroom — Title", bilingual: true },
+      { key: "format_classroom_desc", label: "Classroom — Description", bilingual: true, long: true },
+      { key: "format_online_title", label: "Online — Title", bilingual: true },
+      { key: "format_online_desc", label: "Online — Description", bilingual: true, long: true },
+      { key: "format_inhouse_title", label: "In-House — Title", bilingual: true },
+      { key: "format_inhouse_desc", label: "In-House — Description", bilingual: true, long: true },
     ],
   },
   {
@@ -77,6 +99,28 @@ const GROUPS: Group[] = [
       { key: "page_terms", label: "Terms of Service — Full content", bilingual: true, long: true, rows: 10 },
     ],
   },
+  {
+    title: "Contact Us Page",
+    hint: "Configure the Contact Us page title and subtitle.",
+    fields: [
+      { key: "contact_title", label: "Contact Us — Page title", bilingual: true },
+      { key: "contact_subtitle", label: "Contact Us — Subtitle", bilingual: true, long: true },
+    ],
+  },
+  {
+    title: "Other Page Headers",
+    hint: "Configure titles and subtitles for listing pages.",
+    fields: [
+      { key: "page_countries_title", label: "Countries — Page title", bilingual: true },
+      { key: "page_countries_subtitle", label: "Countries — Subtitle", bilingual: true },
+      { key: "page_certificates_title", label: "Certificates — Page title", bilingual: true },
+      { key: "page_certificates_subtitle", label: "Certificates — Subtitle", bilingual: true },
+      { key: "page_resources_title", label: "Resources — Page title", bilingual: true },
+      { key: "page_resources_subtitle", label: "Resources — Subtitle", bilingual: true },
+      { key: "page_subjects_title", label: "Training Subjects — Page title", bilingual: true },
+      { key: "page_subjects_subtitle", label: "Training Subjects — Subtitle", bilingual: true, long: true },
+    ],
+  },
 ];
 
 export function SiteContentForm({ initial }: { initial: Record<string, string> }) {
@@ -96,6 +140,7 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
     return base;
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   return (
     <form
@@ -104,44 +149,72 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
         e.preventDefault();
         void (async () => {
           setSaving(true);
-          await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
-          setSaving(false);
-          router.refresh();
+          setError("");
+          try {
+            await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
+            router.refresh();
+          } catch (err) {
+            setError(err instanceof Error ? err.message : "An error occurred");
+          } finally {
+            setSaving(false);
+          }
         })();
       }}
     >
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
       {GROUPS.map((g) => (
         <div key={g.title}>
           <h3 className="text-sm font-semibold text-navy">{g.title}</h3>
           <p className="mb-3 mt-0.5 text-xs text-muted-foreground">{g.hint}</p>
           <div className="grid gap-4 sm:grid-cols-2">
-            {g.fields.map((f) =>
-              f.bilingual ? (
-                <div key={f.key} className="grid gap-2 sm:col-span-2 sm:grid-cols-2">
-                  <div>
-                    <Label>{f.label} — English</Label>
-                    {f.long ? (
-                      <Textarea value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={f.rows || 3} />
-                    ) : (
-                      <Input value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} />
-                    )}
+            {g.fields.map((f) => {
+              if (f.type === "upload") {
+                return (
+                  <div key={f.key} className="sm:col-span-2">
+                    <Label>{f.label}</Label>
+                    <div className="space-y-1.5">
+                      <UploadInput value={form[f.key] ?? ""} onChange={(v) => setForm((x) => ({ ...x, [f.key]: v }))} kind="image" label={f.label} />
+                      <input
+                        value={form[f.key] ?? ""}
+                        onChange={(e) => setForm((x) => ({ ...x, [f.key]: e.target.value }))}
+                        placeholder="…or paste a URL"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label>{f.label} — عربي</Label>
-                    {f.long ? (
-                      <Textarea value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={f.rows || 3} />
-                    ) : (
-                      <Input value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} />
-                    )}
+                );
+              }
+              if (f.bilingual) {
+                return (
+                  <div key={f.key} className="grid gap-2 sm:col-span-2 sm:grid-cols-2">
+                    <div>
+                      <Label>{f.label} — English</Label>
+                      {f.long ? (
+                        <Textarea value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={f.rows || 3} />
+                      ) : (
+                        <Input value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} />
+                      )}
+                    </div>
+                    <div>
+                      <Label>{f.label} — عربي</Label>
+                      {f.long ? (
+                        <Textarea value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={f.rows || 3} />
+                      ) : (
+                        <Input value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} />
+                      )}
+                    </div>
                   </div>
-                </div>
-              ) : (
+                );
+              }
+              return (
                 <div key={f.key}>
                   <Label>{f.label}</Label>
                   <Input value={form[f.key]} onChange={(e) => setForm((x) => ({ ...x, [f.key]: e.target.value }))} />
                 </div>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
       ))}

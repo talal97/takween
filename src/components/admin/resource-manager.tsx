@@ -53,6 +53,7 @@ export function ResourceManager({
   const [form, setForm] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState<string | null>(null);
+  const [error, setError] = useState("");
 
   function reset() {
     setEditingId(null);
@@ -145,14 +146,23 @@ export function ResourceManager({
               e.preventDefault();
               void (async () => {
                 setBusy(true);
-                if (editingId) await onUpdate(editingId, payload);
-                else await onCreate(payload);
-                setBusy(false);
-                reset();
-                router.refresh();
+                setError("");
+                try {
+                  if (editingId) await onUpdate(editingId, payload);
+                  else await onCreate(payload);
+                  reset();
+                  router.refresh();
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "An error occurred");
+                } finally {
+                  setBusy(false);
+                }
               })();
             }}
           >
+            {error && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+            )}
             {fields.map((f) => (
               <FieldInput key={f.key} field={f} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
             ))}

@@ -1,5 +1,4 @@
 import { Link } from "@/i18n/navigation";
-import PlainLink from "next/link";
 import { getTranslations } from "next-intl/server";
 import { getSettingsCached } from "@/lib/settings";
 import { MobileNav } from "@/components/site/mobile-nav";
@@ -11,6 +10,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
   const settings = await getSettingsCached();
   const phone = settings.contact_phone || "+971 (04) 425 0700";
   const email = settings.contact_email || "info@takween.com";
+  const brandName = settings.brand_name || "Takween";
 
   return (
     <header className="absolute inset-x-0 top-0 z-50">
@@ -28,8 +28,6 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
             </a>
           </div>
           <div className="flex items-center gap-3">
-            <PlainLink href="/admin" className="hover:text-white transition-colors">Admin</PlainLink>
-            <span className="text-white/30">|</span>
             {locale === "ar" ? (
               <Link href="/" locale="en" className="font-semibold text-gold hover:underline">English</Link>
             ) : (
@@ -42,7 +40,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
       {/* Main navigation — transparent, on hero */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
         <Link href="/" className="py-5 text-2xl font-extrabold tracking-tight text-white">
-          {locale === "ar" ? "تكوين" : "Takween"}
+          {locale === "ar" ? "تكوين" : brandName}
         </Link>
 
         <nav className="hidden items-center lg:flex">
@@ -92,7 +90,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
         </nav>
 
         <div className="lg:hidden">
-          <MobileNav />
+          <MobileNav brandName={brandName} />
         </div>
       </div>
     </header>

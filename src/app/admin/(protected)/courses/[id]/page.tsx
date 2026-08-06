@@ -51,6 +51,8 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
     targetAudienceAr: course.targetAudienceAr ?? "",
     certificateNoteEn: course.certificateNoteEn ?? "",
     certificateNoteAr: course.certificateNoteAr ?? "",
+    seoTitleEn: course.seoTitleEn ?? "",
+    seoTitleAr: course.seoTitleAr ?? "",
   };
 
   const existingDays = (course.dayOutlineEn as Array<{ day: number; title: string; topics: string[] }> | null) ?? undefined;

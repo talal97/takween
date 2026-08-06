@@ -4,6 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { CalendarDays, Globe2 } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "الدورات الجديدة" : "New Training Courses";
+  const description = locale === "ar" ? "اكتشف أحدث الدورات التدريبية المتاحة" : "Discover our latest training courses available worldwide";
+  return buildPageMetadata({ title, description, locale, path: "/new-training-courses" });
+}
 
 export default async function NewTrainingCoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -19,6 +29,7 @@ export default async function NewTrainingCoursesPage({ params }: { params: Promi
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-16 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">{l === "ar" ? "الدورات الجديدة" : "New Training Courses"}</h1>

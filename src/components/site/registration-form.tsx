@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { isoToFlag } from "@/lib/utils";
 
 type Schedule = { id: string; venueId: string; venueName: string; startDate: string; endDate: string; fee: number; currency: string; format: string };
@@ -43,6 +44,7 @@ export function RegistrationForm({
     message: "",
   });
   const [done, setDone] = useState(false);
+  const [ref, setRef] = useState("");
   const [error, setError] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [captchaTs, setCaptchaTs] = useState(0);
@@ -111,6 +113,7 @@ export function RegistrationForm({
       }
       return;
     }
+    setRef(res.ref || "");
     setDone(true);
   }
 
@@ -120,6 +123,14 @@ export function RegistrationForm({
         <div className="mb-2 text-2xl">✓</div>
         <h3 className="font-semibold text-navy">{t("successTitle")}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{t("successMessage")}</p>
+        {ref && (
+          <p className="mt-3 text-sm text-muted-foreground">
+            {t("successRef")}: <span className="font-mono font-semibold text-navy">{ref}</span>
+          </p>
+        )}
+        <Link href="/training-courses" className="mt-4 inline-block text-sm font-medium text-brand underline hover:text-brand-dark">
+          {t("successBrowse")}
+        </Link>
       </div>
     );
   }

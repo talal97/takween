@@ -22,5 +22,6 @@ vi.mock("next/navigation", () => ({
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
     get: vi.fn(() => undefined),
+    set: vi.fn(),
   })),
 }));

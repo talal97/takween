@@ -54,6 +54,8 @@ const courseSchema = z.object({
   targetAudienceAr: z.string().optional(),
   certificateNoteEn: z.string().optional(),
   certificateNoteAr: z.string().optional(),
+  seoTitleEn: z.string().optional(),
+  seoTitleAr: z.string().optional(),
 });
 
 export async function createCourse(
@@ -94,6 +96,8 @@ export async function createCourse(
       targetAudienceAr: input.targetAudienceAr,
       certificateNoteEn: input.certificateNoteEn,
       certificateNoteAr: input.certificateNoteAr,
+      seoTitleEn: input.seoTitleEn,
+      seoTitleAr: input.seoTitleAr,
       dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
       certificates:
         certificateIds.length > 0 ? { connect: certificateIds.map((id) => ({ id })) } : undefined,

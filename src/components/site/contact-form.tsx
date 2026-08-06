@@ -11,6 +11,7 @@ export function ContactForm({ label }: { label: string }) {
   const locale = useLocale();
   const [form, setForm] = useState({ fullName: "", email: "", phone: "", message: "" });
   const [done, setDone] = useState(false);
+  const [ref, setRef] = useState("");
   const [error, setError] = useState("");
   const [captcha, setCaptcha] = useState("");
   const [captchaTs, setCaptchaTs] = useState(0);
@@ -38,8 +39,10 @@ export function ContactForm({ label }: { label: string }) {
       locale,
       captcha,
     });
-    if (res?.ok) setDone(true);
-    else if (res?.error === "captcha") {
+    if (res?.ok) {
+      setRef(res.ref || "");
+      setDone(true);
+    } else if (res?.error === "captcha") {
       setError(ar ? "الرمز غير صحيح، يرجى المحاولة مرة أخرى" : "Incorrect code, please try again");
       setCaptcha("");
       setCaptchaTs(Date.now());
@@ -51,6 +54,17 @@ export function ContactForm({ label }: { label: string }) {
       <div className="text-center">
         <div className="mb-2 text-2xl">✓</div>
         <p className="text-sm text-muted-foreground">{locale === "ar" ? "شكراً لك. سنتواصل معك قريباً." : "Thank you. We will contact you shortly."}</p>
+        {ref && (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {locale === "ar" ? "رقم المرجع" : "Reference"}: <span className="font-mono font-semibold text-navy">{ref}</span>
+          </p>
+        )}
+        <button
+          onClick={() => { setDone(false); setRef(""); setForm({ fullName: "", email: "", phone: "", message: "" }); }}
+          className="mt-4 text-sm font-medium text-brand underline hover:text-brand-dark"
+        >
+          {locale === "ar" ? "إرسال رسالة أخرى" : "Send another message"}
+        </button>
       </div>
     );
   }

@@ -59,7 +59,7 @@ export async function submitRegistration(data: z.infer<typeof registrationSchema
   if (recent > 3) return { ok: false, error: "too-many" };
 
   const { captcha: _captcha, website: _website, ...payload } = input;
-  await prisma.registration.create({ data: { ...payload, email: input.email.toLowerCase() } });
+  const created = await prisma.registration.create({ data: { ...payload, email: input.email.toLowerCase() } });
   await import("next/cache").then(({ revalidatePath }) => revalidatePath("/admin/submissions"));
 
   const { sendRegistrationEmail, sendAdminAlert } = await import("@/lib/mail");
@@ -90,5 +90,5 @@ export async function submitRegistration(data: z.infer<typeof registrationSchema
     jobTitle: input.designation ?? "",
   }).catch(() => {});
 
-  return { ok: true };
+  return { ok: true, ref: created.id.slice(0, 8) };
 }

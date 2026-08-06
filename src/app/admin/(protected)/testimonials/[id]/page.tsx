@@ -6,7 +6,11 @@ import { TestimonialForm } from "@/components/admin/testimonial-form";
 
 export default async function EditTestimonialPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const t = await prisma.testimonial.findUnique({ where: { id } });
+  const [t, courses, categories] = await Promise.all([
+    prisma.testimonial.findUnique({ where: { id } }),
+    prisma.course.findMany({ select: { id: true, titleEn: true }, orderBy: { titleEn: "asc" } }),
+    prisma.category.findMany({ select: { id: true, nameEn: true }, orderBy: { nameEn: "asc" } }),
+  ]);
   if (!t) notFound();
 
   return (
@@ -15,6 +19,8 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
       <Card>
         <CardContent className="pt-6">
           <TestimonialForm
+            courses={courses}
+            categories={categories}
             initial={{
               id: t.id,
               textEn: t.textEn,
@@ -23,6 +29,8 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
               company: t.company ?? "",
               featured: t.featured,
               sort: t.sort,
+              courseId: t.courseId ?? "",
+              categoryId: t.categoryId ?? "",
             }}
           />
         </CardContent>

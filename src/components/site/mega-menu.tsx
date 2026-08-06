@@ -1,9 +1,11 @@
 import { Link } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { ChevronDown } from "lucide-react";
 
 export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
+  const t = await getTranslations("navigation");
   const superCategories = await prisma.superCategory.findMany({
     orderBy: { sort: "asc" },
     include: {
@@ -21,7 +23,7 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
         aria-expanded="false"
         className="flex items-center gap-1 py-4 text-sm font-medium text-white transition-colors hover:text-gold"
       >
-        <span>{locale === "ar" ? "الدورات" : "Courses"}</span>
+        <span>{t("courses")}</span>
         <ChevronDown className="h-3.5 w-3.5" />
       </button>
 
@@ -67,7 +69,7 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
                   href={`/training-subjects/${sc.slug}`}
                   className="ms-7 inline-block text-xs font-semibold text-brand hover:underline"
                 >
-                  {locale === "ar" ? "عرض الكل ←" : "View all →"}
+                  {t("viewAll")} →
                 </Link>
               </div>
             ))}
@@ -77,7 +79,7 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
               href="/training-subjects"
               className="text-sm font-semibold text-brand hover:underline"
             >
-              {locale === "ar" ? "عرض كل التخصصات ←" : "View all Categories →"}
+              {t("viewAllCategories")} →
             </Link>
           </div>
         </div>

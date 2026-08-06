@@ -4,6 +4,16 @@ import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { CalendarDays, Globe2 } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "التقويم التدريبي" : "Training Calendar";
+  const description = locale === "ar" ? "جدول الدورات التدريبية القادمة" : "Upcoming training schedules across all venues";
+  return buildPageMetadata({ title, description, locale, path: "/training-calendar" });
+}
 
 export default async function TrainingCalendarPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -27,6 +37,7 @@ export default async function TrainingCalendarPage({ params }: { params: Promise
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">{l === "ar" ? "التقويم التدريبي" : "Training Calendar"}</h1>

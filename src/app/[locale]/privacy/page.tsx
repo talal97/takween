@@ -2,6 +2,18 @@ import { setRequestLocale } from "next-intl/server";
 import { getSettings } from "@/lib/settings";
 import { PageHeader } from "@/components/site/page-header";
 import { parsePageContent } from "@/lib/utils";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const settings = await getSettings();
+  const title = settings[`page_privacy_title_${l}`] || (l === "ar" ? "سياسة الخصوصية" : "Privacy Policy");
+  const description = settings[`page_privacy_subtitle_${l}`] || (l === "ar" ? "كيف نتعامل مع بياناتك" : "How we handle your data");
+  return buildPageMetadata({ title, description, locale, path: "/privacy" });
+}
 
 const FALLBACK_EN = `## Data Collection and Use
 
@@ -40,6 +52,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
 
   return (
     <div>
+      <Breadcrumb />
       <PageHeader title={title} subtitle={subtitle} />
       <div className="mx-auto max-w-3xl px-4 py-10">
         {blocks.map((block, i) =>

@@ -35,12 +35,30 @@ export function ThemeForm({ initial }: { initial: Record<string, string> }) {
     return base;
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
   function setValue(k: string, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
       <div>
         <h4 className="mb-2 text-sm font-semibold text-muted-foreground">Global (applies to whole site)</h4>
         <div className="grid gap-2.5">
@@ -65,14 +83,9 @@ export function ThemeForm({ initial }: { initial: Record<string, string> }) {
         <Button
           type="button"
           disabled={saving}
-          onClick={async () => {
-            setSaving(true);
-            await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
-            setSaving(false);
-            router.refresh();
-          }}
+          onClick={handleSave}
         >
-          Save Colors
+          {saving ? "Saving…" : "Save Colors"}
         </Button>
         <Button
           type="button"

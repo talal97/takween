@@ -2,6 +2,18 @@ import { setRequestLocale } from "next-intl/server";
 import { getSettings } from "@/lib/settings";
 import { PageHeader } from "@/components/site/page-header";
 import { parsePageContent } from "@/lib/utils";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const settings = await getSettings();
+  const title = settings[`page_terms_title_${l}`] || (l === "ar" ? "شروط الاستخدام" : "Terms of Service");
+  const description = settings[`page_terms_subtitle_${l}`] || (l === "ar" ? "شروط استخدام موقع تكوين" : "Terms for using the Takween website");
+  return buildPageMetadata({ title, description, locale, path: "/terms" });
+}
 
 const FALLBACK_EN = `## Website Content
 
@@ -40,6 +52,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
 
   return (
     <div>
+      <Breadcrumb />
       <PageHeader title={title} subtitle={subtitle} />
       <div className="mx-auto max-w-3xl px-4 py-10">
         {blocks.map((block, i) =>

@@ -19,7 +19,8 @@
                        "english":  "English",
                        "selectYourCategory":  "Select your Category",
                        "selectYourVenue":  "Select your Venue",
-                       "countries":  "Countries"
+                       "countries":  "Countries",
+                       "company":  "Company"
                    },
     "common":  {
                    "registerNow":  "Register Now",
@@ -105,8 +106,41 @@
                  "captchaPlaceholder":  "Type the code above",
                  "captchaInvalid":  "Incorrect code, please try again.",
                  "tooMany":  "Too many attempts. Please try again later.",
-                 "refresh":  "Refresh"
-             },
+                  "refresh":  "Refresh",
+                  "successRef":  "Your reference number",
+                  "successBrowse":  "Browse more courses",
+                  "successNewMessage":  "Send another message"
+              },
+    "breadcrumbs":  {
+                        "home":  "Home",
+                        "trainingSectors":  "Training Sectors",
+                        "courses":  "Courses",
+                        "course":  "Course",
+                        "trainingVenues":  "Training Venues",
+                        "trainingCalendar":  "Training Calendar",
+                        "certificates":  "Certification Programs",
+                        "certifiedCourses":  "Certified Courses",
+                        "countries":  "Countries",
+                        "resources":  "Resources",
+                        "about":  "About Us",
+                        "contact":  "Contact Us",
+                        "privacy":  "Privacy Policy",
+                        "terms":  "Terms of Service",
+                        "newCourses":  "New Courses",
+                        "courseFinder":  "Course Finder"
+                    },
+    "share":  {
+                  "share":  "Share",
+                  "copyLink":  "Copy Link",
+                  "copied":  "Copied!",
+                  "emailCourse":  "Email this course",
+                  "addToCalendar":  "Add to Calendar"
+              },
+    "cookieConsent":  {
+                          "message":  "We use essential cookies for site functionality. No tracking cookies are used.",
+                          "accept":  "Accept",
+                          "learnMore":  "Learn more"
+                      },
     "errors":  {
                    "error":  {
                                  "title":  "Something went wrong",

@@ -53,6 +53,8 @@ type CourseDraft = {
   targetAudienceAr: string;
   certificateNoteEn: string;
   certificateNoteAr: string;
+  seoTitleEn: string;
+  seoTitleAr: string;
 };
 
 const emptyDraft: CourseDraft = {
@@ -83,6 +85,8 @@ const emptyDraft: CourseDraft = {
   targetAudienceAr: "",
   certificateNoteEn: "",
   certificateNoteAr: "",
+  seoTitleEn: "",
+  seoTitleAr: "",
 };
 
 interface CourseFormProps {
@@ -237,6 +241,16 @@ export function CourseForm(props: CourseFormProps) {
             <Area label="Personal Impact (AR)" value={draft.personalImpactAr} onChange={(v) => set("personalImpactAr", v)} rtl />
             <Area label="Target Audience (AR)" value={draft.targetAudienceAr} onChange={(v) => set("targetAudienceAr", v)} rtl />
           </>
+        )}
+      </section>
+
+      <section className="space-y-4 rounded border p-4">
+        <h3 className="font-semibold">SEO</h3>
+        {(draft.locale === "en" || draft.locale === "both") && (
+          <Field label="SEO Title (EN)" value={draft.seoTitleEn} onChange={(v) => set("seoTitleEn", v)} placeholder="Override page title for search engines" />
+        )}
+        {(draft.locale === "ar" || draft.locale === "both") && (
+          <Field label="SEO Title (AR)" value={draft.seoTitleAr} onChange={(v) => set("seoTitleAr", v)} rtl placeholder="Override Arabic page title for search engines" />
         )}
       </section>
 

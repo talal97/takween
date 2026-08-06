@@ -6,6 +6,20 @@ import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const venue = await prisma.venue.findUnique({ where: { slug } });
+  const title = venue?.nameEn || "Training Venue";
+  return buildPageMetadata({ title, locale, path: `/training/${slug}` });
+}
 
 export default async function VenuePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
@@ -25,6 +39,7 @@ export default async function VenuePage({ params }: { params: Promise<{ locale: 
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">{venue.nameEn}</h1>

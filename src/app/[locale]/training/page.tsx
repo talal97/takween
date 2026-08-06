@@ -3,6 +3,16 @@ import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { PageHeader } from "@/components/site/page-header";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const title = locale === "ar" ? "أماكن التدريب" : "Training Venues";
+  const description = locale === "ar" ? "اختر مدينتك وابدأ رحلتك التدريبية اليوم" : "Choose your venue and start your training journey today";
+  return buildPageMetadata({ title, description, locale, path: "/training" });
+}
 
 export default async function TrainingVenuesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -15,6 +25,7 @@ export default async function TrainingVenuesPage({ params }: { params: Promise<{
 
   return (
     <div>
+      <Breadcrumb />
       <PageHeader
         title={l === "ar" ? "أماكن التدريب" : "Training Venues"}
         subtitle={l === "ar" ? "اختر مدينتك وابدأ رحلتك التدريبية اليوم" : "Choose your venue and start your training journey today"}

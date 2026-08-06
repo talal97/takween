@@ -53,6 +53,20 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const allVenues = regionsList.flatMap((r) => r.venues);
   const totalVenues = allVenues.length;
 
+  const heroBadge = s("hero_badge", l === "ar" ? "تدريب عالمي معتمد" : "Globally Accredited Training");
+  const statCoursesLabel = s("stat_courses", l === "ar" ? "دورة تدريبية" : "Training Courses");
+  const statVenuesLabel = s("stat_venues", l === "ar" ? "مدينة" : "Global Venues");
+  const statSubjectsLabel = s("stat_subjects", l === "ar" ? "تخصص" : "Subject Areas");
+  const badgeAccredited = s("badge_accredited", l === "ar" ? "معتمدون عالمياً" : "Globally Accredited");
+  const badgeTrainers = s("badge_trainers", l === "ar" ? "مدربون خبراء" : "Expert Trainers");
+  const badgeProgrammes = s("badge_programmes", l === "ar" ? "برامج عملية" : "Practical Programmes");
+  const formatClassroomTitle = s("format_classroom_title", l === "ar" ? "قاعات تدريب" : "Classroom Training");
+  const formatClassroomDesc = s("format_classroom_desc", l === "ar" ? "تعلم وجهاً لوجه في مدننا العالمية." : "Learn in-person at our world-class venues in Dubai, London, and beyond.");
+  const formatOnlineTitle = s("format_online_title", l === "ar" ? "تدريب أونلاين" : "Online Live Sessions");
+  const formatOnlineDesc = s("format_online_desc", l === "ar" ? "جلسات مباشرة مع خبرائنا." : "Join live virtual classrooms with expert instructors from anywhere.");
+  const formatInhouseTitle = s("format_inhouse_title", l === "ar" ? "تدريب داخلي" : "In-House Training");
+  const formatInhouseDesc = s("format_inhouse_desc", l === "ar" ? "برامج مخصصة لفريقك في موقعك." : "Tailored programmes delivered at your premises for your team.");
+
   return (
     <div className="bg-background">
       {/* ============ HERO ============ */}
@@ -71,7 +85,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <div>
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-gold">
                 <Award className="h-4 w-4" />
-                {l === "ar" ? "تدريب عالمي معتمد" : "Globally Accredited Training"}
+                {heroBadge}
               </span>
               <h1 className="mt-6 text-4xl font-extrabold leading-tight sm:text-5xl lg:text-6xl">
                 {s("hero_title", t("heroTitle"))}
@@ -96,9 +110,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </div>
               <div className="mt-12 grid max-w-md grid-cols-3 gap-6">
                 {[
-                  { n: totalCourses, label: l === "ar" ? "دورة تدريبية" : "Training Courses" },
-                  { n: totalVenues, label: l === "ar" ? "مدينة" : "Global Venues" },
-                  { n: categories.length, label: l === "ar" ? "تخصص" : "Subject Areas" },
+                  { n: totalCourses, label: statCoursesLabel },
+                  { n: totalVenues, label: statVenuesLabel },
+                  { n: categories.length, label: statSubjectsLabel },
                 ].map((item) => (
                   <div key={item.label}>
                     <div className="text-3xl font-extrabold text-gold lg:text-4xl">+{item.n}</div>
@@ -221,9 +235,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
-            { icon: Building2, title: l === "ar" ? "قاعات تدريب" : "Classroom Training", desc: l === "ar" ? "تعلم وجهاً لوجه في مدننا العالمية." : "Learn in-person at our world-class venues in Dubai, London, and beyond." },
-            { icon: MonitorPlay, title: l === "ar" ? "تدريب أونلاين" : "Online Live Sessions", desc: l === "ar" ? "جلسات مباشرة مع خبرائنا." : "Join live virtual classrooms with expert instructors from anywhere." },
-            { icon: UsersIcon, title: l === "ar" ? "تدريب داخلي" : "In-House Training", desc: l === "ar" ? "برامج مخصصة لفريقك في موقعك." : "Tailored programmes delivered at your premises for your team." },
+            { icon: Building2, title: formatClassroomTitle, desc: formatClassroomDesc },
+            { icon: MonitorPlay, title: formatOnlineTitle, desc: formatOnlineDesc },
+            { icon: UsersIcon, title: formatInhouseTitle, desc: formatInhouseDesc },
           ].map((f) => (
             <div key={f.title} className="rounded-xl border bg-white p-8 text-center transition-shadow hover:shadow-lg">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-light text-brand">
@@ -320,9 +334,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {[
-                { icon: ShieldCheck, label: l === "ar" ? "معتمدون عالمياً" : "Globally Accredited" },
-                { icon: Users, label: l === "ar" ? "مدربون خبراء" : "Expert Trainers" },
-                { icon: Award, label: l === "ar" ? "برامج عملية" : "Practical Programmes" },
+                { icon: ShieldCheck, label: badgeAccredited },
+                { icon: Users, label: badgeTrainers },
+                { icon: Award, label: badgeProgrammes },
               ].map((f) => (
                 <span key={f.label} className="inline-flex items-center gap-2 rounded-full bg-brand-light px-4 py-2 text-sm font-medium text-navy">
                   <CheckCircle2 size={16} className="text-brand" />

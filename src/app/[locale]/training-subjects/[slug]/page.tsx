@@ -5,6 +5,29 @@ import { localeText } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { CalendarDays, Globe2 } from "lucide-react";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { buildPageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const l = locale === "ar" ? "ar" : "en";
+  const superCat = await prisma.superCategory.findUnique({ where: { slug } });
+  if (superCat) {
+    const title = localeText({ en: superCat.nameEn, ar: superCat.nameAr }, l);
+    return buildPageMetadata({ title, locale, path: `/training-subjects/${slug}` });
+  }
+  const category = await prisma.category.findUnique({ where: { slug } });
+  if (category) {
+    const title = localeText({ en: category.nameEn, ar: category.nameAr }, l);
+    return buildPageMetadata({ title, locale, path: `/training-subjects/${slug}` });
+  }
+  return buildPageMetadata({ title: "Training Subject", locale, path: `/training-subjects/${slug}` });
+}
 
 export default async function TrainingSubjectPage({
   params,
@@ -30,6 +53,7 @@ export default async function TrainingSubjectPage({
 
     return (
       <div>
+        <Breadcrumb />
         <section className="bg-navy pb-10 pt-28 text-white">
           <div className="mx-auto max-w-7xl px-4">
             <h1 className="text-3xl font-bold sm:text-4xl">{localeText({ en: superCat.nameEn, ar: superCat.nameAr }, l)}</h1>
@@ -75,6 +99,7 @@ export default async function TrainingSubjectPage({
 
   return (
     <div>
+      <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <h1 className="text-3xl font-bold sm:text-4xl">{localeText({ en: category.nameEn, ar: category.nameAr }, l)}</h1>

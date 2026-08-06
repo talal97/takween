@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
  */
 export async function clearStaleSessionCookie() {
   const jar = await cookies();
+  // Clear both regular and secure cookie names
   jar.set("authjs.session-token", "", { path: "/", maxAge: 0 });
-  jar.set("__Secure-authjs.session-token", "", { path: "/", maxAge: 0 });
+  jar.set("__Secure-authjs.session-token", "", { path: "/", maxAge: 0, secure: true, sameSite: "lax" });
 }

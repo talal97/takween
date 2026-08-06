@@ -5,6 +5,8 @@ import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { WhatsAppButton } from "@/components/site/whatsapp-button";
+import { BackToTop } from "@/components/site/back-to-top";
+import { CookieConsent } from "@/components/site/cookie-consent";
 import { LocaleDir } from "@/components/site/locale-dir";
 import { organizationJsonLd } from "@/lib/seo";
 import { Tracker } from "@/components/analytics/tracker";
@@ -41,8 +43,10 @@ export default async function LocaleLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter locale={locale as "en" | "ar"} />
         </div>
-      </NextIntlClientProvider>
       <WhatsAppButton phone={whatsappPhone} />
+      <BackToTop />
+      <CookieConsent />
+      </NextIntlClientProvider>
     </>
   );
 }

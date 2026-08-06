@@ -102,12 +102,19 @@ const testimonialSchema = z.object({
   featured: z.boolean().default(false),
   sort: z.coerce.number().default(0),
   courseId: z.string().optional(),
+  categoryId: z.string().optional(),
 });
 
 export async function createTestimonial(data: z.infer<typeof testimonialSchema>) {
   await requireAdmin();
   const input = testimonialSchema.parse(data);
-  await prisma.testimonial.create({ data: { ...input, courseId: input.courseId || null } });
+  await prisma.testimonial.create({
+    data: {
+      ...input,
+      courseId: input.courseId || null,
+      categoryId: input.categoryId || null,
+    },
+  });
   revalidatePath("/admin/testimonials");
   revalidateSite();
 }
@@ -117,7 +124,11 @@ export async function updateTestimonial(id: string, data: z.infer<typeof testimo
   const input = testimonialSchema.parse(data);
   await prisma.testimonial.update({
     where: { id },
-    data: { ...input, courseId: input.courseId || null },
+    data: {
+      ...input,
+      courseId: input.courseId || null,
+      categoryId: input.categoryId || null,
+    },
   });
   revalidatePath("/admin/testimonials");
   revalidateSite();
@@ -135,6 +146,8 @@ const articleSchema = z.object({
   bodyEn: z.string().optional(),
   bodyAr: z.string().optional(),
   status: z.string().default("published"),
+  type: z.string().default("article"),
+  image: z.string().optional(),
 });
 
 export async function createArticle(data: z.infer<typeof articleSchema>) {
@@ -302,5 +315,38 @@ export async function deleteDownload(id: string) {
   await requireAdmin();
   await prisma.download.delete({ where: { id } });
   revalidatePath("/admin/downloads");
+  revalidateSite();
+}
+
+// ------------------------------------------------------------------
+// Videos
+// ------------------------------------------------------------------
+const videoSchema = z.object({
+  titleEn: z.string().min(1),
+  titleAr: z.string().optional(),
+  youtubeId: z.string().min(1),
+  sort: z.coerce.number().int().default(0),
+});
+
+export async function createVideo(data: z.infer<typeof videoSchema>) {
+  await requireAdmin();
+  const input = videoSchema.parse(data);
+  await prisma.video.create({ data: input });
+  revalidatePath("/admin/videos");
+  revalidateSite();
+}
+
+export async function updateVideo(id: string, data: z.infer<typeof videoSchema>) {
+  await requireAdmin();
+  const input = videoSchema.parse(data);
+  await prisma.video.update({ where: { id }, data: input });
+  revalidatePath("/admin/videos");
+  revalidateSite();
+}
+
+export async function deleteVideo(id: string) {
+  await requireAdmin();
+  await prisma.video.delete({ where: { id } });
+  revalidatePath("/admin/videos");
   revalidateSite();
 }

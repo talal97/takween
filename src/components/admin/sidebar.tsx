@@ -26,6 +26,7 @@ import {
   LogOut,
   ExternalLink,
   DownloadCloud,
+  Play,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,7 @@ const nav = [
       { href: "/admin/testimonials", label: "Testimonials", icon: Star },
       { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
       { href: "/admin/articles", label: "Articles", icon: FileText },
+      { href: "/admin/videos", label: "Videos", icon: Play },
       { href: "/admin/media", label: "Media", icon: FolderOpen },
       { href: "/admin/downloads", label: "Resources", icon: Download },
     ],

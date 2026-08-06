@@ -12,6 +12,8 @@ import { AccordionBlock } from "@/components/site/faq-accordion";
 import { RegistrationForm } from "@/components/site/registration-form";
 import { Link } from "@/i18n/navigation";
 import { Locale } from "@/i18n/config";
+import { Breadcrumb } from "@/components/site/breadcrumb";
+import { ShareButtons } from "@/components/site/share-buttons";
 
 export async function generateMetadata({
   params,
@@ -129,6 +131,7 @@ export default async function CoursePage({
 
   return (
     <div>
+      <Breadcrumb />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -162,6 +165,13 @@ export default async function CoursePage({
           <p className="mt-2 max-w-3xl text-white/80">
             {localeText({ en: course.subtitleEn, ar: course.subtitleAr }, l)}
           </p>
+          <div className="mt-4">
+            <ShareButtons
+              title={localeText({ en: course.titleEn, ar: course.titleAr }, l)}
+              description={localeText({ en: course.subtitleEn, ar: course.subtitleAr }, l)}
+              path={`/${locale}/training-course/${slug}`}
+            />
+          </div>
         </div>
       </section>
 
@@ -180,7 +190,8 @@ export default async function CoursePage({
                   <tr className="border-b text-left text-muted-foreground">
                     <th className="py-2 pr-4">{tc("date")}</th>
                     <th className="py-2 pr-4">{tc("venue")}</th>
-                    <th className="py-2">{tc("fee")}</th>
+                    <th className="py-2 pr-4">{tc("fee")}</th>
+                    <th className="py-2"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -188,7 +199,16 @@ export default async function CoursePage({
                     <tr key={s.id} className="border-b last:border-0">
                       <td className="py-2 pr-4">{formatDateRange(s.startDate, s.endDate, l)}</td>
                       <td className="py-2 pr-4">{s.venue.nameEn}, {s.venue.country}</td>
-                      <td className="py-2 font-medium">{formatCurrency(Number(s.fee), s.currency)}</td>
+                      <td className="py-2 pr-4 font-medium">{formatCurrency(Number(s.fee), s.currency)}</td>
+                      <td className="py-2">
+                        <a
+                          href={`/api/calendar/${s.id}`}
+                          className="text-xs font-medium text-brand underline hover:text-brand-dark"
+                          data-track="calendar-download"
+                        >
+                          {l === "ar" ? "أضف للتقويم" : "Add to Calendar"}
+                        </a>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

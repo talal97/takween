@@ -25,6 +25,7 @@ import {
   FolderOpen,
   LogOut,
   ExternalLink,
+  DownloadCloud,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,6 +72,7 @@ const nav = [
     items: [
       { href: "/admin/users", label: "Users", icon: Users },
       { href: "/admin/settings", label: "Settings & SMTP", icon: Settings },
+      { href: "/admin/import", label: "Import from Live", icon: DownloadCloud },
     ],
   },
 ];

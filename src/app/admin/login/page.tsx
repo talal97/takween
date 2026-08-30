@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { clearStaleSessionCookie } from "@/lib/auth-helpers";
 import { LoginForm } from "@/components/admin/login-form";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 
 export default async function LoginPage() {
   let session = null;

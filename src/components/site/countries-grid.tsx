@@ -11,16 +11,16 @@ type Country = {
   venueCount: number;
 };
 
-function FlagImage({ iso, name }: { iso: string; name: string }) {
-  const code = iso.toLowerCase();
+function FlagImage({ iso, name, flagUrl }: { iso: string; name: string; flagUrl?: string | null }) {
+  const src = flagUrl || `https://flagcdn.com/w80/${iso.toLowerCase()}.png`;
   return (
     <img
-      src={`https://flagcdn.com/w80/${code}.png`}
+      src={src}
       alt={`${name} flag`}
       className="h-6 w-8 rounded object-cover shadow-sm"
       loading="lazy"
       onError={(e) => {
-        e.currentTarget.style.display = "none";
+        e.currentTarget.src = `https://flagcdn.com/w80/${iso.toLowerCase()}.png`;
       }}
     />
   );
@@ -36,7 +36,7 @@ export function CountriesGrid({ countries, locale, compact = false }: { countrie
             href="/countries"
             className="group flex items-center gap-3 rounded-xl border bg-white px-5 py-3 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-md"
           >
-            <FlagImage iso={c.iso} name={c.nameEn} />
+            <FlagImage iso={c.iso} name={c.nameEn} flagUrl={c.flag} />
             <span className="text-sm font-medium text-navy group-hover:text-brand">{localeText({ en: c.nameEn, ar: c.nameAr }, locale)}</span>
           </Link>
         ))}
@@ -54,7 +54,7 @@ export function CountriesGrid({ countries, locale, compact = false }: { countrie
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-brand opacity-0 transition-opacity group-hover:opacity-100" />
           <div className="flex justify-center">
-            <FlagImage iso={c.iso} name={c.nameEn} />
+            <FlagImage iso={c.iso} name={c.nameEn} flagUrl={c.flag} />
           </div>
           <h3 className="mt-3 text-sm font-semibold text-navy group-hover:text-brand">
             {localeText({ en: c.nameEn, ar: c.nameAr }, locale)}

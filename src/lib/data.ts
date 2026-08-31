@@ -32,16 +32,25 @@ export const getNavigationCached = unstable_cache(getNavigation, ["navigation"],
 export async function getHomePageData(locale: Locale = "en") {
   const localeFilter = locale === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
 
-  const [categories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts, totalCourses] =
+  const [superCategories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts, totalCourses] =
     await Promise.all([
-      prisma.category.findMany({ where: { featured: true, courses: { some: { locale: localeFilter } } }, orderBy: { sort: "asc" }, take: 12 }),
+      prisma.superCategory.findMany({
+        orderBy: { sort: "asc" },
+        include: {
+          categories: {
+            orderBy: { nameEn: "asc" },
+            where: { courses: { some: { locale: localeFilter } } },
+            include: { _count: { select: { courses: { where: { locale: localeFilter } } } } },
+          },
+        },
+      }),
       prisma.region.findMany({ orderBy: { sort: "asc" }, include: { venues: { orderBy: { nameEn: "asc" } } } }),
       prisma.certificate.findMany({ orderBy: { sort: "asc" }, take: 8 }),
       prisma.course.findMany({
-        where: { featured: true, locale: localeFilter },
+        where: { featured: true, locale: localeFilter, schedules: { some: { endDate: { gte: new Date() } } } },
         orderBy: { updatedAt: "desc" },
         take: 6,
-        include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } }, category: true },
+        include: { schedules: { where: { endDate: { gte: new Date() } }, orderBy: { startDate: "asc" }, include: { venue: true } }, category: true },
       }),
       prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 3 }),
       prisma.testimonial.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 3 }),
@@ -50,7 +59,7 @@ export async function getHomePageData(locale: Locale = "en") {
       prisma.course.count({ where: { locale: localeFilter } }),
     ]);
   return {
-    categories,
+    superCategories,
     regionsList,
     certificates,
     featured,

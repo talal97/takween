@@ -73,6 +73,7 @@ const superCategorySchema = z.object({
   nameEn: z.string().min(1),
   nameAr: z.string().optional(),
   image: z.string().optional(),
+  icon: z.string().optional(),
   sort: z.coerce.number().default(0),
   featured: z.boolean().default(false),
 });

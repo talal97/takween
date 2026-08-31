@@ -24,7 +24,7 @@ export default async function NewTrainingCoursesPage({ params }: { params: Promi
     where: { locale: localeFilter },
     orderBy: { createdAt: "desc" },
     take: 24,
-    include: { schedules: { orderBy: { startDate: "asc" }, include: { venue: true } } },
+    include: { schedules: { where: { endDate: { gte: new Date() } }, orderBy: { startDate: "asc" }, include: { venue: true } } },
   });
 
   return (

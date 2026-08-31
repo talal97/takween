@@ -32,7 +32,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const heroImage = settings.hero_image || "";
 
   const {
-    categories,
+    superCategories,
     regionsList,
     certificates,
     featured,
@@ -52,6 +52,9 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const allVenues = regionsList.flatMap((r) => r.venues);
   const totalVenues = allVenues.length;
+
+  const flatCategories = superCategories.flatMap((sc) => sc.categories);
+  const totalCategories = flatCategories.length;
 
   const heroBadge = s("hero_badge", l === "ar" ? "تدريب عالمي معتمد" : "Globally Accredited Training");
   const statCoursesLabel = s("stat_courses", l === "ar" ? "دورة تدريبية" : "Training Courses");
@@ -112,7 +115,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {[
                   { n: totalCourses, label: statCoursesLabel },
                   { n: totalVenues, label: statVenuesLabel },
-                  { n: categories.length, label: statSubjectsLabel },
+                  { n: totalCategories, label: statSubjectsLabel },
                 ].map((item) => (
                   <div key={item.label}>
                     <div className="text-3xl font-extrabold text-gold lg:text-4xl">+{item.n}</div>
@@ -127,7 +130,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 {l === "ar" ? "ابحث عن دورتك" : "Find Your Course"}
               </h3>
               <QuickSearch
-                categories={categories.map((c) => ({ key: c.id, slug: c.slug, labelEn: c.nameEn, labelAr: c.nameAr }))}
+                categories={flatCategories.map((c) => ({ key: c.id, slug: c.slug, labelEn: c.nameEn, labelAr: c.nameAr }))}
                 venues={allVenues.map((v) => ({ key: v.id, slug: v.slug, labelEn: v.nameEn }))}
               />
             </div>
@@ -146,32 +149,51 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             {l === "ar" ? "عرض الكل" : "View all"} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.map((c) => {
-            const count = counts[c.id] ?? 0;
-            return (
-              <Link
-                key={c.id}
-                href={`/training-courses/${c.slug}`}
-                className="group relative overflow-hidden rounded-xl border bg-white p-5 transition-all hover:-translate-y-1 hover:border-brand hover:shadow-lg"
-              >
-                <div className="absolute inset-x-0 top-0 h-1 bg-brand opacity-0 transition-opacity group-hover:opacity-100" />
-                {c.icon ? (
-                  <img src={c.icon} alt="" className="h-10 w-10 rounded-lg object-contain" />
+        <div className="mt-10 space-y-8">
+          {superCategories.filter((sc) => sc.categories.length > 0).slice(0, 6).map((sc) => (
+            <div key={sc.id} className="rounded-xl border bg-white p-6 transition-shadow hover:shadow-md">
+              <Link href={`/training-subjects/${sc.slug}`} className="group flex items-center gap-3">
+                {sc.icon ? (
+                  <img src={sc.icon} alt="" className="h-8 w-8 rounded-lg object-contain" />
+                ) : sc.image ? (
+                  <img src={sc.image} alt="" className="h-8 w-8 rounded-lg object-contain" />
                 ) : (
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-brand-light text-brand">
-                    <UsersIcon size={20} />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-light text-brand text-sm font-bold">
+                    {localeText({ en: sc.nameEn, ar: sc.nameAr }, l).charAt(0)}
                   </div>
                 )}
-                <h3 className="mt-4 font-semibold leading-snug text-navy group-hover:text-brand">
-                  {localeText({ en: c.nameEn, ar: c.nameAr }, l)}
+                <h3 className="text-lg font-bold text-navy transition-colors group-hover:text-brand">
+                  {localeText({ en: sc.nameEn, ar: sc.nameAr }, l)}
                 </h3>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {l === "ar" ? `${count} دورة` : `${count} courses`}
-                </p>
+                <ArrowRight className="h-4 w-4 text-brand opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
-            );
-          })}
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {sc.categories.map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/training-courses/${c.slug}`}
+                    className="group flex items-center gap-3 rounded-lg border border-gray-100 p-3 transition-all hover:-translate-y-0.5 hover:border-brand hover:bg-brand-light/30 hover:shadow-sm"
+                  >
+                    {c.icon ? (
+                      <img src={c.icon} alt="" className="h-8 w-8 shrink-0 rounded-md object-contain" />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-light text-brand text-xs font-bold">
+                        {localeText({ en: c.nameEn, ar: c.nameAr }, l).charAt(0)}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-navy group-hover:text-brand">
+                        {localeText({ en: c.nameEn, ar: c.nameAr }, l)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {c._count.courses} {l === "ar" ? "دورة" : "courses"}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

@@ -43,12 +43,12 @@ export default async function CourseFinderPage({
             { code: { contains: q, mode: "insensitive" } },
           ],
         },
-        include: { schedules: { include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
+        include: { schedules: { where: { endDate: { gte: new Date() } }, include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
         take: 40,
       })
     : await prisma.course.findMany({
         where: { locale: localeFilter },
-        include: { schedules: { include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
+        include: { schedules: { where: { endDate: { gte: new Date() } }, include: { venue: true }, orderBy: { startDate: "asc" } }, category: true },
         take: 60,
       });
 

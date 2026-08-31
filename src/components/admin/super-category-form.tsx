@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Initial = { id?: string; slug: string; nameEn: string; nameAr?: string; image?: string; sort?: number; featured?: boolean };
+type Initial = { id?: string; slug: string; nameEn: string; nameAr?: string; image?: string; icon?: string; sort?: number; featured?: boolean };
 
 export function SuperCategoryForm({ initial }: { initial?: Initial }) {
   const router = useRouter();
@@ -16,6 +16,7 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
     nameEn: initial?.nameEn ?? "",
     nameAr: initial?.nameAr ?? "",
     image: initial?.image ?? "",
+    icon: initial?.icon ?? "",
     sort: String(initial?.sort ?? 0),
     featured: initial?.featured ?? false,
   });
@@ -38,7 +39,7 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
         await createSuperCategory(payload);
       }
       router.refresh();
-      if (!initial?.id) setForm({ slug: "", nameEn: "", nameAr: "", image: "", sort: "0", featured: false });
+      if (!initial?.id) setForm({ slug: "", nameEn: "", nameAr: "", image: "", icon: "", sort: "0", featured: false });
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -56,6 +57,7 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
         <Field label="Name (EN)" value={form.nameEn} onChange={(v) => set("nameEn", v)} required />
         <Field label="Name (AR)" value={form.nameAr} onChange={(v) => set("nameAr", v)} rtl />
         <Field label="Image" value={form.image} onChange={(v) => set("image", v)} />
+        <Field label="Icon" value={form.icon} onChange={(v) => set("icon", v)} />
         <Field label="Sort" value={form.sort} onChange={(v) => set("sort", v)} />
         <div className="flex items-end gap-4">
           <label className="flex items-center gap-2 text-sm">

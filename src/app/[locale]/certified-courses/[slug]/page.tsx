@@ -35,7 +35,7 @@ export default async function CertifiedCoursePage({
 
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const schedules = await prisma.schedule.findMany({
-    where: { course: { locale: localeFilter, certificates: { some: { id: cert.id } } } },
+    where: { course: { locale: localeFilter, certificates: { some: { id: cert.id } } }, endDate: { gte: new Date() } },
     include: { course: true, venue: true },
     orderBy: { startDate: "asc" },
   });

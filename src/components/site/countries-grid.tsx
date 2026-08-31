@@ -1,5 +1,4 @@
 import { Link } from "@/i18n/navigation";
-import { isoToFlag } from "@/lib/utils";
 import { localeText } from "@/lib/data";
 import { Locale } from "@/i18n/config";
 import { MapPin } from "lucide-react";
@@ -12,6 +11,21 @@ type Country = {
   venueCount: number;
 };
 
+function FlagImage({ iso, name }: { iso: string; name: string }) {
+  const code = iso.toLowerCase();
+  return (
+    <img
+      src={`https://flagcdn.com/w80/${code}.png`}
+      alt={`${name} flag`}
+      className="h-6 w-8 rounded object-cover shadow-sm"
+      loading="lazy"
+      onError={(e) => {
+        e.currentTarget.style.display = "none";
+      }}
+    />
+  );
+}
+
 export function CountriesGrid({ countries, locale, compact = false }: { countries: Country[]; locale: Locale; compact?: boolean }) {
   if (compact) {
     return (
@@ -22,7 +36,7 @@ export function CountriesGrid({ countries, locale, compact = false }: { countrie
             href="/countries"
             className="group flex items-center gap-3 rounded-xl border bg-white px-5 py-3 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-md"
           >
-            <span className="text-2xl leading-none" role="img" aria-label={c.nameEn}>{isoToFlag(c.iso)}</span>
+            <FlagImage iso={c.iso} name={c.nameEn} />
             <span className="text-sm font-medium text-navy group-hover:text-brand">{localeText({ en: c.nameEn, ar: c.nameAr }, locale)}</span>
           </Link>
         ))}
@@ -39,7 +53,9 @@ export function CountriesGrid({ countries, locale, compact = false }: { countrie
           className="group relative overflow-hidden rounded-xl border bg-white p-6 text-center transition-all hover:-translate-y-1 hover:border-brand hover:shadow-lg"
         >
           <div className="absolute inset-x-0 top-0 h-1 bg-brand opacity-0 transition-opacity group-hover:opacity-100" />
-          <span className="text-4xl leading-none" role="img" aria-label={c.nameEn}>{isoToFlag(c.iso)}</span>
+          <div className="flex justify-center">
+            <FlagImage iso={c.iso} name={c.nameEn} />
+          </div>
           <h3 className="mt-3 text-sm font-semibold text-navy group-hover:text-brand">
             {localeText({ en: c.nameEn, ar: c.nameAr }, locale)}
           </h3>

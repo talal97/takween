@@ -65,6 +65,7 @@ model SuperCategory {
   nameEn    String
   nameAr    String?
   image     String?
+  icon      String?
   sort      Int     @default(0)
   featured  Boolean @default(false)
   createdAt DateTime @default(now())

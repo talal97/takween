@@ -92,7 +92,7 @@ export default async function TrainingSubjectPage({
 
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const schedules = await prisma.schedule.findMany({
-    where: { course: { categoryId: category.id, locale: localeFilter } },
+    where: { course: { categoryId: category.id, locale: localeFilter }, endDate: { gte: new Date() } },
     include: { course: true, venue: true },
     orderBy: { startDate: "asc" },
   });

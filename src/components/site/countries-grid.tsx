@@ -1,3 +1,5 @@
+"use client";
+
 import { Link } from "@/i18n/navigation";
 import { localeText } from "@/lib/data";
 import { Locale } from "@/i18n/config";

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Kufi_Arabic } from "next/font/google";
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { ThemeStyle } from "@/components/site/theme-style";
@@ -6,6 +6,11 @@ import { siteUrl } from "@/lib/seo";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const notoKufiArabic = Noto_Kufi_Arabic({
+  variable: "--font-noto-kufi-arabic",
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700"],
+});
 
 const baseUrl = siteUrl();
 
@@ -38,7 +43,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${notoKufiArabic.variable} antialiased font-sans`}>
         <ThemeStyle />
         {children}
       </body>

@@ -21,7 +21,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
 
   return (
     <footer className="bg-navy text-white">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
         {/* Brand + socials */}
         <div>
           <div className="text-2xl font-extrabold text-white">

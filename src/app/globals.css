@@ -54,6 +54,11 @@ body {
   font-family: inherit;
 }
 
+/* Arabic pages use a proper Arabic typeface instead of the Latin grotesque */
+html[dir="rtl"] {
+  --font-sans: var(--font-noto-kufi-arabic);
+}
+
 /* Section divider — subtle top border between alternating sections */
 .section-divider {
   border-top: 1px solid var(--border);

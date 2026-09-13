@@ -101,10 +101,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     "section_categories",
     l === "ar" ? `اختر من بين أكثر من ${totalCourses}+ برنامج تدريبي` : `Choose From Over ${totalCourses}+ Training Programmes`
   );
-  const venuesTitle = s(
-    "section_venues",
-    l === "ar" ? `اختر مكان التدريب الذي يناسبك من بين أكثر من ${totalVenues}+ مدينة حول العالم` : `Choose Your Training Location From Over ${totalVenues}+ Cities Worldwide`
-  );
   const certificatesTitle = s("section_certificates", l === "ar" ? "طوّر مسيرتك المهنية بشهادات معتمدة" : "Advance Your Career With Accredited Certificates");
   const formatsTitle = s("section_formats", l === "ar" ? "اختر أسلوب التدريب الذي يناسب مسيرتك المهنية" : "Choose the Training Format That Fits Your Career Path");
   const featuredTitle = s("section_featured", t("featuredTitle"));
@@ -171,7 +167,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <Link
               key={sc.id}
               href={`/training-subjects/${sc.slug}`}
-              className="group flex items-center gap-3 rounded-md bg-muted p-3 transition-colors hover:bg-brand-light"
+              className="group flex items-center gap-3 rounded-md bg-muted p-3 transition-colors hover:bg-brand-light rtl:flex-row-reverse"
             >
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-semibold text-navy group-hover:text-brand">
@@ -200,44 +196,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           >
             {l === "ar" ? "عرض جميع الدورات التدريبية" : "View All Training Courses"}
           </Link>
-        </div>
-      </section>
-
-      {/* ============ VENUES ============ */}
-      <section className="section-divider bg-muted/40 py-15">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "الانتشار العالمي" : "Global Reach"}</span>
-            <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{venuesTitle}</h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              {l === "ar"
-                ? "نُقدّم دوراتنا التدريبية في أبرز الوجهات حول العالم، ما يمنحك مرونة اختيار المكان الأقرب إليك أو الأنسب لجدولك، دون التنازل عن جودة المحتوى أو خبرة المدربين."
-                : "Our courses run in leading destinations around the world, giving you the flexibility to choose the location that's closest to you or best fits your schedule — without compromising on content quality or trainer expertise."}
-            </p>
-          </div>
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {allVenues.map((v) => (
-              <Link
-                key={v.id}
-                href={`/training/${v.slug}`}
-                className="group flex items-center gap-3 rounded-md bg-white p-3 transition-colors hover:bg-brand-light"
-              >
-                <Globe2 className="h-4 w-4 shrink-0 text-brand" />
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-navy group-hover:text-brand">{v.nameEn}</div>
-                  <div className="truncate text-xs text-muted-foreground">{v.country}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Link
-              href="/training"
-              className="inline-flex items-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
-            >
-              {l === "ar" ? "عرض جميع أماكن التدريب" : "View All Training Venues"}
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -450,7 +408,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               {clients.map((c) => (
                 <span key={c.id} className="text-lg font-bold uppercase tracking-wide text-gray-300 transition-colors hover:text-gray-400">
                   {c.logo ? (
-                    <img src={c.logo} alt={c.nameEn} className="h-8 w-auto object-contain opacity-40 grayscale" />
+                    <img src={c.logo} alt={c.nameEn} className="h-10 w-auto object-contain opacity-40 grayscale" />
                   ) : (
                     c.nameEn
                   )}

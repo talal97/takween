@@ -61,7 +61,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               {phone && (
                 <a href={`tel:${phone}`} className="flex items-center gap-3 text-sm text-muted-foreground hover:text-brand">
                   <Phone className="h-4 w-4 shrink-0 text-brand" />
-                  {phone}
+                  <span dir="ltr">{phone}</span>
                 </a>
               )}
               {email && (

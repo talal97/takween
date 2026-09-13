@@ -91,7 +91,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
           <ul className="space-y-3 text-sm text-white/60">
             <li className="flex items-start gap-2">
               <Phone className="mt-0.5 h-4 w-4 shrink-0 text-white/40" />
-              <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} data-track="footer-phone" className="transition-colors hover:text-white">{phone}</a>
+              <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} data-track="footer-phone" className="transition-colors hover:text-white"><span dir="ltr">{phone}</span></a>
             </li>
             <li className="flex items-start gap-2">
               <Mail className="mt-0.5 h-4 w-4 shrink-0 text-white/40" />

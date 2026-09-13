@@ -20,11 +20,11 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
           <div className="flex items-center gap-5">
             <a href={`tel:${phone.replace(/[^+\d]/g, "")}`} data-track="header-phone" className="flex items-center gap-1.5 hover:text-white transition-colors">
               <Phone className="h-3 w-3" />
-              {phone}
+              <span dir="ltr">{phone}</span>
             </a>
             <a href={`mailto:${email}`} data-track="header-email" className="hidden items-center gap-1.5 hover:text-white transition-colors sm:flex">
               <Mail className="h-3 w-3" />
-              {email}
+              <span dir="ltr">{email}</span>
             </a>
           </div>
           <div className="flex items-center gap-3">

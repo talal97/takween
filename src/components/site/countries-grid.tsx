@@ -36,7 +36,7 @@ export function CountriesGrid({ countries, locale, compact = false }: { countrie
           <Link
             key={c.iso}
             href="/countries"
-            className="group flex items-center gap-3 rounded-xl border bg-white px-5 py-3 transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-md"
+            className="group flex items-center gap-3 rounded-full border border-border/60 bg-white px-5 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand hover:shadow-md"
           >
             <FlagImage iso={c.iso} name={c.nameEn} flagUrl={c.flag} />
             <span className="text-sm font-medium text-navy group-hover:text-brand">{localeText({ en: c.nameEn, ar: c.nameAr }, locale)}</span>

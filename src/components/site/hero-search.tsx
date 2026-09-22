@@ -19,18 +19,18 @@ export function HeroSearch() {
   return (
     <form
       onSubmit={onSubmit}
-      className="mx-auto flex max-w-md items-center gap-1 rounded-full border border-border bg-white py-1 pe-1 ps-4 shadow-sm"
+      className="mx-auto flex max-w-lg items-center gap-1 rounded-full border border-border bg-white py-1.5 pe-1.5 ps-5 shadow-lg shadow-black/10"
     >
       <input
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder={ar ? "ابحث عن دورة تدريبية معينة" : "Search for a specific training course"}
-        className="h-9 w-full min-w-0 border-0 bg-transparent text-sm text-navy outline-none placeholder:text-muted-foreground"
+        className="h-10 w-full min-w-0 border-0 bg-transparent text-sm text-navy outline-none placeholder:text-muted-foreground"
       />
       <button
         type="submit"
         aria-label={ar ? "بحث" : "Search"}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark"
       >
         <Search className="h-4 w-4" />
       </button>

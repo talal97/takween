@@ -20,6 +20,7 @@ import {
   Sparkles,
   Handshake,
 } from "lucide-react";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 export const dynamic = "force-dynamic";
 
@@ -118,7 +119,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="bg-background">
       {/* ============ HERO ============ */}
-      <section className="relative overflow-hidden bg-navy text-white">
+      <section className={`relative overflow-hidden text-white ${heroImage ? "bg-navy" : "hero-pattern"}`}>
         {heroImage ? (
           <img
             src={heroImage}
@@ -128,11 +129,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           />
         ) : null}
         <div className="hero-overlay absolute inset-0" />
-        <div className="relative mx-auto max-w-3xl px-4 pb-14 pt-32 text-center lg:pt-40">
-          <h1 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">{heroTitle}</h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-white/80 sm:text-lg">{heroSubtitle}</p>
+        <div className="relative mx-auto max-w-3xl px-4 pb-16 pt-32 text-center lg:pt-44">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-gold backdrop-blur-sm">
+            {badgeAccredited}
+          </span>
+          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">{heroTitle}</h1>
+          <p className="mx-auto mt-5 max-w-xl text-base text-white/75 sm:text-lg">{heroSubtitle}</p>
 
-          <div className="mt-8">
+          <div className="mt-9">
             <HeroSearch />
           </div>
 
@@ -143,7 +147,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               { n: totalCategories, label: statSubjectsLabel },
             ].map((item) => (
               <div key={item.label} className="flex-1 px-4 text-center first:ps-0 last:pe-0">
-                <div className="text-2xl font-extrabold text-gold">+{item.n}</div>
+                <div className="text-2xl font-extrabold text-gold sm:text-3xl">+{item.n}</div>
                 <div className="mt-1 text-xs text-white/60">{item.label}</div>
               </div>
             ))}
@@ -152,10 +156,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ CATEGORIES ============ */}
-      <section className="section-divider mx-auto max-w-7xl px-4 py-15">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "المجالات التدريبية" : "Training Areas"}</span>
-          <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{categoriesTitle}</h2>
+          <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{categoriesTitle}</h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             {l === "ar"
               ? "صمّمنا مجموعة متكاملة من البرامج التدريبية تغطي مختلف المجالات المهنية لتناسب احتياجات الأفراد والمؤسسات على حدٍّ سواء. مهما كان تخصصك أو طموحك المهني، ستجد لدينا البرنامج المناسب."
@@ -163,31 +167,34 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </p>
         </div>
         <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {superCategories.filter((sc) => sc.categories.length > 0).map((sc) => (
-            <Link
-              key={sc.id}
-              href={`/training-subjects/${sc.slug}`}
-              className="group flex items-center gap-3 rounded-md bg-muted p-3 transition-colors hover:bg-brand-light rtl:flex-row-reverse"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-sm font-semibold text-navy group-hover:text-brand">
-                  {localeText({ en: sc.nameEn, ar: sc.nameAr }, l)}
+          {superCategories.filter((sc) => sc.categories.length > 0).map((sc) => {
+            const FallbackIcon = getCategoryIcon(sc.slug);
+            return (
+              <Link
+                key={sc.id}
+                href={`/training-subjects/${sc.slug}`}
+                className="group flex items-center gap-3 rounded-md bg-muted p-3 transition-colors hover:bg-brand-light rtl:flex-row-reverse"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-semibold text-navy group-hover:text-brand">
+                    {localeText({ en: sc.nameEn, ar: sc.nameAr }, l)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {sc.categories.reduce((sum, c) => sum + c._count.courses, 0)} {l === "ar" ? "دورة" : "courses"}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {sc.categories.reduce((sum, c) => sum + c._count.courses, 0)} {l === "ar" ? "دورة" : "courses"}
-                </div>
-              </div>
-              {sc.icon ? (
-                <img src={sc.icon} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-              ) : sc.image ? (
-                <img src={sc.image} alt="" className="h-9 w-9 shrink-0 rounded-lg object-contain" />
-              ) : (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand text-sm font-bold">
-                  {localeText({ en: sc.nameEn, ar: sc.nameAr }, l).charAt(0)}
-                </div>
-              )}
-            </Link>
-          ))}
+                {sc.icon ? (
+                  <img src={sc.icon} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+                ) : sc.image ? (
+                  <img src={sc.image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+                ) : (
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-light text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+                    <FallbackIcon size={20} strokeWidth={1.75} />
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
         <div className="mt-8 text-center">
           <Link
@@ -200,10 +207,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ COUNTRIES ============ */}
-      <section className="section-divider mx-auto max-w-7xl px-4 py-15">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-16">
         <div className="text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-brand">{t("countriesSubtitle")}</span>
-          <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{t("countriesTitle")}</h2>
+          <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{t("countriesTitle")}</h2>
         </div>
         <div className="mt-10">
           <CountriesGrid countries={countries} locale={l} compact />
@@ -216,10 +223,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ CERTIFICATES ============ */}
-      <section className="section-divider mx-auto max-w-7xl px-4 py-15">
+      <section className="section-divider mx-auto max-w-7xl px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "التطوير المهني" : "Professional Development"}</span>
-          <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{certificatesTitle}</h2>
+          <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{certificatesTitle}</h2>
           <p className="mt-4 leading-relaxed text-muted-foreground">
             {l === "ar"
               ? "احصل على شهادة مهنية عند إتمام دورتك التدريبية، لتعزيز سيرتك الذاتية وترسيخ مكانتك ضمن المحترفين المعتمدين في مجالك."
@@ -236,7 +243,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             <Link
               key={c.id}
               href={`/certified-courses/${c.slug}`}
-              className="group flex items-center gap-3 rounded-md bg-muted p-3 transition-colors hover:bg-brand-light"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md"
             >
               {c.logo ? (
                 <img src={c.logo} alt="" className="h-10 w-10 rounded object-contain" />
@@ -250,11 +257,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ FORMATS ============ */}
-      <section className="section-divider bg-muted/40 py-15">
+      <section className="section-divider bg-muted/40 py-16">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "طرق التدريب" : "Training Formats"}</span>
-            <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{formatsTitle}</h2>
+            <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{formatsTitle}</h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
               {l === "ar"
                 ? "سواء فضّلت التعلم في القاعة، أو عن بُعد، أو برنامجاً مصمماً خصيصاً لمؤسستك، نوفّر لك المسار الأنسب لتحقيق أهدافك."
@@ -263,7 +270,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
           <div className="mt-10 grid grid-cols-2 gap-4 gap-y-6 lg:grid-cols-4">
             {formats.map((f) => (
-              <div key={f.title} className="flex flex-col rounded-xl bg-white p-4 text-center transition-colors hover:bg-muted">
+              <div
+                key={f.title}
+                className="flex flex-col rounded-xl border border-border/60 bg-white p-5 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-brand/30 hover:shadow-md"
+              >
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-light text-brand">
                   <f.icon size={22} />
                 </div>
@@ -279,11 +289,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       </section>
 
       {/* ============ FEATURED COURSES ============ */}
-      <section className="section-divider bg-navy py-15 text-white">
+      <section className="section-divider bg-navy py-16 text-white">
         <div className="mx-auto max-w-7xl px-4">
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-sm font-semibold uppercase tracking-wider text-gold">{l === "ar" ? "الأكثر طلباً" : "Most Popular"}</span>
-            <h2 className="mt-2 text-2xl font-semibold md:text-3xl">{featuredTitle}</h2>
+            <h2 className="mt-2 text-2xl font-bold md:text-4xl">{featuredTitle}</h2>
             <p className="mt-4 leading-relaxed text-white/70">
               {l === "ar"
                 ? "تصفّح مجموعة مختارة من دوراتنا الأكثر طلباً هذا الموسم، والمصمّمة لتلبية احتياجات المهنيين والمؤسسات في مختلف القطاعات."
@@ -302,7 +312,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
                 <Link
                   key={c.id}
                   href={`/training-course/${c.slug}`}
-                  className="group flex items-center justify-between gap-4 border-b border-white/10 py-5 first:border-t"
+                  className="group flex items-center justify-between gap-4 border-b border-white/10 px-3 py-5 transition-colors first:border-t hover:bg-white/5"
                 >
                   <div className="min-w-0">
                     <h3 className="truncate text-base font-semibold text-white transition-colors group-hover:text-gold">
@@ -335,7 +345,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "من نحن" : "About Us"}</span>
-            <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{aboutTitle}</h2>
+            <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{aboutTitle}</h2>
             <p className="mt-5 leading-relaxed text-muted-foreground">
               {s(
                 "about_text",
@@ -372,7 +382,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           {testimonials.length > 0 && (
             <div className="space-y-5">
               {testimonials.slice(0, 3).map((tm) => (
-                <figure key={tm.id} className="rounded-xl bg-muted p-5 transition-colors hover:bg-brand-light/40">
+                <figure key={tm.id} className="rounded-xl border border-border/60 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md">
                   <Quote className="h-6 w-6 text-brand/30" />
                   <blockquote className="mt-2 text-sm leading-relaxed text-navy">
                     {localeText({ en: tm.textEn, ar: tm.textAr }, l)}
@@ -395,10 +405,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ============ CLIENTS ============ */}
       {clients.length > 0 && (
-        <section className="section-divider bg-white py-15">
+        <section className="section-divider bg-white py-16">
           <div className="mx-auto max-w-7xl px-4 text-center">
             <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "ثقة يعتد بها" : "Trusted By"}</span>
-            <h2 className="mx-auto mt-2 max-w-2xl text-2xl font-semibold text-navy md:text-3xl">{clientsTitle}</h2>
+            <h2 className="mx-auto mt-2 max-w-2xl text-2xl font-bold text-navy md:text-4xl">{clientsTitle}</h2>
             <p className="mx-auto mt-4 max-w-2xl leading-relaxed text-muted-foreground">
               {l === "ar"
                 ? "نفخر بثقة المؤسسات التي تعتمد على برامجنا التدريبية لتطوير كفاءات فرقها وتعزيز أدائها."
@@ -421,10 +431,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
       {/* ============ ARTICLES / INSIGHTS ============ */}
       {articles.length > 0 && (
-        <section className="section-divider mx-auto max-w-7xl px-4 py-15">
+        <section className="section-divider mx-auto max-w-7xl px-4 py-16">
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-sm font-semibold uppercase tracking-wider text-brand">{l === "ar" ? "المدونة" : "Insights"}</span>
-            <h2 className="mt-2 text-2xl font-semibold text-navy md:text-3xl">{articlesTitle}</h2>
+            <h2 className="mt-2 text-2xl font-bold text-navy md:text-4xl">{articlesTitle}</h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">
               {l === "ar"
                 ? "اطّلع على أحدث المقالات والرؤى من فريقنا لدعم تطورك المهني ومواكبة مستجدات مجالك."
@@ -438,7 +448,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {articles.map((a) => (
-              <Link key={a.id} href={`/resources/${a.slug}`} className="group overflow-hidden rounded-xl bg-white transition-colors hover:bg-muted">
+              <Link
+                key={a.id}
+                href={`/resources/${a.slug}`}
+                className="group overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:shadow-md"
+              >
                 {a.image && (
                   <div className="relative h-44 overflow-hidden">
                     <img src={a.image} alt="" className="course-card-img h-full w-full object-cover" loading="lazy" />
@@ -462,8 +476,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       )}
 
       {/* ============ CTA ============ */}
-      <section className="bg-brand">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-12 text-center text-white sm:flex-row sm:text-left">
+      <section className="bg-gradient-to-r from-brand-dark to-brand">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-14 text-center text-white sm:flex-row sm:text-left">
           <div>
             <h2 className="text-2xl font-bold sm:text-3xl">{s("cta_title", l === "ar" ? "جاهز لتطوير مهاراتك؟" : "Ready to advance your career?")}</h2>
             <p className="mt-1 text-white/80">{s("cta_subtitle", l === "ar" ? "تواصل مع مستشارينا التدريبيين اليوم." : "Talk to our training advisors today.")}</p>

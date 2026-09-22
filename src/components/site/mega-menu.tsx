@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { localeText } from "@/lib/data";
 import { ChevronDown } from "lucide-react";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
   const t = await getTranslations("navigation");
@@ -35,19 +36,25 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
             </span>
           </div>
           <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {superCategories.map((sc) => (
+            {superCategories.map((sc) => {
+              const FallbackIcon = getCategoryIcon(sc.slug);
+              return (
               <div key={sc.id} className="space-y-2">
                 <Link
                   href={`/training-subjects/${sc.slug}`}
                   className="group/cat flex items-center gap-2"
                 >
-                  {sc.image && (
+                  {sc.icon || sc.image ? (
                     <img
-                      src={sc.image}
+                      src={sc.icon || sc.image || ""}
                       alt=""
-                      className="h-5 w-5 rounded object-contain"
+                      className="h-6 w-6 rounded object-contain"
                       loading="lazy"
                     />
+                  ) : (
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-brand-light text-brand">
+                      <FallbackIcon size={14} strokeWidth={1.75} />
+                    </span>
                   )}
                   <span className="text-sm font-semibold text-navy transition-colors group-hover/cat:text-brand">
                     {localeText({ en: sc.nameEn, ar: sc.nameAr }, locale)}
@@ -72,7 +79,8 @@ export async function MegaMenu({ locale }: { locale: "en" | "ar" }) {
                   {t("viewAll")} →
                 </Link>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-4 border-t pt-3">
             <Link

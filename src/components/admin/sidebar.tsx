@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -28,6 +29,8 @@ import {
   DownloadCloud,
   Play,
   GalleryHorizontal,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -83,69 +86,115 @@ const nav = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  // Close the mobile drawer whenever the route changes (i.e. a nav link was tapped).
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
-    <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-border/70 bg-white">
-      <div className="flex h-16 items-center gap-3 border-b border-border/70 px-5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-navy text-sm font-bold text-white shadow-sm">
-          T
-        </span>
-        <div className="flex flex-col leading-tight">
-          <span className="text-base font-bold tracking-tight text-navy">Takween</span>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-brand">Admin Panel</span>
-        </div>
-      </div>
-
-      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
-        {nav.map((section) => (
-          <div key={section.label}>
-            <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-              {section.label}
-            </p>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                      active && "bg-brand/10 font-medium text-brand hover:bg-brand/10 hover:text-brand"
-                    )}
-                  >
-                    {active && (
-                      <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand" />
-                    )}
-                    <Icon className={cn("h-4 w-4", active && "text-brand")} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </nav>
-
-      <div className="space-y-1 border-t border-border/70 p-3">
-        <Link
-          href="/"
-          target="_blank"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <ExternalLink className="h-4 w-4" /> View Site
-        </Link>
+    <>
+      {/* Mobile top bar — fixed (not sticky) since it's a sibling of the flex-row layout in
+          layout.tsx and must span the full viewport width rather than sit inside that row. */}
+      <div className="fixed inset-x-0 top-0 z-30 flex h-14 items-center gap-3 border-b border-border/70 bg-white px-4 lg:hidden">
         <button
           type="button"
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          onClick={() => setOpen(true)}
+          aria-label="Open menu"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
         >
-          <LogOut className="h-4 w-4" /> Sign Out
+          <Menu className="h-5 w-5" />
         </button>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-navy text-xs font-bold text-white shadow-sm">
+          T
+        </span>
+        <span className="text-sm font-bold tracking-tight text-navy">Takween Admin</span>
       </div>
-    </aside>
+
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 start-0 z-50 flex h-screen w-72 max-w-[85vw] shrink-0 flex-col border-r border-border/70 bg-white transition-transform duration-200 ease-out lg:sticky lg:top-0 lg:z-0 lg:w-64 lg:max-w-none lg:translate-x-0",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex h-16 items-center gap-3 border-b border-border/70 px-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-navy text-sm font-bold text-white shadow-sm">
+            T
+          </span>
+          <div className="flex flex-col leading-tight">
+            <span className="text-base font-bold tracking-tight text-navy">Takween</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-brand">Admin Panel</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close menu"
+            className="ms-auto flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+          {nav.map((section) => (
+            <div key={section.label}>
+              <p className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const active = item.exact
+                    ? pathname === item.href
+                    : pathname.startsWith(item.href);
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                        active && "bg-brand/10 font-medium text-brand hover:bg-brand/10 hover:text-brand"
+                      )}
+                    >
+                      {active && (
+                        <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-brand" />
+                      )}
+                      <Icon className={cn("h-4 w-4", active && "text-brand")} />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        <div className="space-y-1 border-t border-border/70 p-3">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ExternalLink className="h-4 w-4" /> View Site
+          </Link>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

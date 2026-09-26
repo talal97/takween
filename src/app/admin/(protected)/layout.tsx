@@ -17,7 +17,7 @@ export default async function AdminGuardLayout({ children }: { children: React.R
   return (
     <div className="flex min-h-screen bg-slate-50/70">
       <AdminSidebar />
-      <main className="flex-1 overflow-auto p-6 lg:p-8">
+      <main className="flex-1 overflow-auto p-4 pt-20 lg:p-8">
         <div className="mx-auto max-w-6xl">{children}</div>
       </main>
     </div>

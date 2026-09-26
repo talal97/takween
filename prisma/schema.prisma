@@ -362,6 +362,17 @@ model Client {
 }
 
 // ---------------------------------------------------------------
+// Homepage hero carousel slides
+// ---------------------------------------------------------------
+model HeroSlide {
+  id      String  @id @default(cuid())
+  image   String
+  titleEn String?
+  titleAr String?
+  sort    Int     @default(0)
+}
+
+// ---------------------------------------------------------------
 // Site configuration (contact, social, logos)
 // ---------------------------------------------------------------
 model SiteSetting {

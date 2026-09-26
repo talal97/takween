@@ -5,6 +5,7 @@ import { getSettingsCached } from "@/lib/settings";
 import { localeText, getHomePageDataCached, getCountriesCached } from "@/lib/data";
 import { formatDateRange, formatCurrency } from "@/lib/utils";
 import { HeroSearch } from "@/components/site/hero-search";
+import { HeroCarousel } from "@/components/site/hero-carousel";
 import { CountriesGrid } from "@/components/site/countries-grid";
 import {
   CalendarDays,
@@ -41,7 +42,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   const settings = await getSettingsCached();
   const s = (k: string, fb: string) => settings[`${k}_${l}`] || fb;
-  const heroImage = settings.hero_image || "";
+  const legacyHeroImage = settings.hero_image || "";
 
   const {
     superCategories,
@@ -51,9 +52,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     articles,
     testimonials,
     clients,
+    heroSlides,
     categoryCounts,
     totalCourses,
   } = await getHomePageDataCached(l);
+
+  const heroSlideImages =
+    heroSlides.length > 0
+      ? heroSlides.map((slide) => ({ id: slide.id, image: slide.image, caption: localeText({ en: slide.titleEn, ar: slide.titleAr }, l) }))
+      : legacyHeroImage
+        ? [{ id: "legacy", image: legacyHeroImage, caption: "" }]
+        : [];
 
   const countries = await getCountriesCached();
 
@@ -119,28 +128,21 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <div className="bg-background">
       {/* ============ HERO ============ */}
-      <section className={`relative overflow-hidden text-white ${heroImage ? "bg-navy" : "hero-pattern"}`}>
-        {heroImage ? (
-          <img
-            src={heroImage}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-            fetchPriority="high"
-          />
-        ) : null}
+      <section className={`relative overflow-hidden text-white ${heroSlideImages.length > 0 ? "bg-navy" : "hero-pattern"}`}>
+        <HeroCarousel slides={heroSlideImages} />
         <div className="hero-overlay absolute inset-0" />
-        <div className="relative mx-auto max-w-3xl px-4 pb-16 pt-32 text-center lg:pt-44">
+        <div className="relative mx-auto max-w-3xl px-4 pb-10 pt-20 text-center sm:pb-12 sm:pt-24 lg:pt-28">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-gold backdrop-blur-sm">
             {badgeAccredited}
           </span>
-          <h1 className="mt-5 text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">{heroTitle}</h1>
-          <p className="mx-auto mt-5 max-w-xl text-base text-white/75 sm:text-lg">{heroSubtitle}</p>
+          <h1 className="mt-4 text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">{heroTitle}</h1>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-white/75 sm:text-base">{heroSubtitle}</p>
 
-          <div className="mt-9">
+          <div className="mt-7">
             <HeroSearch />
           </div>
 
-          <div className="mx-auto mt-10 flex max-w-lg items-center justify-center divide-x divide-white/15 rtl:divide-x-reverse">
+          <div className="mx-auto mt-8 flex max-w-lg items-center justify-center divide-x divide-white/15 rtl:divide-x-reverse">
             {[
               { n: totalCourses, label: statCoursesLabel },
               { n: totalVenues, label: statVenuesLabel },

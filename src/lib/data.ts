@@ -32,7 +32,7 @@ export const getNavigationCached = unstable_cache(getNavigation, ["navigation"],
 export async function getHomePageData(locale: Locale = "en") {
   const localeFilter = locale === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
 
-  const [superCategories, regionsList, certificates, featured, articles, testimonials, clients, categoryCounts, totalCourses] =
+  const [superCategories, regionsList, certificates, featured, articles, testimonials, clients, heroSlides, categoryCounts, totalCourses] =
     await Promise.all([
       prisma.superCategory.findMany({
         orderBy: { sort: "asc" },
@@ -55,6 +55,7 @@ export async function getHomePageData(locale: Locale = "en") {
       prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 3 }),
       prisma.testimonial.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 3 }),
       prisma.client.findMany({ orderBy: { sort: "asc" }, take: 12 }),
+      prisma.heroSlide.findMany({ orderBy: { sort: "asc" } }),
       prisma.course.groupBy({ by: ["categoryId"], where: { locale: localeFilter }, _count: { _all: true } }),
       prisma.course.count({ where: { locale: localeFilter } }),
     ]);
@@ -66,6 +67,7 @@ export async function getHomePageData(locale: Locale = "en") {
     articles,
     testimonials,
     clients,
+    heroSlides,
     categoryCounts,
     totalCourses,
   };

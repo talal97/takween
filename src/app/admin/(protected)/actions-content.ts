@@ -249,6 +249,39 @@ export async function deleteClient(id: string) {
 }
 
 // ------------------------------------------------------------------
+// Hero carousel slides
+// ------------------------------------------------------------------
+const heroSlideSchema = z.object({
+  image: z.string().min(1),
+  titleEn: z.string().optional(),
+  titleAr: z.string().optional(),
+  sort: z.coerce.number().int().default(0),
+});
+
+export async function createHeroSlide(data: z.infer<typeof heroSlideSchema>) {
+  await requireAdmin();
+  const input = heroSlideSchema.parse(data);
+  await prisma.heroSlide.create({ data: input });
+  revalidatePath("/admin/hero-slides");
+  revalidateSite();
+}
+
+export async function updateHeroSlide(id: string, data: z.infer<typeof heroSlideSchema>) {
+  await requireAdmin();
+  const input = heroSlideSchema.parse(data);
+  await prisma.heroSlide.update({ where: { id }, data: input });
+  revalidatePath("/admin/hero-slides");
+  revalidateSite();
+}
+
+export async function deleteHeroSlide(id: string) {
+  await requireAdmin();
+  await prisma.heroSlide.delete({ where: { id } });
+  revalidatePath("/admin/hero-slides");
+  revalidateSite();
+}
+
+// ------------------------------------------------------------------
 // Providers / Associations
 // ------------------------------------------------------------------
 const providerSchema = z.object({

@@ -27,6 +27,7 @@ import {
   ExternalLink,
   DownloadCloud,
   Play,
+  GalleryHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ const nav = [
   {
     label: "Content",
     items: [
+      { href: "/admin/hero-slides", label: "Hero Slides", icon: GalleryHorizontal },
       { href: "/admin/courses", label: "Courses", icon: BookOpen },
       { href: "/admin/categories", label: "Categories", icon: FolderTree },
       { href: "/admin/super-categories", label: "Super Categories", icon: Layers },

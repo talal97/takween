@@ -11,7 +11,6 @@ export default function Error({
   reset: () => void;
 }) {
   const t = useTranslations("errors");
-  const nav = useTranslations("navigation");
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
@@ -30,7 +29,7 @@ export default function Error({
           className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-100"
         >
           <Home className="h-4 w-4" />
-          {nav("backToHome")}
+          {t("error.backToHome")}
         </Link>
       </div>
     </div>

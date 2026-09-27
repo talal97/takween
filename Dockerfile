@@ -42,10 +42,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && addgroup --system --gid 1001 nodejs \
     && adduser --system --uid 1001 nextjs
 
-# Prisma CLI + client so migrations/seed can run at boot
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Full node_modules (not just cherry-picked prisma/@prisma/.prisma folders) so the
+# Prisma CLI has all of its own transitive runtime dependencies (e.g. @prisma/config
+# pulls in effect/c12/deepmerge-ts/empathic) available to run migrations/seed at boot.
+# Next's own traced "standalone" output below still takes precedence for the app itself.
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 
 COPY --from=builder /app/scripts ./scripts

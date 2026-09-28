@@ -14,6 +14,11 @@ const notoKufiArabic = Noto_Kufi_Arabic({
 
 const baseUrl = siteUrl();
 
+// <ThemeStyle /> reads theme colors from the database on every render, so
+// this layout (and pages like the global not-found page) can't be
+// statically prerendered at Docker build time — no DB is reachable there.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {

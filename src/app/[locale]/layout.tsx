@@ -12,6 +12,11 @@ import { organizationJsonLd } from "@/lib/seo";
 import { Tracker } from "@/components/analytics/tracker";
 import { getSettingsCached } from "@/lib/settings";
 
+// This layout (and every page under it) reads from the database on every
+// request (settings, nav, content), so none of it can be statically
+// prerendered at Docker build time — no DB is reachable there.
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }

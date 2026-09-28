@@ -2,6 +2,10 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { locales } from "@/i18n/config";
 
+// Reads from the database, so it must not be pre-rendered at Docker build time
+// (no DB is reachable there) — render it per-request instead.
+export const dynamic = "force-dynamic";
+
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://takween.com";
 
 const STATIC_PATHS = [

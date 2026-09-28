@@ -18,7 +18,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_SITE_URL=https://takween.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ARG AUTH_SECRET=build-time-only
+ARG AUTH_SECRET=build-time-only-placeholder-not-a-real-secret
 ENV AUTH_SECRET=$AUTH_SECRET
 ARG DATABASE_URL=postgresql://takween:changeme@localhost:5432/takween?schema=public
 ENV DATABASE_URL=$DATABASE_URL
@@ -34,7 +34,7 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ARG NEXT_PUBLIC_SITE_URL=https://takween.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ARG AUTH_SECRET=build-time-only
+ARG AUTH_SECRET=build-time-only-placeholder-not-a-real-secret
 ENV AUTH_SECRET=$AUTH_SECRET
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \

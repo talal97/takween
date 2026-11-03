@@ -1,5 +1,6 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateRegistrationNote } from "@/app/admin/(protected)/actions-settings";
@@ -9,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 export function AdminNoteForm({ id, note }: { id: string; note: string }) {
   const router = useRouter();
   const [value, setValue] = useState(note);
+  const markSaved = useUnsavedChanges(value);
   const [saved, setSaved] = useState(false);
 
   return (
@@ -18,6 +20,7 @@ export function AdminNoteForm({ id, note }: { id: string; note: string }) {
         e.preventDefault();
         void (async () => {
           await updateRegistrationNote(id, value);
+          markSaved();
           setSaved(true);
           router.refresh();
           setTimeout(() => setSaved(false), 1500);

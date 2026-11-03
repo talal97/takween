@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createSuperCategory, updateSuperCategory } from "@/app/admin/(protected)/actions-taxonomy";
@@ -23,6 +25,8 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const markSaved = useUnsavedChanges(form);
+
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
     setForm((f) => ({ ...f, [k]: v }));
   }
@@ -38,6 +42,7 @@ export function SuperCategoryForm({ initial }: { initial?: Initial }) {
       } else {
         await createSuperCategory(payload);
       }
+      markSaved();
       router.refresh();
       if (!initial?.id) setForm({ slug: "", nameEn: "", nameAr: "", image: "", icon: "", sort: "0", featured: false });
     } catch (err) {

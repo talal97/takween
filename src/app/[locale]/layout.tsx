@@ -1,3 +1,5 @@
+
+import { serializeJsonLd } from "@/lib/safe-json";
 import { NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -35,11 +37,11 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const orgJson = await organizationJsonLd();
   const settings = await getSettingsCached();
-  const whatsappPhone = settings.whatsapp_phone || "";
+  const whatsappPhone = settings.whatsapp_phone || settings.contact_whatsapp || "";
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJson) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgJson) }} />
           <LocaleDir locale={locale as "en" | "ar"} />
       <NextIntlClientProvider messages={messages}>
         <div className="flex min-h-screen flex-col">

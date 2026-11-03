@@ -54,6 +54,7 @@ export function RegistrationForm({
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [captcha, setCaptcha] = useState("");
   const [captchaTs, setCaptchaTs] = useState(0);
 
@@ -86,43 +87,52 @@ export function RegistrationForm({
     const schedule = schedules.find((s) => s.id === form.schedule);
     const country = countries.find((c) => c.iso === form.countryIso);
     const format = mode === "register" ? schedule?.format : mode;
-    const res = await submitRegistration({
-      type: mode,
-      courseTitle,
-      courseCode,
-      scheduleSummary: schedule ? `${schedule.venueName} ${schedule.startDate}` : undefined,
-      venueName: schedule?.venueName,
-      startDate: schedule?.startDate,
-      fee: schedule ? String(schedule.fee) : undefined,
-      currency: schedule?.currency,
-      format,
-      salutation: form.salutation,
-      fullName: form.fullName,
-      email: form.email,
-      phone: form.phone,
-      countryIso: form.countryIso,
-      country: country ? (locale === "ar" && country.nameAr ? country.nameAr : country.nameEn) : undefined,
-      company: form.company,
-      designation: form.designation,
-      paymentMode: form.paymentMode,
-      message: form.message,
-      locale,
-      captcha,
-      website: "",
-    });
-    if (!res?.ok) {
-      if (res?.error === "captcha") {
-        setError(t("captchaInvalid"));
-        refreshCaptcha();
-      } else if (res?.error === "too-many") {
-        setError(t("tooMany"));
-      } else {
-        setError(t("invalidEmail"));
+    setBusy(true);
+    try {
+      const res = await submitRegistration({
+        type: mode,
+        courseTitle,
+        courseCode,
+        scheduleSummary: schedule ? `${schedule.venueName} ${schedule.startDate}` : undefined,
+        venueName: schedule?.venueName,
+        startDate: schedule?.startDate,
+        fee: schedule ? String(schedule.fee) : undefined,
+        currency: schedule?.currency,
+        format,
+        salutation: form.salutation,
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        countryIso: form.countryIso,
+        country: country ? (locale === "ar" && country.nameAr ? country.nameAr : country.nameEn) : undefined,
+        company: form.company,
+        designation: form.designation,
+        paymentMode: form.paymentMode,
+        message: form.message,
+        locale,
+        captcha,
+        website: "",
+      });
+      if (!res?.ok) {
+        if (res?.error === "captcha") {
+          setError(t("captchaInvalid"));
+          refreshCaptcha();
+        } else if (res?.error === "too-many") {
+          setError(t("tooMany"));
+        } else {
+          setError(t("invalidEmail"));
+        }
+        return;
       }
-      return;
+      setRef(res.ref || "");
+      setDone(true);
+    } catch {
+      setError(locale === "ar" ? "تعذر الإرسال. يرجى المحاولة مرة أخرى." : "Could not send your request. Please try again.");
+    } finally {
+      setBusy(false);
+      setCaptcha("");
+      setCaptchaTs(Date.now());
     }
-    setRef(res.ref || "");
-    setDone(true);
   }
 
   if (done) {
@@ -136,7 +146,7 @@ export function RegistrationForm({
             {t("successRef")}: <span className="font-mono font-semibold text-navy">{ref}</span>
           </p>
         )}
-        <Link href="/training-courses" className="mt-4 inline-block text-sm font-medium text-brand underline hover:text-brand-dark">
+        <Link href="/course-finder" className="mt-4 inline-block text-sm font-medium text-brand underline hover:text-brand-dark">
           {t("successBrowse")}
         </Link>
       </div>
@@ -262,7 +272,7 @@ export function RegistrationForm({
         />
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
-      <Button type="submit" data-track={`register-submit-${mode}`} className="w-full">{modeLabels[mode]}</Button>
+      <Button disabled={busy} type="submit" data-track={`register-submit-${mode}`} className="w-full">{modeLabels[mode]}</Button>
     </form>
   );
 }

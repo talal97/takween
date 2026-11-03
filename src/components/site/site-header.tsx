@@ -11,6 +11,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
   const phone = settings.contact_phone || "+971 (04) 425 0700";
   const email = settings.contact_email || "info@takween.com";
   const brandName = settings.brand_name || "Takween";
+  const brandNameAr = settings.brand_name_ar || "تكوين";
 
   return (
     <header className="absolute inset-x-0 top-0 z-50">
@@ -29,7 +30,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
           </div>
           <div className="flex items-center gap-3">
             {locale === "ar" ? (
-              <Link href="/" locale="en" className="font-semibold text-gold hover:underline">English</Link>
+              <Link href="/" locale="en" className="font-semibold text-gold hover:underline">{t("english")}</Link>
             ) : (
               <Link href="/" locale="ar" className="font-semibold text-gold hover:underline">{t("arabic")}</Link>
             )}
@@ -40,7 +41,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
       {/* Main navigation — transparent, on hero */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4">
         <Link href="/" className="py-5 text-2xl font-extrabold tracking-tight text-white">
-          {locale === "ar" ? "تكوين" : brandName}
+          {locale === "ar" ? brandNameAr : brandName}
         </Link>
 
         <nav className="hidden items-center lg:flex">
@@ -49,7 +50,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
             className="px-3 py-5 text-sm font-medium text-white/90 transition-colors hover:text-gold"
           >
             <span className="rounded bg-brand px-2 py-0.5 text-xs font-bold uppercase text-white">
-              {locale === "ar" ? "جديد" : "New"}
+              {t("new")}
             </span>
           </Link>
           <Link
@@ -90,7 +91,7 @@ export async function SiteHeader({ locale }: { locale: "en" | "ar" }) {
         </nav>
 
         <div className="lg:hidden">
-          <MobileNav brandName={brandName} />
+          <MobileNav brandName={brandName} brandNameAr={brandNameAr} />
         </div>
       </div>
     </header>

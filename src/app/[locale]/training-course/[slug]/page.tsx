@@ -1,3 +1,5 @@
+
+import { serializeJsonLd } from "@/lib/safe-json";
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
@@ -23,15 +25,12 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const l = (locale === "ar" ? "ar" : "en") as Locale;
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
-  const course = await prisma.course.findFirst({ where: { slug, locale: localeFilter } });
-  const title = course ? localeText({ en: course.titleEn, ar: course.titleAr }, l) : "Course";
+  const course = await prisma.course.findFirst({ where: { slug, locale: localeFilter }, orderBy: { locale: l === "ar" ? "asc" : "desc" } });
+  const title = course ? localeText({ en: course.seoTitleEn, ar: course.seoTitleAr }, l) || localeText({ en: course.titleEn, ar: course.titleAr }, l) : "Course";
   const description = localeText({ en: course?.subtitleEn, ar: course?.subtitleAr }, l);
   const alternates: { canonical?: string; languages?: Record<string, string> } = {
     canonical: `/${locale}/training-course/${slug}`,
-    languages: {
-      "/en/training-course/[slug]": "/en/training-course/" + slug,
-      "/ar/training-course/[slug]": "/ar/training-course/" + slug,
-    },
+    languages: Object.fromEntries((course?.locale === "both" ? ["en", "ar"] : [l]).map((language) => [language, `/${language}/training-course/${slug}`])),
   };
   return {
     title,
@@ -60,6 +59,7 @@ export default async function CoursePage({
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
   const course = await prisma.course.findFirst({
     where: { slug, locale: localeFilter },
+    orderBy: { locale: l === "ar" ? "asc" : "desc" },
     include: {
       category: { include: { faqs: true } },
       schedules: { where: { endDate: { gte: new Date() } }, include: { venue: true }, orderBy: { startDate: "asc" } },
@@ -120,7 +120,7 @@ export default async function CoursePage({
     ];
   }
 
-  const explicitRelated = course.relatedAsSource.map((r) => r.related);
+  const explicitRelated = course.relatedAsSource.map((r) => r.related).filter((r) => r.locale === l || r.locale === "both");
   const related =
     explicitRelated.length > 0
       ? explicitRelated
@@ -130,13 +130,13 @@ export default async function CoursePage({
           take: 3,
         });
 
-  const rawOutline = l === "ar" && course.dayOutlineAr ? course.dayOutlineAr : course.dayOutlineEn;
+  const rawOutline = l === "ar" && Array.isArray(course.dayOutlineAr) && course.dayOutlineAr.length > 0 ? course.dayOutlineAr : course.dayOutlineEn;
   const days = (rawOutline as Array<{ day: number; title: string; topics: string[] }> | null) ?? [];
 
   const schedules = course.schedules.map((s) => ({
     id: s.id,
     venueId: s.venueId,
-    venueName: s.venue.nameEn,
+    venueName: localeText({ en: s.venue.nameEn, ar: s.venue.nameAr }, l),
     startDate: formatDateRange(s.startDate, s.endDate, l),
     endDate: "",
     fee: Number(s.fee),
@@ -150,7 +150,7 @@ export default async function CoursePage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: serializeJsonLd(
             await courseJsonLd({
               name: localeText({ en: course.titleEn, ar: course.titleAr }, l),
               description: course.subtitleEn || undefined,
@@ -173,7 +173,7 @@ export default async function CoursePage({
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
             </div>
           )}
-          <Badge className="bg-brand">{course.badgeEn || `${course.durationDays}-Day Training`}</Badge>
+          <Badge className="bg-brand">{localeText({ en: course.badgeEn, ar: course.badgeAr }, l) || (l === "ar" ? `دورة تدريبية لمدة ${course.durationDays} أيام` : `${course.durationDays}-Day Training`)}</Badge>
           <h1 className="mt-3 text-3xl font-bold sm:text-4xl">
             {localeText({ en: course.titleEn, ar: course.titleAr }, l)}
           </h1>
@@ -202,19 +202,19 @@ export default async function CoursePage({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-muted-foreground">
-                    <th className="py-2 pr-4">{tc("date")}</th>
-                    <th className="py-2 pr-4">{tc("venue")}</th>
-                    <th className="py-2 pr-4">{tc("fee")}</th>
+                  <tr className="border-b text-start text-muted-foreground">
+                    <th className="py-2 pe-4">{tc("date")}</th>
+                    <th className="py-2 pe-4">{tc("venue")}</th>
+                    <th className="py-2 pe-4">{tc("fee")}</th>
                     <th className="py-2"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {course.schedules.map((s) => (
                     <tr key={s.id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">{formatDateRange(s.startDate, s.endDate, l)}</td>
-                      <td className="py-2 pr-4">{s.venue.nameEn}, {s.venue.country}</td>
-                      <td className="py-2 pr-4 font-medium">{formatCurrency(Number(s.fee), s.currency)}</td>
+                      <td className="py-2 pe-4">{formatDateRange(s.startDate, s.endDate, l)}</td>
+                      <td className="py-2 pe-4">{localeText({ en: s.venue.nameEn, ar: s.venue.nameAr }, l)}, {s.venue.country}</td>
+                      <td className="py-2 pe-4 font-medium">{formatCurrency(Number(s.fee), s.currency)}</td>
                       <td className="py-2">
                         <a
                           href={`/api/calendar/${s.id}`}
@@ -236,22 +236,22 @@ export default async function CoursePage({
 
       <section className="mx-auto grid max-w-7xl gap-8 px-4 pb-12 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          {course.introEn && (
+          {localeText({ en: course.introEn, ar: course.introAr }, l) && (
             <Prose title={t("introduction")} body={localeText({ en: course.introEn, ar: course.introAr }, l)} />
           )}
-          {course.objectivesEn && (
+          {localeText({ en: course.objectivesEn, ar: course.objectivesAr }, l) && (
             <Prose title={t("objectives")} body={localeText({ en: course.objectivesEn, ar: course.objectivesAr }, l)} />
           )}
-          {course.methodologyEn && (
+          {localeText({ en: course.methodologyEn, ar: course.methodologyAr }, l) && (
             <Prose title={t("methodology")} body={localeText({ en: course.methodologyEn, ar: course.methodologyAr }, l)} />
           )}
-          {course.orgImpactEn && (
+          {localeText({ en: course.orgImpactEn, ar: course.orgImpactAr }, l) && (
             <Prose title={t("orgImpact")} body={localeText({ en: course.orgImpactEn, ar: course.orgImpactAr }, l)} />
           )}
-          {course.personalImpactEn && (
+          {localeText({ en: course.personalImpactEn, ar: course.personalImpactAr }, l) && (
             <Prose title={t("personalImpact")} body={localeText({ en: course.personalImpactEn, ar: course.personalImpactAr }, l)} />
           )}
-          {course.targetAudienceEn && (
+          {localeText({ en: course.targetAudienceEn, ar: course.targetAudienceAr }, l) && (
             <Prose title={t("targetAudience")} body={localeText({ en: course.targetAudienceEn, ar: course.targetAudienceAr }, l)} />
           )}
 
@@ -263,7 +263,7 @@ export default async function CoursePage({
                   <div key={d.day} className="rounded-md border p-4">
                     <div className="font-medium text-brand">{t("day")} {d.day}</div>
                     <div className="font-semibold">{d.title}</div>
-                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                    <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-muted-foreground">
                       {d.topics.map((tp) => (
                         <li key={tp}>{tp}</li>
                       ))}
@@ -314,10 +314,11 @@ export default async function CoursePage({
             </CardContent>
           </Card>
 
-          {course.certificates.length > 0 && (
+          {(course.certificates.length > 0 || localeText({ en: course.certificateNoteEn, ar: course.certificateNoteAr }, l)) && (
             <Card>
               <CardContent className="pt-6">
                 <h3 className="mb-3 font-semibold text-navy">{t("certificates")}</h3>
+                <p className="mb-3 whitespace-pre-line text-sm">{localeText({ en: course.certificateNoteEn, ar: course.certificateNoteAr }, l)}</p>
                 <ul className="space-y-2">
                   {course.certificates.map((c) => (
                     <li key={c.id}>

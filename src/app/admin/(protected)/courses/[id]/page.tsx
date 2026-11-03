@@ -57,6 +57,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   const existingDays = (course.dayOutlineEn as Array<{ day: number; title: string; topics: string[] }> | null) ?? undefined;
   const existingSchedules = course.schedules.map((s) => ({
+    active: s.active,
     venueId: s.venueId,
     startDate: s.startDate,
     endDate: s.endDate,
@@ -83,6 +84,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
             id={course.id}
             initial={initial}
             existingDays={existingDays}
+            existingDaysAr={((course.dayOutlineAr ?? (course.locale === "ar" ? course.dayOutlineEn : null)) as Array<{ day: number; title: string; topics: string[] }> | null) ?? undefined}
             existingSchedules={existingSchedules}
             existingCertIds={existingCertIds}
             existingRelatedIds={existingRelatedIds}

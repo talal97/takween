@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { writeWorkbook } from "@/lib/excel";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -72,10 +73,7 @@ const buffer = pm.createPdf(dd);
     });
   }
 
-  const ExcelJS = await import("exceljs");
-  const wb = new ExcelJS.default.Workbook();
-  const ws = wb.addWorksheet("Schedules");
-  ws.columns = [
+  const columns = [
     { header: "Code", key: "code", width: 12 },
     { header: "Course", key: "title", width: 40 },
     { header: "Venue", key: "venue", width: 24 },
@@ -86,10 +84,8 @@ const buffer = pm.createPdf(dd);
     { header: "Currency", key: "currency", width: 10 },
     { header: "Format", key: "format", width: 12 },
   ];
-  ws.addRows(rows);
-  ws.getRow(1).font = { bold: true };
-  const buf = await wb.xlsx.writeBuffer();
-  return new NextResponse(new Uint8Array(buf as ArrayBuffer), {
+  const buf = await writeWorkbook("Schedules", columns, rows);
+  return new NextResponse(new Uint8Array(buf), {
     headers: { "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Content-Disposition": `attachment; filename="${slug}.xlsx"` },
   });
 }

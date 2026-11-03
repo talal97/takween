@@ -13,6 +13,7 @@ export function ContactForm({ label }: { label: string }) {
   const [done, setDone] = useState(false);
   const [ref, setRef] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [captcha, setCaptcha] = useState("");
   const [captchaTs, setCaptchaTs] = useState(0);
   const ar = locale === "ar";
@@ -28,22 +29,33 @@ export function ContactForm({ label }: { label: string }) {
       setError(ar ? "يرجى إدخال بريد إلكتروني صحيح" : "Please enter a valid email");
       return;
     }
-    const res = await submitRegistration({
-      type: "contact",
-      courseTitle: "General Enquiry",
-      salutation: "Mr.",
-      fullName: form.fullName,
-      email: form.email,
-      phone: form.phone,
-      message: form.message,
-      locale,
-      captcha,
-    });
-    if (res?.ok) {
-      setRef(res.ref || "");
-      setDone(true);
-    } else if (res?.error === "captcha") {
-      setError(ar ? "الرمز غير صحيح، يرجى المحاولة مرة أخرى" : "Incorrect code, please try again");
+    setBusy(true);
+    try {
+      const res = await submitRegistration({
+        type: "contact",
+        courseTitle: "General Enquiry",
+        salutation: "Mr.",
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        message: form.message,
+        locale,
+        captcha,
+      });
+      if (res?.ok) {
+        setRef(res.ref || "");
+        setDone(true);
+      } else if (res?.error === "captcha") {
+        setError(ar ? "الرمز غير صحيح، يرجى المحاولة مرة أخرى" : "Incorrect code, please try again");
+        setCaptcha("");
+        setCaptchaTs(Date.now());
+      } else {
+        setError(ar ? "تعذر الإرسال. تحقق من البيانات وحاول لاحقاً." : "Could not send. Check your details and try again shortly.");
+      }
+    } catch {
+      setError(locale === "ar" ? "تعذر الإرسال. يرجى المحاولة مرة أخرى." : "Could not send your request. Please try again.");
+    } finally {
+      setBusy(false);
       setCaptcha("");
       setCaptchaTs(Date.now());
     }
@@ -107,7 +119,7 @@ export function ContactForm({ label }: { label: string }) {
         </div>
         <Input value={captcha} onChange={(e) => setCaptcha(e.target.value)} required />
       </div>
-      <Button type="submit" data-track="contact-submit" className="w-full">{label}</Button>
+      <Button disabled={busy} type="submit" data-track="contact-submit" className="w-full">{label}</Button>
     </form>
   );
 }

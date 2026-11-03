@@ -17,18 +17,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const l = locale === "ar" ? "ar" : "en";
-  const article = await prisma.article.findUnique({ where: { slug } });
+  const article = await prisma.article.findFirst({ where: { slug, status: "published", locale: { in: [l, "both"] } } });
   if (!article) return buildPageMetadata({ title: "Article", locale, path: `/resources/${slug}` });
   const title = localeText({ en: article.titleEn, ar: article.titleAr }, l);
   const description = localeText({ en: article.excerptEn, ar: article.excerptAr }, l);
-  return buildPageMetadata({ title, description, locale, path: `/resources/${slug}`, image: article.image ?? undefined });
+  return buildPageMetadata({ title, description, locale, path: `/resources/${slug}`, image: article.image ?? undefined, availableLocales: article.locale === "both" ? ["en", "ar"] : [l] });
 }
 
 export default async function ResourcePage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
-  const article = await prisma.article.findUnique({ where: { slug } });
+  const article = await prisma.article.findFirst({ where: { slug, status: "published", locale: { in: [l, "both"] } } });
   if (!article) notFound();
 
   return (
@@ -47,7 +47,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ local
             path={`/${locale}/resources/${slug}`}
           />
         </div>
-        <p className="mt-6 leading-relaxed text-muted-foreground">{localeText({ en: article.bodyEn, ar: article.bodyAr }, l)}</p>
+        <p className="mt-6 whitespace-pre-line leading-relaxed text-muted-foreground">{localeText({ en: article.bodyEn, ar: article.bodyAr }, l)}</p>
       </article>
     </div>
   );

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { captureRevision } from "@/lib/content-revisions";
 import { slugify } from "@/lib/slug";
 import { requireAdmin, revalidateSite } from "./actions-helpers";
 
@@ -27,7 +28,7 @@ export async function createCertificate(data: z.infer<typeof certificateSchema>)
       code: input.code,
       nameEn: input.nameEn,
       nameAr: input.nameAr,
-      slug: input.slug || slugify(input.nameEn),
+      slug: slugify(input.slug || input.nameEn),
       description: input.description,
       logo: input.logo,
       sort: Number(input.sort ?? 0),
@@ -43,6 +44,7 @@ export async function updateCertificate(id: string, data: z.infer<typeof certifi
   await prisma.certificate.update({
     where: { id },
     data: {
+      slug: slugify(input.slug || input.nameEn),
       code: input.code,
       nameEn: input.nameEn,
       nameAr: input.nameAr,
@@ -138,30 +140,35 @@ export async function updateTestimonial(id: string, data: z.infer<typeof testimo
 // Articles
 // ------------------------------------------------------------------
 const articleSchema = z.object({
-  slug: z.string().min(1),
-  titleEn: z.string().min(1),
+  locale: z.enum(["en", "ar", "both"]).default("both"),
+  slug: z.string().transform(slugify).pipe(z.string().min(1, "Enter a valid slug")),
+  titleEn: z.string().default(""),
   titleAr: z.string().optional(),
   excerptEn: z.string().optional(),
   excerptAr: z.string().optional(),
   bodyEn: z.string().optional(),
   bodyAr: z.string().optional(),
-  status: z.string().default("published"),
-  type: z.string().default("article"),
+  status: z.enum(["published", "draft"]).default("published"),
+  type: z.enum(["article", "press", "case_study"]).default("article"),
   image: z.string().optional(),
-});
+}).refine((article) => article.locale === "en" ? Boolean(article.titleEn.trim()) : article.locale === "ar" ? Boolean(article.titleAr?.trim()) : Boolean(article.titleEn.trim() || article.titleAr?.trim()), "Enter a title for the selected website language");
 
-export async function createArticle(data: z.infer<typeof articleSchema>) {
+export async function createArticle(data: z.input<typeof articleSchema>) {
   await requireAdmin();
   const input = articleSchema.parse(data);
-  await prisma.article.create({ data: { ...input, slug: slugify(input.slug) } });
+  const article = await prisma.article.create({ data: { ...input, slug: slugify(input.slug) } });
   revalidatePath("/admin/articles");
   revalidateSite();
+  return article.id;
 }
 
-export async function updateArticle(id: string, data: z.infer<typeof articleSchema>) {
-  await requireAdmin();
+export async function updateArticle(id: string, data: z.input<typeof articleSchema>) {
+  const session = await requireAdmin();
   const input = articleSchema.parse(data);
-  await prisma.article.update({ where: { id }, data: { ...input, slug: slugify(input.slug) } });
+  await prisma.$transaction(async (tx) => {
+    await captureRevision(tx, "article", id, session?.user?.email || "Admin");
+    await tx.article.update({ where: { id }, data: { ...input, slug: slugify(input.slug) } });
+  });
   revalidatePath("/admin/articles");
   revalidateSite();
 }

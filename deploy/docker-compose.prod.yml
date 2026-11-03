@@ -16,8 +16,6 @@ services:
       network: host
       args:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://wazzankw.com}
-        AUTH_SECRET: ${AUTH_SECRET}
-        DATABASE_URL: ${DATABASE_URL}
     container_name: takween-app
     restart: unless-stopped
     env_file: .env
@@ -30,8 +28,8 @@ services:
       # next-auth v5: explicit canonical URL so post-login redirects use the domain
       AUTH_URL: ${AUTH_URL:-https://wazzankw.com}
       AUTH_TRUST_HOST: "true"
-      # Migrations are applied as a deploy step (prisma CLI is not shipped in the
-      # slim runner image; boot-time migrate would crash the container).
+      # Apply migrations before starting the updated app:
+      # docker compose -f docker-compose.prod.yml run --rm app node node_modules/prisma/build/index.js migrate deploy
       RUN_MIGRATIONS: "false"
       SEED_ON_START: "false"
     depends_on:

@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSetting } from "@/app/admin/(protected)/actions-settings";
@@ -50,12 +52,15 @@ export function PaymentMethodsForm({ initial }: { initial: Record<string, string
     setMethods((prev) => prev.map((m) => (m.id === id ? { ...m, [field]: value } : m)));
   }
 
+  const markSaved = useUnsavedChanges(methods);
+
   async function handleSave() {
     setSaving(true);
     setError("");
     try {
       const filtered = methods.filter((m) => m.label_en.trim());
       await saveSetting("payment_methods", JSON.stringify(filtered));
+      markSaved();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

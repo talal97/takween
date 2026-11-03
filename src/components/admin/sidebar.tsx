@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { confirmDiscardChanges } from "./unsaved-changes";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
@@ -46,6 +47,7 @@ const nav = [
     label: "Content",
     items: [
       { href: "/admin/hero-slides", label: "Hero Slides", icon: GalleryHorizontal },
+      { href: "/admin/interface-text", label: "Interface Text", icon: FileText },
       { href: "/admin/courses", label: "Courses", icon: BookOpen },
       { href: "/admin/categories", label: "Categories", icon: FolderTree },
       { href: "/admin/super-categories", label: "Super Categories", icon: Layers },
@@ -84,7 +86,7 @@ const nav = [
   },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ isOwner = false }: { isOwner?: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -151,7 +153,7 @@ export function AdminSidebar() {
                 {section.label}
               </p>
               <div className="space-y-0.5">
-                {section.items.map((item) => {
+                {section.items.filter((item) => item.href !== "/admin/users" || isOwner).map((item) => {
                   const active = item.exact
                     ? pathname === item.href
                     : pathname.startsWith(item.href);
@@ -188,7 +190,7 @@ export function AdminSidebar() {
           </Link>
           <button
             type="button"
-            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            onClick={async () => { if (await confirmDiscardChanges()) void signOut({ callbackUrl: "/admin/login" }); }}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
           >
             <LogOut className="h-4 w-4" /> Sign Out

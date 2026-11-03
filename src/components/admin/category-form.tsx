@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createCategory, updateCategory } from "@/app/admin/(protected)/actions-taxonomy";
@@ -50,6 +52,8 @@ export function CategoryForm({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const markSaved = useUnsavedChanges(form);
+
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
@@ -65,6 +69,7 @@ export function CategoryForm({
       } else {
         await createCategory(payload);
       }
+      markSaved();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

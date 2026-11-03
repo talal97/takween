@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Refuse to run with the placeholder secret in production.
 if (
   process.env.NODE_ENV === "production" &&
-  (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 32)
+  (!process.env.AUTH_SECRET || process.env.AUTH_SECRET.length < 32 || process.env.AUTH_SECRET === "replace-me-with-a-long-random-string" || (process.env.AUTH_SECRET === "build-time-only-placeholder-not-a-real-secret" && process.env.NEXT_PHASE !== "phase-production-build"))
 ) {
   throw new Error(
     "AUTH_SECRET must be set to a strong random value (>=32 chars) in production. " +
@@ -105,11 +105,20 @@ export const authConfig: NextAuthConfig = {
       if (isAdminRoute) return isLoggedIn;
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = (user as { role?: string }).role;
       }
+      if (typeof token.id !== "string" || !token.id) return null;
+      const current = await prisma.user.findUnique({ where: { id: token.id } });
+      if (!current || !["admin", "owner"].includes(current.role)) return null;
+      const version = current.updatedAt.toISOString();
+      // Invalidate old sessions after a password/role/profile change, including
+      // tokens issued before session versioning was introduced.
+      if (!user && token.userVersion !== version) return null;
+      token.userVersion = version;
+      token.role = current.role;
       return token;
     },
     session({ session, token }) {

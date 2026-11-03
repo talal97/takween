@@ -26,9 +26,9 @@ export default async function CourseFinderPage({
   const { locale } = await params;
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
-  const t = await getTranslations("common");
+  const [t, navigation] = await Promise.all([getTranslations("common"), getTranslations("navigation")]);
   const sp = await searchParams;
-  const q = ((sp.q as string) || "").trim().toLowerCase();
+  const q = (typeof sp.q === "string" ? sp.q : "").trim().toLowerCase();
 
   const localeFilter = l === "ar" ? { in: ["ar", "both"] } : { in: ["en", "both"] };
 
@@ -40,6 +40,7 @@ export default async function CourseFinderPage({
             { titleEn: { contains: q, mode: "insensitive" } },
             { titleAr: { contains: q, mode: "insensitive" } },
             { subtitleEn: { contains: q, mode: "insensitive" } },
+            { subtitleAr: { contains: q, mode: "insensitive" } },
             { code: { contains: q, mode: "insensitive" } },
           ],
         },
@@ -57,13 +58,14 @@ export default async function CourseFinderPage({
       <Breadcrumb />
       <section className="bg-navy pb-10 pt-28 text-white">
         <div className="mx-auto max-w-7xl px-4">
-          <h1 className="text-3xl font-bold sm:text-4xl">{t("courseFinder")}</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{navigation("courseFinder")}</h1>
           <p className="mt-2 text-white/70">{l === "ar" ? "ابحث عن دورة بالكلمة المفتاحية أو الكود أو العنوان" : "Search courses by keyword, code or title"}</p>
           <form method="get" className="mt-6 flex max-w-2xl gap-2">
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 name="q"
+                aria-label={l === "ar" ? "البحث عن دورة" : "Search courses"}
                 defaultValue={q}
                 placeholder={l === "ar" ? "ابحث عن دورة..." : "Search for a course..."}
                 className="h-12 w-full rounded-lg border border-white/20 bg-white/10 ps-10 pe-4 text-sm text-white placeholder:text-white/50 outline-none focus:border-brand focus:bg-white/15"

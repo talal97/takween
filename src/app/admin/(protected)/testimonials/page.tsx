@@ -10,7 +10,7 @@ import { TestimonialForm } from "@/components/admin/testimonial-form";
 export default async function TestimonialsPage() {
   const [items, courses, categories] = await Promise.all([
     prisma.testimonial.findMany({ orderBy: { sort: "asc" } }),
-    prisma.course.findMany({ select: { id: true, titleEn: true }, orderBy: { titleEn: "asc" } }),
+    prisma.course.findMany({ select: { id: true, titleEn: true, titleAr: true }, orderBy: { titleEn: "asc" } }),
     prisma.category.findMany({ select: { id: true, nameEn: true }, orderBy: { nameEn: "asc" } }),
   ]);
 

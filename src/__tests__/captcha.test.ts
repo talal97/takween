@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { encryptCaptcha, decryptCaptcha } from "@/lib/captcha";
 
 describe("captcha encrypt/decrypt", () => {
@@ -27,6 +27,9 @@ describe("captcha encrypt/decrypt", () => {
   });
 
   it("returns null for malformed token", () => {
+    const token = encryptCaptcha("hello");
+    expect(decryptCaptcha(token + ".extra")).toBeNull();
+    expect(decryptCaptcha(token + "=")).toBeNull();
     expect(decryptCaptcha("not-a-token")).toBeNull();
     expect(decryptCaptcha("a.b")).toBeNull();
     expect(decryptCaptcha("")).toBeNull();
@@ -46,4 +49,14 @@ describe("captcha encrypt/decrypt", () => {
     const encrypted = encryptCaptcha("مرحبا");
     expect(decryptCaptcha(encrypted)).toBe("مرحبا");
   });
+});
+
+it("rejects expired challenges on the server", () => {
+  vi.useFakeTimers();
+  try {
+    const token = encryptCaptcha("abcde");
+    expect(decryptCaptcha(token)).toBe("abcde");
+    vi.advanceTimersByTime(600_001);
+    expect(decryptCaptcha(token)).toBeNull();
+  } finally { vi.useRealTimers(); }
 });

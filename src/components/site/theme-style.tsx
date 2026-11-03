@@ -33,13 +33,13 @@ export async function ThemeStyle() {
 
   const globalDefs = GLOBAL_TOKENS.map(([cssVar, key]) => {
     const value = settings[key];
-    return value ? `${cssVar}: ${value};` : "";
+    return value && /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(value) ? `${cssVar}: ${value};` : "";
   }).filter(Boolean);
 
   const perLocale: Record<string, string[]> = {};
   for (const [locale, key] of LOCALE_TOKENS) {
     const value = settings[key];
-    if (value) (perLocale[locale] ??= []).push(`${VAR_BY_KEY[key]}: ${value};`);
+    if (value && /^#[0-9a-f]{3}(?:[0-9a-f]{3})?$/i.test(value)) (perLocale[locale] ??= []).push(`${VAR_BY_KEY[key]}: ${value};`);
   }
 
   const rules: string[] = [];

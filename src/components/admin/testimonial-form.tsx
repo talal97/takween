@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTestimonial, updateTestimonial } from "@/app/admin/(protected)/actions-content";
@@ -8,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-type Course = { id: string; titleEn: string | null };
+type Course = { id: string; titleEn: string | null; titleAr?: string | null };
 type Category = { id: string; nameEn: string };
 
 type Initial = {
@@ -38,6 +40,8 @@ export function TestimonialForm({ initial, courses = [], categories = [] }: { in
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const markSaved = useUnsavedChanges(form);
+
   function set<K extends keyof typeof form>(k: K, v: typeof form[K]) {
     setForm((f) => ({ ...f, [k]: v }));
   }
@@ -58,6 +62,7 @@ export function TestimonialForm({ initial, courses = [], categories = [] }: { in
       } else {
         await createTestimonial(payload);
       }
+      markSaved();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -103,7 +108,7 @@ export function TestimonialForm({ initial, courses = [], categories = [] }: { in
           >
             <option value="">None</option>
             {courses.map((c) => (
-              <option key={c.id} value={c.id}>{c.titleEn || "Untitled"}</option>
+              <option key={c.id} value={c.id}>{c.titleEn || c.titleAr || "Untitled"}</option>
             ))}
           </select>
         </div>

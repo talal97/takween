@@ -6,6 +6,7 @@ WORKDIR /app
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY vendor ./vendor
 RUN npm ci
 
 # --- builder ---
@@ -18,10 +19,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_SITE_URL=https://takween.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ARG AUTH_SECRET=build-time-only-placeholder-not-a-real-secret
-ENV AUTH_SECRET=$AUTH_SECRET
-ARG DATABASE_URL=postgresql://takween:changeme@localhost:5432/takween?schema=public
-ENV DATABASE_URL=$DATABASE_URL
+ENV AUTH_SECRET=build-time-only-placeholder-not-a-real-secret
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build?schema=public
 RUN npx prisma generate \
     && npm run build
 
@@ -34,8 +33,7 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ARG NEXT_PUBLIC_SITE_URL=https://takween.com
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
-ARG AUTH_SECRET=build-time-only-placeholder-not-a-real-secret
-ENV AUTH_SECRET=$AUTH_SECRET
+# AUTH_SECRET must be provided at runtime, never baked into the image.
 
 RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/* \
@@ -47,6 +45,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
 # pulls in effect/c12/deepmerge-ts/empathic) available to run migrations/seed at boot.
 # Next's own traced "standalone" output below still takes precedence for the app itself.
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/vendor ./vendor
 COPY --from=builder /app/prisma ./prisma
 
 COPY --from=builder /app/scripts ./scripts

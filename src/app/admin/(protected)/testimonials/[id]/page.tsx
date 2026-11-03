@@ -8,7 +8,7 @@ export default async function EditTestimonialPage({ params }: { params: Promise<
   const { id } = await params;
   const [t, courses, categories] = await Promise.all([
     prisma.testimonial.findUnique({ where: { id } }),
-    prisma.course.findMany({ select: { id: true, titleEn: true }, orderBy: { titleEn: "asc" } }),
+    prisma.course.findMany({ select: { id: true, titleEn: true, titleAr: true }, orderBy: { titleEn: "asc" } }),
     prisma.category.findMany({ select: { id: true, nameEn: true }, orderBy: { nameEn: "asc" } }),
   ]);
   if (!t) notFound();

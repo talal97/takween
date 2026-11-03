@@ -1,5 +1,6 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSettings } from "@/app/admin/(protected)/actions-settings";
@@ -37,6 +38,8 @@ export function ThemeForm({ initial }: { initial: Record<string, string> }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const markSaved = useUnsavedChanges(form);
+
   function setValue(k: string, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
@@ -46,6 +49,7 @@ export function ThemeForm({ initial }: { initial: Record<string, string> }) {
     setError("");
     try {
       await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
+      markSaved();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

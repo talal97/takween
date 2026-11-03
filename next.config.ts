@@ -13,6 +13,10 @@ if (process.env.NEXT_PUBLIC_IMAGE_HOST) {
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  serverExternalPackages: ["svg-captcha"],
+  outputFileTracingIncludes: {
+    "/api/captcha": ["./node_modules/svg-captcha/fonts/**/*"],
+  },
   reactStrictMode: true,
   images: {
     remotePatterns: imagePatterns,

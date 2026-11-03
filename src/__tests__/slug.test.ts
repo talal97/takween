@@ -20,10 +20,9 @@ describe("slugify", () => {
   it("collapses multiple hyphens", () => {
     expect(slugify("a   b")).toBe("a-b");
   });
-  it("handles Arabic text by stripping non-latin chars", () => {
+  it("preserves Arabic slugs", () => {
     const result = slugify("دورة تدريبية");
-    // Non-latin chars are stripped, leaving hyphens that get trimmed
-    expect(result).not.toContain(" ");
+    expect(result).toBe("دورة-تدريبية");
   });
 });
 

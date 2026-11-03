@@ -26,7 +26,7 @@ async function getDynamicSlugs() {
     prisma.course.findMany({ select: { slug: true }, where: { locale: { in: ["en", "both"] } }, orderBy: { updatedAt: "desc" } }),
     prisma.course.findMany({ select: { slug: true }, where: { locale: { in: ["ar", "both"] } }, orderBy: { updatedAt: "desc" } }),
     prisma.category.findMany({ select: { slug: true, superCategoryId: true } }),
-    prisma.article.findMany({ select: { slug: true }, where: { status: "published" } }),
+    prisma.article.findMany({ select: { slug: true, locale: true }, where: { status: "published" } }),
     prisma.certificate.findMany({ select: { slug: true } }),
   ]);
 
@@ -86,7 +86,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
-    for (const a of articles) {
+    for (const a of articles.filter((article) => article.locale === "both" || article.locale === locale)) {
       entries.push({
         url: url(`/resources/${a.slug}`, locale),
         lastModified: new Date(),

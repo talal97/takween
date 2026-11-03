@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSettings, testSmtp } from "@/app/admin/(protected)/actions-settings";
@@ -22,6 +24,8 @@ export function SmtpForm({ initial, envManaged, envConfig }: { initial: Record<s
   function set<K extends keyof typeof form>(k: K, v: string) {
     setForm((f) => ({ ...f, [k]: v }));
   }
+
+  const markSaved = useUnsavedChanges(form);
 
   if (envManaged) {
     const cfg = envConfig || { host: "", port: "587", user: "", pass: "", from: "no-reply@takween.com" };
@@ -85,6 +89,7 @@ export function SmtpForm({ initial, envManaged, envConfig }: { initial: Record<s
         onSubmit={async (e) => {
           e.preventDefault();
           await saveSettings({}, form);
+          markSaved();
           setSaved(true);
           setTimeout(() => setSaved(false), 2500);
           router.refresh();
@@ -125,6 +130,7 @@ export function SmtpForm({ initial, envManaged, envConfig }: { initial: Record<s
             setResult(null);
             try {
               await saveSettings({}, form);
+          markSaved();
               await testSmtp(form);
               setResult("ok");
             } catch {

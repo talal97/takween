@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { createHash } from "crypto";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { prisma } from "@/lib/prisma";
 
 // Public-facing registration/enquiry submission. Kept out of the admin route
@@ -53,13 +55,28 @@ export async function submitRegistration(data: z.infer<typeof registrationSchema
     return { ok: false, error: "captcha" };
   }
 
+  if (!checkRateLimit("registration-global", 30)) return { ok: false, error: "too-many" };
+  // An atomic unique insert prevents replay across processes and concurrent requests.
+  const tokenKey = `captcha-used:${createHash("sha256").update(challenge!).digest("hex")}`;
+  try {
+    await prisma.captchaUse.create({ data: { id: tokenKey, expiresAt: new Date(Date.now() + 600_000) } });
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2002") return { ok: false, error: "captcha" };
+    throw error;
+  }
+  await prisma.captchaUse.deleteMany({ where: { expiresAt: { lt: new Date() } } });
   const recent = await prisma.registration.count({
     where: { email: input.email.toLowerCase(), createdAt: { gte: new Date(Date.now() - 60_000) } },
   });
   if (recent > 3) return { ok: false, error: "too-many" };
 
-  const { captcha: _captcha, website: _website, ...payload } = input;
-  const created = await prisma.registration.create({ data: { ...payload, email: input.email.toLowerCase() } });
+  const created = await prisma.registration.create({ data: {
+    type: input.type, courseTitle: input.courseTitle, courseCode: input.courseCode,
+    scheduleSummary: input.scheduleSummary, salutation: input.salutation,
+    fullName: input.fullName, email: input.email.toLowerCase(), phone: input.phone,
+    countryIso: input.countryIso, company: input.company, designation: input.designation,
+    message: input.message, paymentMode: input.paymentMode, locale: input.locale,
+  } });
   await import("next/cache").then(({ revalidatePath }) => revalidatePath("/admin/submissions"));
 
   const { sendRegistrationEmail, sendAdminAlert } = await import("@/lib/mail");

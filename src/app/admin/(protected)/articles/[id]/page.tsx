@@ -11,7 +11,7 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
 
   return (
     <div>
-      <PageHeader title="Edit Article" description={a.titleEn} />
+      <PageHeader title="Edit Article" description={a.titleEn || a.titleAr || a.slug} />
       <Card>
         <CardContent className="pt-6">
           <ArticleForm
@@ -25,6 +25,9 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
               bodyEn: a.bodyEn ?? "",
               bodyAr: a.bodyAr ?? "",
               status: a.status,
+              locale: a.locale,
+              type: a.type,
+              image: a.image ?? "",
             }}
           />
         </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useUnsavedChanges } from "./unsaved-changes";
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSettings } from "@/app/admin/(protected)/actions-settings";
 import { Button } from "@/components/ui/button";
@@ -71,9 +72,6 @@ const GROUPS: Group[] = [
     hint: "Used across the site header and footer.",
     fields: [
       { key: "brand_tagline", label: "Brand tagline", bilingual: true },
-      { key: "contact_phone", label: "Contact phone" },
-      { key: "contact_email", label: "Contact email" },
-      { key: "contact_whatsapp", label: "WhatsApp number" },
       { key: "contact_address", label: "Address", bilingual: true, long: true },
     ],
   },
@@ -125,6 +123,9 @@ const GROUPS: Group[] = [
 
 export function SiteContentForm({ initial }: { initial: Record<string, string> }) {
   const router = useRouter();
+  const id = useId();
+  const [editingLanguage, setEditingLanguage] = useState("both");
+  const [saved, setSaved] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() => {
     const base: Record<string, string> = {};
     for (const g of GROUPS) {
@@ -139,6 +140,7 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
     }
     return base;
   });
+  const markSaved = useUnsavedChanges(form);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -150,9 +152,12 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
         void (async () => {
           setSaving(true);
           setError("");
+          setSaved(false);
           try {
             await saveSettings(form, { host: "", port: "587", user: "", pass: "", from: "" });
+            markSaved();
             router.refresh();
+            setSaved(true);
           } catch (err) {
             setError(err instanceof Error ? err.message : "An error occurred");
           } finally {
@@ -164,6 +169,14 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
       {error && (
         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
+      {saved && <p role="status">Site content saved.</p>}
+      <div>
+        <Label htmlFor={`${id}-language`}>Editing language</Label>
+        <select id={`${id}-language`} value={editingLanguage} onChange={(event) => setEditingLanguage(event.target.value)} className="mt-1 block rounded border p-2">
+          <option value="both">English & Arabic</option><option value="en">English</option><option value="ar">Arabic</option>
+        </select>
+        <p className="mt-2 text-sm text-muted-foreground">Filters the translation fields only. The other language is preserved. Contact details are managed in Site Contact Info below.</p>
+      </div>
       {GROUPS.map((g) => (
         <div key={g.title}>
           <h3 className="text-sm font-semibold text-navy">{g.title}</h3>
@@ -189,20 +202,20 @@ export function SiteContentForm({ initial }: { initial: Record<string, string> }
               if (f.bilingual) {
                 return (
                   <div key={f.key} className="grid gap-2 sm:col-span-2 sm:grid-cols-2">
-                    <div>
-                      <Label>{f.label} — English</Label>
+                    <div hidden={editingLanguage === "ar"}>
+                      <Label htmlFor={`${id}-${f.key}-en`}>{f.label} — English</Label>
                       {f.long ? (
-                        <Textarea value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={f.rows || 3} />
+                        <Textarea id={`${id}-${f.key}-en`} value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} rows={f.rows || 3} />
                       ) : (
-                        <Input value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} />
+                        <Input id={`${id}-${f.key}-en`} value={form[`${f.key}_en`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_en`]: e.target.value }))} />
                       )}
                     </div>
-                    <div>
-                      <Label>{f.label} — عربي</Label>
+                    <div hidden={editingLanguage === "en"}>
+                      <Label htmlFor={`${id}-${f.key}-ar`}>{f.label} — عربي</Label>
                       {f.long ? (
-                        <Textarea value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={f.rows || 3} />
+                        <Textarea id={`${id}-${f.key}-ar`} dir="rtl" value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} rows={f.rows || 3} />
                       ) : (
-                        <Input value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} />
+                        <Input id={`${id}-${f.key}-ar`} dir="rtl" value={form[`${f.key}_ar`]} onChange={(e) => setForm((x) => ({ ...x, [`${f.key}_ar`]: e.target.value }))} />
                       )}
                     </div>
                   </div>

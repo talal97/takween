@@ -19,7 +19,7 @@ type AuthorizedCallback = (params: {
 type JwtCallback = (params: {
   token: Record<string, unknown>;
   user?: Record<string, unknown>;
-}) => Record<string, unknown>;
+}) => Promise<Record<string, unknown> | null>;
 type SessionCallback = (params: {
   session: { user: Record<string, unknown> };
   token: Record<string, unknown>;
@@ -233,9 +233,10 @@ describe("auth config", () => {
     const token = { name: "test" };
     const user = { id: "u1", role: "owner" };
 
-    const result = jwt({ token, user });
-    expect(result.id).toBe("u1");
-    expect(result.role).toBe("owner");
+    mockPrisma.user.findUnique.mockResolvedValue({ id: "u1", role: "owner", updatedAt: new Date("2026-01-01") });
+    const result = await jwt({ token, user });
+    expect(result?.id).toBe("u1");
+    expect(result?.role).toBe("owner");
   });
 
   it("session callback adds id and role to session", async () => {
@@ -248,5 +249,20 @@ describe("auth config", () => {
     const result = session({ session: sess, token });
     expect(result.user.id).toBe("u1");
     expect((result.user as Record<string, unknown>).role).toBe("admin");
+  });
+});
+
+
+describe("session revocation", () => {
+  it("rejects deleted users, changed accounts and legacy tokens", async () => {
+    const { authConfig } = await import("@/auth/auth.config");
+    const jwt = authConfig.callbacks?.jwt as unknown as JwtCallback;
+    mockPrisma.user.findUnique.mockResolvedValue(null);
+    expect(await jwt({ token: { id: "deleted" } })).toBeNull();
+    mockPrisma.user.findUnique.mockResolvedValue({ id: "u1", role: "admin", updatedAt: new Date("2026-02-01") });
+    expect(await jwt({ token: { id: "u1", role: "owner", userVersion: "2026-01-01T00:00:00.000Z" } })).toBeNull();
+    expect(await jwt({ token: { id: "u1", role: "owner" } })).toBeNull();
+    const valid = await jwt({ token: { id: "u1", role: "owner", userVersion: "2026-02-01T00:00:00.000Z" } });
+    expect(valid?.role).toBe("admin");
   });
 });

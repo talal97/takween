@@ -24,7 +24,7 @@ export default async function ResourcesPage({ params }: { params: Promise<{ loca
   const l = (locale === "ar" ? "ar" : "en") as "en" | "ar";
   setRequestLocale(locale);
   const [articles, downloads, settings] = await Promise.all([
-    prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" } }),
+    prisma.article.findMany({ where: { status: "published", locale: { in: [l, "both"] } }, orderBy: { publishedAt: "desc" } }),
     prisma.download.findMany({ orderBy: { sort: "asc" } }),
     getSettingsCached(),
   ]);

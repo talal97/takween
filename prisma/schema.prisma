@@ -194,6 +194,17 @@ model Course {
    @@index([locale])
 }
 
+model ContentRevision {
+  id        String   @id @default(cuid())
+  kind      String
+  entityId  String
+  actor     String
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  @@index([kind, entityId, createdAt])
+}
+
 model CourseRelation {
   courseId  String
   course    Course @relation("CourseSource", fields: [courseId], references: [id])
@@ -318,6 +329,7 @@ model Registration {
 model Article {
   id           String   @id @default(cuid())
   slug         String   @unique
+  locale       String   @default("both") // en | ar | both
   titleEn      String
   titleAr      String?
   excerptEn    String?
@@ -330,6 +342,7 @@ model Article {
    type         String   @default("article") // article | press | case_study
 
    @@index([status, publishedAt])
+   @@index([locale, status, publishedAt])
    @@index([publishedAt])
 }
 
@@ -378,6 +391,14 @@ model HeroSlide {
 model SiteSetting {
   key    String @id
   value  String
+}
+
+// Consumed CAPTCHA tokens; unique IDs make replay prevention atomic.
+model CaptchaUse {
+  id        String   @id
+  expiresAt DateTime
+
+  @@index([expiresAt])
 }
 
 // ---------------------------------------------------------------

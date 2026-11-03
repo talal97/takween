@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { confirmDiscardChanges, useUnsavedChanges } from "./unsaved-changes";
+
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,19 +56,28 @@ export function ResourceManager({
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState("");
+  const defaultValue = (field: FieldSpec) => field.type === "select" ? field.options[0]?.value ?? "" : "";
+
+  const markSaved = useUnsavedChanges(form);
 
   function reset() {
+    markSaved({});
     setEditingId(null);
     setForm({});
   }
 
-  function startEdit(item: RowData) {
+  async function startEdit(item: RowData) {
+    if (!await confirmDiscardChanges()) return;
+    setError("");
+    setSaved("");
     setEditingId(item.id as string);
     const f: Record<string, string> = {};
     for (const field of fields) {
       const v = item[field.key];
       f[field.key] = v == null ? "" : String(v);
     }
+    markSaved(f);
     setForm(f);
   }
 
@@ -74,7 +85,7 @@ export function ResourceManager({
     setForm((f) => ({ ...f, [k]: v }));
   }
 
-  const payload = Object.fromEntries(fields.map((f) => [f.key, form[f.key] ?? ""]));
+  const payload = Object.fromEntries(fields.map((f) => [f.key, form[f.key] ?? defaultValue(f)]));
 
   return (
     <div className="grid gap-6 lg:grid-cols-3">
@@ -102,7 +113,7 @@ export function ResourceManager({
                   {columns.map((c) => <Cell key={c.key} col={c} item={item} />)}
                   <TableCell className="text-right">
                     <div className="inline-flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => startEdit(item)} title="Edit">
+                      <Button disabled={busy} size="sm" variant="ghost" onClick={() => startEdit(item)} title="Edit" aria-label={`Edit ${title}`}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       {confirm === item.id ? (
@@ -110,10 +121,20 @@ export function ResourceManager({
                           <Button
                             size="sm"
                             variant="destructive"
+                            disabled={busy}
                             onClick={async () => {
-                              await onDelete(item.id as string);
-                              setConfirm(null);
-                              router.refresh();
+                              setBusy(true);
+                              setError("");
+                              setSaved("");
+                              try {
+                                await onDelete(item.id as string);
+                                if (editingId === item.id) reset();
+                                setConfirm(null);
+                                setSaved(`${title} deleted.`);
+                                router.refresh();
+                              } catch {
+                                setError(`Could not delete this ${title.toLowerCase()}. It may still be used by other content.`);
+                              } finally { setBusy(false); }
                             }}
                           >
                             Confirm
@@ -123,7 +144,7 @@ export function ResourceManager({
                           </Button>
                         </>
                       ) : (
-                        <Button size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirm(item.id as string)} title="Delete">
+                        <Button disabled={busy} size="sm" variant="ghost" className="text-destructive" onClick={() => setConfirm(item.id as string)} title="Delete" aria-label={`Delete ${title}`}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -147,9 +168,11 @@ export function ResourceManager({
               void (async () => {
                 setBusy(true);
                 setError("");
+                setSaved("");
                 try {
                   if (editingId) await onUpdate(editingId, payload);
                   else await onCreate(payload);
+                  setSaved(`${title} saved.`);
                   reset();
                   router.refresh();
                 } catch (err) {
@@ -161,17 +184,20 @@ export function ResourceManager({
             }}
           >
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+              <div role="alert" className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
             )}
-            {fields.map((f) => (
-              <FieldInput key={f.key} field={f} value={form[f.key] ?? ""} onChange={(v) => set(f.key, v)} />
-            ))}
+            {saved && <p role="status" className="text-sm">{saved}</p>}
+            <fieldset disabled={busy} className="grid gap-3">
+              {fields.map((f) => (
+                <FieldInput key={f.key} field={f} value={form[f.key] ?? defaultValue(f)} onChange={(v) => set(f.key, v)} />
+              ))}
+            </fieldset>
             <div className="flex gap-2 pt-1">
               <Button type="submit" className={cn("flex-1")} disabled={busy}>
                 {busy ? "Saving…" : editingId ? "Save changes" : "Add"}
               </Button>
               {editingId && (
-                <Button type="button" variant="outline" onClick={reset}>
+                <Button type="button" variant="outline" onClick={async () => { if (await confirmDiscardChanges()) reset(); }}>
                   Cancel
                 </Button>
               )}
@@ -220,13 +246,16 @@ function FieldInput({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const id = useId();
+  const dir = field.key.endsWith("Ar") ? "rtl" : undefined;
   if (field.type === "upload") {
     return (
       <div>
-        <Label>{field.label}</Label>
+        <Label htmlFor={id}>{field.label}</Label>
         <div className="space-y-1.5">
           <UploadInput value={value} onChange={onChange} kind={field.image ? "image" : "file"} label={field.label} />
           <input
+            id={id}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="…or paste a URL"
@@ -239,13 +268,14 @@ function FieldInput({
   if (field.type === "select") {
     return (
       <div>
-        <Label>{field.label}</Label>
+        <Label htmlFor={id}>{field.label}</Label>
         <select
+          id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
         >
-          <option value="">Select…</option>
+          {!field.options.some((option) => option.value === value) && <option value={value}>{value || "Select…"}</option>}
           {field.options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -258,15 +288,15 @@ function FieldInput({
   if (field.type === "textarea") {
     return (
       <div>
-        <Label>{field.label}</Label>
-        <Textarea value={value} onChange={(e) => onChange(e.target.value)} rows={3} />
+        <Label htmlFor={id}>{field.label}</Label>
+        <Textarea id={id} dir={dir} value={value} onChange={(e) => onChange(e.target.value)} rows={3} />
       </div>
     );
   }
   return (
     <div>
-      <Label>{field.label}</Label>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
+      <Label htmlFor={id}>{field.label}</Label>
+      <Input id={id} dir={dir} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }

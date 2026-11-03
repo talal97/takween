@@ -1,5 +1,7 @@
 "use client";
 
+import { serializeJsonLd } from "@/lib/safe-json";
+
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { ChevronRight, ChevronLeft, Home } from "lucide-react";
@@ -62,7 +64,7 @@ export function Breadcrumb() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }} />
       <nav aria-label="Breadcrumb" className="mx-auto max-w-7xl px-4 pt-24 pb-2">
         <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
           {items.map((item, idx) => (

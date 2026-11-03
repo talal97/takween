@@ -9,7 +9,9 @@ export const SITE_TAG = "site";
 // Small helpers to pick localized content based on the locale.
 export function localeText(field: { en?: string | null; ar?: string | null } | null | undefined, locale: Locale) {
   if (!field) return "";
-  return locale === "ar" && field.ar ? field.ar : (field.en ?? "");
+  const preferred = locale === "ar" ? field.ar : field.en;
+  const fallback = locale === "ar" ? field.en : field.ar;
+  return preferred?.trim() ? preferred : (fallback ?? "");
 }
 
 // The navigation structure shown in headers/footers is identical for both
@@ -52,7 +54,7 @@ export async function getHomePageData(locale: Locale = "en") {
         take: 6,
         include: { schedules: { where: { endDate: { gte: new Date() } }, orderBy: { startDate: "asc" }, include: { venue: true } }, category: true },
       }),
-      prisma.article.findMany({ where: { status: "published" }, orderBy: { publishedAt: "desc" }, take: 3 }),
+      prisma.article.findMany({ where: { status: "published", locale: localeFilter }, orderBy: { publishedAt: "desc" }, take: 3 }),
       prisma.testimonial.findMany({ where: { featured: true }, orderBy: { sort: "asc" }, take: 3 }),
       prisma.client.findMany({ orderBy: { sort: "asc" }, take: 12 }),
       prisma.heroSlide.findMany({ orderBy: { sort: "asc" } }),

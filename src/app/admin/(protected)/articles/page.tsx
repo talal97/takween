@@ -28,19 +28,21 @@ export default async function ArticlesPage() {
                 <TableHead>Title</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Website visibility</TableHead>
                 <TableHead>Published</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {articles.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No articles yet.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No articles yet.</TableCell></TableRow>
               )}
               {articles.map((a) => (
                 <TableRow key={a.id}>
-                  <TableCell className="font-medium">{a.titleEn}</TableCell>
+                  <TableCell className="font-medium">{a.titleEn || a.titleAr || a.slug}</TableCell>
                   <TableCell><Badge variant="secondary">{a.type}</Badge></TableCell>
                   <TableCell>{a.status}</TableCell>
+                  <TableCell>{a.locale === "en" ? "English only" : a.locale === "ar" ? "Arabic only" : "Both"}</TableCell>
                   <TableCell className="text-muted-foreground">{a.publishedAt.toLocaleDateString()}</TableCell>
                   <TableCell className="flex justify-end gap-2 text-right">
                     <Link href={`/admin/articles/${a.id}`} className="text-sm text-muted-foreground hover:text-foreground">Edit</Link>

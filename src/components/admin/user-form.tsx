@@ -1,5 +1,7 @@
 "use client";
 
+import { useUnsavedChanges } from "./unsaved-changes";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUser, updateUser, deleteUser, changePassword } from "@/app/admin/(protected)/actions-users";
@@ -24,6 +26,8 @@ export function UserForm({ initial }: { initial?: UserInitial }) {
   });
   const [error, setError] = useState("");
 
+  const markSaved = useUnsavedChanges(form);
+
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
   }
@@ -37,6 +41,7 @@ export function UserForm({ initial }: { initial?: UserInitial }) {
       } else {
         await createUser({ name: form.name, email: form.email, password: form.password, role: form.role as "admin" | "owner" });
       }
+      markSaved();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -55,8 +60,8 @@ export function UserForm({ initial }: { initial?: UserInitial }) {
           <Label>Email</Label>
           <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} required />
         </div>
-        <div className="space-y-1.5">
-          <Label>{initial ? "New Password (leave blank to keep)" : "Password"}</Label>
+        {!initial && <div className="space-y-1.5">
+          <Label>Password</Label>
           <Input
             type="password"
             value={form.password}
@@ -64,7 +69,7 @@ export function UserForm({ initial }: { initial?: UserInitial }) {
             required={!initial}
             minLength={8}
           />
-        </div>
+        </div>}
         <div className="space-y-1.5">
           <Label>Role</Label>
           <select
@@ -106,6 +111,7 @@ export function ChangePasswordForm({ userId }: { userId: string }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const markPasswordSaved = useUnsavedChanges(password);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -113,6 +119,7 @@ export function ChangePasswordForm({ userId }: { userId: string }) {
     setSuccess(false);
     try {
       await changePassword(userId, { password });
+      markPasswordSaved("");
       setPassword("");
       setSuccess(true);
       router.refresh();

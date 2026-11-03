@@ -77,6 +77,7 @@ export function buildPageMetadata(opts: {
   locale: string;
   path: string;
   image?: string;
+  availableLocales?: readonly string[];
 }): Metadata {
   const { title, description, locale, path, image } = opts;
   const brand = "Takween";
@@ -86,10 +87,7 @@ export function buildPageMetadata(opts: {
     description,
     alternates: {
       canonical: siteUrl(`/${locale}${path}`),
-      languages: {
-        [`/en${path}`]: `/en${path}`,
-        [`/ar${path}`]: `/ar${path}`,
-      },
+      languages: Object.fromEntries((opts.availableLocales ?? ["en", "ar"]).map((language) => [language, `/${language}${path}`])),
     },
     openGraph: {
       title: fullTitle,

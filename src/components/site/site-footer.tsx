@@ -8,9 +8,10 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
   const settings = await getSettingsCached();
   const phone = settings.contact_phone || "+971 (04) 425 0700";
   const email = settings.contact_email || "info@takween.com";
-  const address = settings.contact_address || "";
+  const address = settings[`contact_address_${locale}`] || settings.contact_address || "";
   const tagline = settings[`brand_tagline_${locale}`] || "";
   const brandName = settings.brand_name || "Takween";
+  const brandNameAr = settings.brand_name_ar || "تكوين";
   const socials: Array<{ key: string; icon: typeof Facebook }> = [
     { key: "social_facebook", icon: Facebook },
     { key: "social_instagram", icon: Instagram },
@@ -25,7 +26,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
         {/* Brand + socials */}
         <div>
           <div className="text-2xl font-extrabold text-white">
-            {locale === "ar" ? "تكوين" : brandName}
+            {locale === "ar" ? brandNameAr : brandName}
           </div>
           <p className="mt-3 text-sm leading-relaxed text-white/60">
             {tagline ||
@@ -111,7 +112,7 @@ export async function SiteFooter({ locale }: { locale: "en" | "ar" }) {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-5 text-xs text-white/40 sm:flex-row">
           <p>
-            © {new Date().getFullYear()} {locale === "ar" ? "تكوين" : brandName} — {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
+            © {new Date().getFullYear()} {locale === "ar" ? brandNameAr : brandName} — {locale === "ar" ? "جميع الحقوق محفوظة" : "All rights reserved"}
           </p>
           <div className="flex gap-4">
             <Link href="/privacy" className="transition-colors hover:text-white/70">{locale === "ar" ? "الخصوصية" : "Privacy Policy"}</Link>

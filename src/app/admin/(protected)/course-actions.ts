@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 import { slugify } from "@/lib/slug";
+import { captureRevision } from "@/lib/content-revisions";
 import { SITE_TAG } from "@/lib/data";
 
 function revalidateSite() {
@@ -12,32 +13,33 @@ function revalidateSite() {
 }
 
 const scheduleSchema = z.object({
+  active: z.boolean().optional(),
   venueId: z.string().min(1),
-  startDate: z.string().min(1),
-  endDate: z.string().min(1),
-  fee: z.coerce.number().default(5950),
+  startDate: z.string().date(),
+  endDate: z.string().date(),
+  fee: z.coerce.number().finite().nonnegative().default(5950),
   currency: z.string().default("USD"),
-  format: z.string().default("classroom"),
-});
+  format: z.enum(["classroom", "online", "inhouse"]).default("classroom"),
+}).refine((s) => s.endDate >= s.startDate, "End date must not precede start date");
 
 const daySchema = z.object({
-  day: z.coerce.number(),
+  day: z.coerce.number().int().positive(),
   title: z.string(),
   topics: z.array(z.string()),
 });
 
 const courseSchema = z.object({
-  code: z.string().optional(),
-  slug: z.string().min(1),
+  code: z.string().trim().min(1, "Course code is required"),
+  slug: z.string().transform(slugify).pipe(z.string().min(1, "Enter a valid slug")),
   locale: z.enum(["en", "ar", "both"]).default("both"),
   image: z.string().optional(),
-  titleEn: z.string().optional(),
-  titleAr: z.string().optional(),
+  titleEn: z.string().nullish(),
+  titleAr: z.string().nullish(),
   subtitleEn: z.string().optional(),
   subtitleAr: z.string().optional(),
   badgeEn: z.string().optional(),
   badgeAr: z.string().optional(),
-  durationDays: z.coerce.number().default(5),
+  durationDays: z.coerce.number().int().positive().default(5),
   categoryId: z.string().min(1),
   featured: z.boolean().default(false),
   introEn: z.string().optional(),
@@ -63,10 +65,17 @@ export async function createCourse(
   schedules: z.infer<typeof scheduleSchema>[],
   days: z.infer<typeof daySchema>[],
   certificateIds: string[],
-  relatedIds: string[]
+  relatedIds: string[],
+  daysAr?: z.infer<typeof daySchema>[]
 ) {
   await requireAdmin();
   const input = courseSchema.parse(data);
+  for (const language of input.locale === "both" ? ["en", "ar"] : [input.locale]) {
+    if (!(language === "ar" ? input.titleAr : input.titleEn)?.trim()) throw new Error(`Title required for ${language}`);
+  }
+  schedules = z.array(scheduleSchema).parse(schedules);
+  days = z.array(daySchema).parse(days);
+  if (daysAr) daysAr = z.array(daySchema).parse(daysAr);
   const out = await prisma.course.create({
     data: {
       code: input.code || "",
@@ -98,6 +107,7 @@ export async function createCourse(
       certificateNoteAr: input.certificateNoteAr,
       seoTitleEn: input.seoTitleEn,
       seoTitleAr: input.seoTitleAr,
+      ...(daysAr !== undefined ? { dayOutlineAr: daysAr.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })) } : {}),
       dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
       certificates:
         certificateIds.length > 0 ? { connect: certificateIds.map((id) => ({ id })) } : undefined,
@@ -119,12 +129,20 @@ export async function updateCourse(
   schedules: z.infer<typeof scheduleSchema>[],
   days: z.infer<typeof daySchema>[],
   certificateIds: string[],
-  relatedIds: string[]
+  relatedIds: string[],
+  daysAr?: z.infer<typeof daySchema>[]
 ) {
-  await requireAdmin();
+  const session = await requireAdmin();
   const input = courseSchema.parse(data);
+  for (const language of input.locale === "both" ? ["en", "ar"] : [input.locale]) {
+    if (!(language === "ar" ? input.titleAr : input.titleEn)?.trim()) throw new Error(`Title required for ${language}`);
+  }
+  schedules = z.array(scheduleSchema).parse(schedules);
+  days = z.array(daySchema).parse(days);
+  if (daysAr) daysAr = z.array(daySchema).parse(daysAr);
 
   await prisma.$transaction(async (tx) => {
+    await captureRevision(tx, "course", id, session?.user?.email || "Admin");
     await tx.schedule.deleteMany({ where: { courseId: id } });
     await tx.courseRelation.deleteMany({ where: { courseId: id } });
     await tx.course.update({
@@ -132,12 +150,14 @@ export async function updateCourse(
       data: {
         ...input,
         slug: slugify(input.slug),
-        dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
+        ...(daysAr !== undefined ? { dayOutlineAr: daysAr.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })) } : {}),
+      dayOutlineEn: days.filter((d) => d.title).map((d) => ({ day: d.day, title: d.title, topics: d.topics })),
         certificates: certificateIds.length > 0 ? { set: certificateIds.map((cid) => ({ id: cid })) } : { set: [] },
         relatedAsSource:
           relatedIds.length > 0 ? { create: relatedIds.map((rid) => ({ relatedId: rid })) } : undefined,
         schedules: {
           create: schedules.filter((s) => s.startDate).map((s) => ({
+            active: s.active,
             venueId: s.venueId,
             startDate: new Date(s.startDate),
             endDate: new Date(s.endDate),

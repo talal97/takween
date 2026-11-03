@@ -1,8 +1,9 @@
 export function slugify(input: string): string {
   return input
     .toLowerCase()
+    .normalize("NFC")
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}\p{M}]+/gu, "-")
     .replace(/(^-|-$)/g, "");
 }
 
